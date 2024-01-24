@@ -18,13 +18,14 @@ const navigation = (): VerticalNavItemsType => {
     {
       title: 'Dashboard',
       icon: HomeOutline,
-      path: '/'
+      path: '/',
     },
     {
       title: 'Account Settings',
       icon: AccountCogOutline,
       path: '/account-settings'
     },
+  
     {
       sectionTitle: 'Pages'
     },
