@@ -60,7 +60,7 @@ const UserLayout = ({ children }: Props) => {
       verticalNavItems={VerticalNavItems()} // Navigation Items
       // afterVerticalNavMenuContent={UpgradeToProImg}
       verticalAppBarContent={(
-        props // AppBar Content
+        props: { toggleNavVisibility: () => void } // AppBar Content
       ) => (
         <VerticalAppBarContent
           hidden={hidden}
