@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AppConstants from '../../enums/app';
 const axiosClient = axios.create({
-    baseURL: 'https://dummyjson.com',
+    baseURL: 'https://booking-birthday.azurewebsites.net',
     headers: {
         'content-type': 'application/json',
     },

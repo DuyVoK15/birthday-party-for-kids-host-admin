@@ -1,13 +1,20 @@
-import { AxiosResponse } from 'axios';
-import { LoginDto } from 'src/utils/fakeDto';
-import axiosClient from './axiosClient/axiosClient';
+import { AxiosResponse } from 'axios'
+import { LoginDto } from 'src/utils/fakeDto'
+import axiosClient from './axiosClient/axiosClient'
+import { LoginResponse, UserInfoResponse } from 'src/dtos/response/auth.response'
+import { LoginRequest } from 'src/dtos/request/auth.request'
 
 export const authService = {
-  login: (payload: {
-    username: string;
-    password: string;
-  }): Promise<AxiosResponse<LoginDto>> => {
-    const url = '/auth/login';
-    return axiosClient.post(url, { ...payload });
+  loginHost: (payload: LoginRequest): Promise<AxiosResponse<LoginResponse>> => {
+    const url = '/api/account/host/authenticate'
+    return axiosClient.post(url, { ...payload })
+  },
+  loginAdmin: (payload: LoginRequest): Promise<AxiosResponse<LoginResponse>> => {
+    const url = '/api/account/admin/authenticate'
+    return axiosClient.post(url, { ...payload })
+  },
+  getUserInfo: (): Promise<AxiosResponse<UserInfoResponse>> => {
+    const url = '/api/account/information'
+    return axiosClient.get(url)
   }
-};
+}
