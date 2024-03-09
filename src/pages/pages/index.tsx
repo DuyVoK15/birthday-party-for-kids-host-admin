@@ -31,6 +31,7 @@ const Page = () => {
   const handleNavigateToAdmin = () => {
     router.push('/pages/admin/login')
   }
+  
   return (
     <Box className='content-center'>
       <Card sx={{ zIndex: 1 }}>
