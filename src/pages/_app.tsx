@@ -32,7 +32,6 @@ import '../../styles/globals.css'
 import { Provider } from 'react-redux'
 import { store } from 'src/app/store'
 import { SnackbarProvider } from 'notistack'
-import LoadAuthProvider from './LoadAuthProvider'
 
 // ** Extend App Props with Emotion
 type ExtendedAppProps = AppProps & {
