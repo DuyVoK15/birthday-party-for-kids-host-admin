@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, SyntheticEvent, Fragment } from 'react'
+import { useState, SyntheticEvent, Fragment, useEffect } from 'react'
 
 // ** Next Import
 import { useRouter } from 'next/router'
@@ -22,6 +22,11 @@ import LogoutVariant from 'mdi-material-ui/LogoutVariant'
 import AccountOutline from 'mdi-material-ui/AccountOutline'
 import MessageOutline from 'mdi-material-ui/MessageOutline'
 import HelpCircleOutline from 'mdi-material-ui/HelpCircleOutline'
+import { useAppSelector } from 'src/app/hooks'
+import AppConstants from 'src/enums/app'
+import { ROLE_ENUM } from 'src/enums/roles'
+import { useAppDispatch } from 'src/app/store'
+import { getUserInfo, logout } from 'src/features/auth.slice'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -64,6 +69,31 @@ const UserDropdown = () => {
     }
   }
 
+  // Dispatch
+  const dispatch = useAppDispatch()
+  const [roleId, setRoleId] = useState<string | null>(null)
+  const userInfo = useAppSelector(state => state.authReducer.userInfo)
+  const fetchUserInfo = async () => {
+    await dispatch(getUserInfo())
+  }
+  const handleLogout = async () => {
+    await dispatch(logout())
+    if (roleId === ROLE_ENUM.HOST) {
+      router.push('/pages/host/login')
+    }
+    if (roleId === ROLE_ENUM.ADMIN) {
+      router.push('/pages/admin/login')
+    }
+  }
+
+  // hook
+  useEffect(() => {
+    const roleId = localStorage.getItem(AppConstants.ROLE)
+    const access = localStorage.getItem(AppConstants.ACCESS_TOKEN)
+    console.log(roleId)
+    setRoleId(roleId)
+    fetchUserInfo()
+  }, [])
   return (
     <Fragment>
       <Badge
@@ -74,10 +104,10 @@ const UserDropdown = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Avatar
-          alt='John Doe'
+          alt={userInfo?.data?.fullName || 'UserName'}
           onClick={handleDropdownOpen}
           sx={{ width: 40, height: 40 }}
-          src='/images/avatars/1.png'
+          src={userInfo?.data?.avatarUrl || '/images/avatars/1.png'}
         />
       </Badge>
       <Menu
@@ -95,12 +125,16 @@ const UserDropdown = () => {
               badgeContent={<BadgeContentSpan />}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
-              <Avatar alt='John Doe' src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
+              <Avatar
+                alt={userInfo?.data?.fullName || 'UserName'}
+                src={userInfo?.data?.avatarUrl || '/images/avatars/1.png'}
+                sx={{ width: '2.5rem', height: '2.5rem' }}
+              />
             </Badge>
             <Box sx={{ display: 'flex', marginLeft: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 600 }}>John Doe</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{userInfo?.data?.fullName || 'Full Name'}</Typography>
               <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-                Admin
+                {userInfo?.data?.authorities?.[0]?.authority || 'undefined'}
               </Typography>
             </Box>
           </Box>
@@ -144,7 +178,7 @@ const UserDropdown = () => {
           </Box>
         </MenuItem>
         <Divider />
-        <MenuItem sx={{ py: 2 }} onClick={() => handleDropdownClose('/pages/login')}>
+        <MenuItem sx={{ py: 2 }} onClick={handleLogout}>
           <LogoutVariant sx={{ marginRight: 2, fontSize: '1.375rem', color: 'text.secondary' }} />
           Logout
         </MenuItem>

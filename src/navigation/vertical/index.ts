@@ -5,6 +5,8 @@ import CubeOutline from 'mdi-material-ui/CubeOutline'
 import HomeOutline from 'mdi-material-ui/HomeOutline'
 import FormatLetterCase from 'mdi-material-ui/FormatLetterCase'
 import AccountCogOutline from 'mdi-material-ui/AccountCogOutline'
+import ChatOutline from 'mdi-material-ui/ChatOutline'
+import CommentOutline from 'mdi-material-ui/CommentOutline'
 import CreditCardOutline from 'mdi-material-ui/CreditCardOutline'
 import AccountPlusOutline from 'mdi-material-ui/AccountPlusOutline'
 import AlertCircleOutline from 'mdi-material-ui/AlertCircleOutline'
@@ -25,27 +27,44 @@ const navigation = (): VerticalNavItemsType => {
       icon: AccountCogOutline,
       path: '/account-settings'
     },
-  
     {
-      sectionTitle: 'Pages'
+      title: 'Chat',
+      icon: ChatOutline,
+      path: '/chats'
     },
     {
-      title: 'Login',
-      icon: Login,
-      path: '/pages/login',
-      openInNewTab: true
+      title: 'Inquiry',
+      icon: CommentOutline,
+      path: '/inquiries'
+    },
+    // {
+    //   sectionTitle: 'Pages'
+    // },
+    // {
+    //   title: 'Login',
+    //   icon: Login,
+    //   path: '/pages',
+    //   openInNewTab: true
+    // },
+    // {
+    //   title: 'Register',
+    //   icon: AccountPlusOutline,
+    //   path: '/pages/register',
+    //   openInNewTab: true
+    // },
+    // {
+    //   title: 'Error',
+    //   icon: AlertCircleOutline,
+    //   path: '/pages/error',
+    //   openInNewTab: true
+    // },
+    {
+      sectionTitle: 'Management'
     },
     {
-      title: 'Register',
-      icon: AccountPlusOutline,
-      path: '/pages/register',
-      openInNewTab: true
-    },
-    {
-      title: 'Error',
-      icon: AlertCircleOutline,
-      path: '/pages/error',
-      openInNewTab: true
+      title: 'Customer',
+      icon: FormatLetterCase,
+      path: '/managements/customer'
     },
     {
       sectionTitle: 'User Interface'
@@ -74,7 +93,8 @@ const navigation = (): VerticalNavItemsType => {
       icon: CubeOutline,
       title: 'Form Layouts',
       path: '/form-layouts'
-    }
+    },
+    
   ]
 }
 
