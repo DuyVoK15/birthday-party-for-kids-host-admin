@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router'
 import { useEffect, useLayoutEffect } from 'react'
 import AppConstants from 'src/enums/app'
-import withAuth from './withAuth'
 
 export default function isAdmin(Component: any) {
   return function IsAdmin(props: any) {

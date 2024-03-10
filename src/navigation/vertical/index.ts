@@ -1,4 +1,4 @@
-import Table from 'mdi-material-ui/Table';
+import Table from 'mdi-material-ui/Table'
 import CubeOutline from 'mdi-material-ui/CubeOutline'
 import HomeOutline from 'mdi-material-ui/HomeOutline'
 import FormatLetterCase from 'mdi-material-ui/FormatLetterCase'
@@ -13,8 +13,8 @@ import { VerticalNavItemsType } from 'src/@core/layouts/types'
 import AppConstants from 'src/enums/app'
 
 const navigation = (): VerticalNavItemsType => {
-  const role = typeof window !== 'undefined' ? window.localStorage.getItem(AppConstants.ROLE) : false;
-  
+  const role = typeof window !== 'undefined' ? window.localStorage.getItem(AppConstants.ROLE) : false
+
   return role === 'HOST'
     ? [
         {
@@ -25,17 +25,17 @@ const navigation = (): VerticalNavItemsType => {
         {
           title: 'Account Settings',
           icon: AccountCogOutline,
-          path: '/account-settings'
+          path: '/host/account-settings'
         },
         {
           title: 'Chat',
           icon: ChatOutline,
-          path: '/chats'
+          path: '/host/chats'
         },
         {
           title: 'Inquiry',
           icon: CommentOutline,
-          path: '/inquiries'
+          path: '/host/inquiries'
         },
         // {
         //   sectionTitle: 'Pages'
@@ -64,7 +64,7 @@ const navigation = (): VerticalNavItemsType => {
         {
           title: 'Customer',
           icon: FormatLetterCase,
-          path: '/managements/customer'
+          path: '/host/managements/customer'
         },
         {
           sectionTitle: 'User Interface'
@@ -72,27 +72,27 @@ const navigation = (): VerticalNavItemsType => {
         {
           title: 'Typography',
           icon: FormatLetterCase,
-          path: '/typography'
+          path: '/host/typography'
         },
         {
           title: 'Icons',
-          path: '/icons',
+          path: '/host/icons',
           icon: GoogleCirclesExtended
         },
         {
           title: 'Cards',
           icon: CreditCardOutline,
-          path: '/cards'
+          path: '/host/cards'
         },
         {
           title: 'Tables',
           icon: Table,
-          path: '/tables'
+          path: '/host/tables'
         },
         {
           icon: CubeOutline,
           title: 'Form Layouts',
-          path: '/form-layouts'
+          path: '/host/form-layouts'
         }
       ]
     : [
@@ -144,7 +144,8 @@ const navigation = (): VerticalNavItemsType => {
           title: 'Slot',
           icon: FormatLetterCase,
           path: '/admin/managements/slot'
-        },{
+        },
+        {
           title: 'Payment',
           icon: FormatLetterCase,
           path: '/admin/managements/payment'
