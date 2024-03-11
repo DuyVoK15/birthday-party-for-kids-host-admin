@@ -81,4 +81,4 @@ const CardBasic = () => {
   )
 }
 
-export default isHost(CardBasic)
+export default CardBasic

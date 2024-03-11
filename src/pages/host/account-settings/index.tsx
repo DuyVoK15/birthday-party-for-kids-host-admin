@@ -101,4 +101,4 @@ const AccountSettings = () => {
   )
 }
 
-export default isHost(AccountSettings)
+export default AccountSettings
