@@ -67,6 +67,11 @@ const navigation = (): VerticalNavItemsType => {
           path: '/host/managements/customer'
         },
         {
+          title: 'Slot',
+          icon: FormatLetterCase,
+          path: '/host/managements/slot'
+        },
+        {
           sectionTitle: 'User Interface'
         },
         {

@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 // ** MUI Imports
 import Fab from '@mui/material/Fab'
@@ -24,9 +24,10 @@ import ScrollToTop from 'src/@core/components/scroll-to-top'
 // ** Styled Component
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import withAuth from 'src/views/withAuth'
-import AppConstants from 'src/enums/app'
-import isHost from 'src/views/isHost'
 import isAdmin from 'src/views/isAdmin'
+import { getRoleFromStorage } from 'src/utils/storage'
+import { useAuthContext } from '../context/AuthContext'
+import BlankLayout from './BlankLayout'
 
 const VerticalLayoutWrapper = styled('div')({
   height: '100%',
@@ -51,8 +52,6 @@ const ContentWrapper = styled('main')(({ theme }) => ({
     paddingRight: theme.spacing(4)
   }
 }))
-// ** Check role
-const role = typeof window !== 'undefined' ? window.localStorage.getItem(AppConstants.ROLE) : false
 
 const VerticalLayout = (props: LayoutProps) => {
   // ** Props
@@ -68,6 +67,11 @@ const VerticalLayout = (props: LayoutProps) => {
   // ** Toggle Functions
   const toggleNavVisibility = () => setNavVisible(!navVisible)
 
+  const role = getRoleFromStorage()
+
+  const { loading, setLoading } = useAuthContext()
+  console.log('object')
+ 
   return (
     <>
       <VerticalLayoutWrapper className='layout-wrapper'>
@@ -121,4 +125,4 @@ const VerticalLayout = (props: LayoutProps) => {
   )
 }
 
-export default withAuth(role === 'HOST' ? isAdmin(VerticalLayout) : isHost(VerticalLayout))
+export default withAuth(VerticalLayout)

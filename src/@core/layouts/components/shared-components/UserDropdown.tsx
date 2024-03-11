@@ -23,10 +23,10 @@ import AccountOutline from 'mdi-material-ui/AccountOutline'
 import MessageOutline from 'mdi-material-ui/MessageOutline'
 import HelpCircleOutline from 'mdi-material-ui/HelpCircleOutline'
 import { useAppSelector } from 'src/app/hooks'
-import AppConstants from 'src/enums/app'
 import { ROLE_ENUM } from 'src/enums/roles'
 import { useAppDispatch } from 'src/app/store'
 import { getUserInfo, logout } from 'src/features/auth.slice'
+import { getRoleFromStorage } from 'src/utils/storage'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -69,31 +69,28 @@ const UserDropdown = () => {
     }
   }
 
-  // Dispatch
+  // ** Dispatch
   const dispatch = useAppDispatch()
-  const [roleId, setRoleId] = useState<string | null>(null)
+  const role = getRoleFromStorage()
   const userInfo = useAppSelector(state => state.authReducer.userInfo)
   const fetchUserInfo = async () => {
     await dispatch(getUserInfo())
   }
   const handleLogout = async () => {
     await dispatch(logout())
-    if (roleId === ROLE_ENUM.HOST) {
+    if (role === ROLE_ENUM.HOST) {
       router.push('/pages/host/login')
     }
-    if (roleId === ROLE_ENUM.ADMIN) {
+    if (role === ROLE_ENUM.ADMIN) {
       router.push('/pages/admin/login')
     }
   }
 
-  // hook
-  useEffect(() => {
-    const roleId = localStorage.getItem(AppConstants.ROLE)
-    const access = localStorage.getItem(AppConstants.ACCESS_TOKEN)
-    console.log(roleId)
-    setRoleId(roleId)
-    fetchUserInfo()
-  }, [])
+  // ** Hook
+  // useEffect(() => {
+  //   fetchUserInfo()
+  // }, [])
+
   return (
     <Fragment>
       <Badge

@@ -1,5 +1,5 @@
 // ** React Imports
-import { MouseEvent, ReactNode, useState } from 'react'
+import { FormEvent, MouseEvent, ReactNode, useState } from 'react'
 
 // ** Next Imports
 import Link from 'next/link'
@@ -65,7 +65,7 @@ const LoginPage = () => {
   })
   const [username, setUsername] = useState<string>('')
   const [password, setPassword] = useState<string>('')
-  
+
   // ** Hook
   const router = useRouter()
 
@@ -79,7 +79,8 @@ const LoginPage = () => {
 
   // Dispatch
   const dispatch = useAppDispatch()
-  const handleLoginHost = async () => {
+  const handleLoginHost = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     await dispatch(loginHost({ username, password })).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
         await dispatch(getUserInfo()).then(res => {
@@ -110,7 +111,7 @@ const LoginPage = () => {
             </Typography>
           </Box>
 
-          <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
+          <form noValidate autoComplete='off' onSubmit={handleLoginHost}>
             <TextField
               autoFocus
               fullWidth
@@ -150,7 +151,7 @@ const LoginPage = () => {
                 <LinkStyled onClick={e => e.preventDefault()}>Forgot Password?</LinkStyled>
               </Link>
             </Box>
-            <Button fullWidth size='large' variant='contained' sx={{ marginBottom: 7 }} onClick={handleLoginHost}>
+            <Button type='submit' fullWidth size='large' variant='contained' sx={{ marginBottom: 7 }}>
               Login
             </Button>
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>

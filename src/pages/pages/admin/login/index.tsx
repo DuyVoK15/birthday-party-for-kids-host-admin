@@ -1,5 +1,5 @@
 // ** React Imports
-import { MouseEvent, ReactNode, useState } from 'react';
+import { FormEvent, MouseEvent, ReactNode, useState } from 'react'
 
 // ** Next Imports
 import { useRouter } from 'next/router'
@@ -14,7 +14,7 @@ import IconButton from '@mui/material/IconButton'
 import CardContent from '@mui/material/CardContent'
 import FormControl from '@mui/material/FormControl'
 import OutlinedInput from '@mui/material/OutlinedInput'
-import { styled } from '@mui/material/styles';
+import { styled } from '@mui/material/styles'
 import MuiCard, { CardProps } from '@mui/material/Card'
 import InputAdornment from '@mui/material/InputAdornment'
 
@@ -27,7 +27,7 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
-import { getUserInfo, loginAdmin } from 'src/features/auth.slice';
+import { getUserInfo, loginAdmin } from 'src/features/auth.slice'
 import { useAppDispatch } from 'src/app/store'
 import { Avatar } from '@mui/material'
 
@@ -49,7 +49,7 @@ const LoginPage = () => {
   })
   const [username, setUsername] = useState<string>('')
   const [password, setPassword] = useState<string>('')
-  
+
   // ** Hook
   const router = useRouter()
 
@@ -63,7 +63,8 @@ const LoginPage = () => {
 
   // Dispatch
   const dispatch = useAppDispatch()
-  const handleLoginAdmin = async () => {
+  const handleLoginAdmin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     await dispatch(loginAdmin({ username, password })).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
         await dispatch(getUserInfo()).then(res => {
@@ -93,7 +94,7 @@ const LoginPage = () => {
               ADMINISTRATOR
             </Typography>
           </Box>
-          <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
+          <form noValidate autoComplete='off' onSubmit={handleLoginAdmin}>
             <TextField
               autoFocus
               fullWidth
@@ -126,18 +127,7 @@ const LoginPage = () => {
               />
             </FormControl>
 
-            <Button
-              fullWidth
-              size='large'
-              variant='contained'
-              sx={{ marginTop: 10, marginBottom: 7 }}
-              onClick={handleLoginAdmin}
-              onKeyPress={e => {
-                if (e.key === 'Enter') {
-                  handleLoginAdmin()
-                }
-              }}
-            >
+            <Button fullWidth type='submit' size='large' variant='contained' sx={{ marginTop: 10, marginBottom: 7 }}>
               Login
             </Button>
           </form>
