@@ -1,19 +1,24 @@
 import { useRouter } from 'next/router'
-import { useEffect, useLayoutEffect } from 'react'
+import { useEffect } from 'react'
+import { useAuthContext } from 'src/@core/context/AuthContext'
 import AppConstants from 'src/enums/app'
+import { getRoleFromStorage } from 'src/utils/storage'
 
 export default function isAdmin(Component: any) {
   return function IsAdmin(props: any) {
     const router = useRouter()
-    const role = typeof window !== 'undefined' ? window.localStorage.getItem(AppConstants.ROLE) : false
+    const role = getRoleFromStorage()
+    const { loading, setLoading } = useAuthContext()
 
     useEffect(() => {
       if (role !== 'ADMIN') {
-        router.push('/pages/admin/login')
+        setLoading(true)
+        router.push('/401')
       }
     }, [])
 
     if (role !== 'ADMIN') {
+      setLoading(false)
       return null
     }
 
