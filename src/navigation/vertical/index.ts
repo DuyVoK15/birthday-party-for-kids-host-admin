@@ -67,9 +67,29 @@ const navigation = (): VerticalNavItemsType => {
           path: '/host/managements/customer'
         },
         {
+          title: 'Package Service',
+          icon: FormatLetterCase,
+          path: '/host/managements/package-service'
+        },
+        {
           title: 'Slot',
           icon: FormatLetterCase,
           path: '/host/managements/slot'
+        },
+        {
+          title: 'Service',
+          icon: FormatLetterCase,
+          path: '/host/managements/service'
+        },
+        {
+          title: 'Package',
+          icon: FormatLetterCase,
+          path: '/host/managements/package'
+        },
+        {
+          title: 'Theme',
+          icon: FormatLetterCase,
+          path: '/host/managements/theme'
         },
         {
           sectionTitle: 'User Interface'
