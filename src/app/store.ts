@@ -7,6 +7,7 @@ import slotReducer from '../features/slice/slot.slice'
 import themeReducer from '../features/slice/theme.slice'
 import packageReducer from '../features/slice/package.slice'
 import serviceReducer from '../features/slice/service.slice'
+import inquiryReducer from '../features/slice/inquiry.slice'
 
 export const store = configureStore({
   reducer: {
@@ -14,7 +15,8 @@ export const store = configureStore({
     slotReducer,
     themeReducer,
     packageReducer,
-    serviceReducer
+    serviceReducer,
+    inquiryReducer
   }
 })
 
