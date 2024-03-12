@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Form, Input, InputNumber, Modal, Popconfirm, Space, Table, TimePicker, Typography } from 'antd'
 import { useAppDispatch } from 'src/app/store'
-import { createSlot, deleteSlot, getAllSlot } from 'src/features/action/slot.action'
+import { createSlot, deleteSlot, getAllSlot, updateSlot } from 'src/features/action/slot.action'
 import { useAppSelector } from 'src/app/hooks'
 import dayjs, { Dayjs } from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-
-dayjs.extend(customParseFormat)
+import { SlotCreateRequest } from 'src/dtos/request/slot.request'
 
 interface Item {
   key: string
@@ -36,8 +35,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
-  const inputNode = inputType === 'number' ? <InputNumber /> : <Input />
-
   return (
     <td {...restProps}>
       {editing ? (
@@ -50,8 +47,13 @@ const EditableCell: React.FC<EditableCellProps> = ({
               message: `Please Input ${title}!`
             }
           ]}
+          getValueProps={i => {
+            return { value: dayjs(i, 'HH:mm:ss') }
+          }}
+          getValueFromEvent={onChange => dayjs(onChange?.$d)?.format('HH:mm:ss')}
+          initialValue={dayjs('00:00:00', 'HH:mm:ss')}
         >
-          {inputNode}
+          <TimePicker />
         </Form.Item>
       ) : (
         children
@@ -73,32 +75,24 @@ const App: React.FC = () => {
     form.setFieldsValue({ startTime: '', endTime: '', ...record })
     setEditingKey(record.key)
   }
-  const remove = (record: Partial<Item> & { key: React.Key }) => {
-    setRemovingKey(record.key)
-  }
 
   const cancel = () => {
     setEditingKey('')
   }
 
-  const save = async (key: React.Key) => {
+  const save = async (id: number) => {
     try {
       const row = (await form.validateFields()) as Item
-
-      const newData = [...data]
-      const index = newData.findIndex(item => key === item.key)
-      if (index > -1) {
-        const item = newData[index]
-        newData.splice(index, 1, {
-          ...item,
-          ...row
+      if (row) {
+        await updateOneSlot({
+          id,
+          payload: {
+            timeStart: row?.startTime,
+            timeEnd: row?.endTime
+          }
+        }).then(() => {
+          setEditingKey('')
         })
-        setData(newData)
-        setEditingKey('')
-      } else {
-        newData.push(row)
-        setData(newData)
-        setEditingKey('')
       }
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)
@@ -140,7 +134,7 @@ const App: React.FC = () => {
         const editable = isEditing(record)
         return editable ? (
           <Space>
-            <Typography.Link onClick={() => save(record.key)}>Save</Typography.Link>
+            <Typography.Link onClick={() => save(record?.id)}>Save</Typography.Link>
             <Typography.Link onClick={() => cancel()}>Cancel</Typography.Link>
             <Popconfirm title='Sure to delete?' onConfirm={() => removeOne(record?.id)}>
               <a>Delete</a>
@@ -161,6 +155,7 @@ const App: React.FC = () => {
     if (!col.editable) {
       return col
     }
+    console.log(col.dataIndex)
     return {
       ...col,
       onCell: (record: Item) => ({
@@ -240,9 +235,17 @@ const App: React.FC = () => {
   }
 
   const deleteOneSlot = async (id: number) => {
-    await dispatch(deleteSlot(id)).then(res => {
+    await dispatch(deleteSlot(id)).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
-        fetchAllSlot()
+        await fetchAllSlot()
+      }
+    })
+  }
+
+  const updateOneSlot = async (request: { id: number; payload: SlotCreateRequest }) => {
+    await dispatch(updateSlot({ id: request?.id, payload: request?.payload })).then(async res => {
+      if (res?.meta?.requestStatus === 'fulfilled') {
+        await fetchAllSlot()
       }
     })
   }
@@ -287,7 +290,7 @@ const App: React.FC = () => {
         }}
         bordered
         dataSource={data}
-        // columns={mergedColumns}
+        columns={mergedColumns}
         rowClassName='editable-row'
         pagination={{
           onChange: cancel
