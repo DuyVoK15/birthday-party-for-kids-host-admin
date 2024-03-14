@@ -12,20 +12,34 @@ import {
   TimePicker,
   Typography,
   Upload,
-  UploadFile
+  UploadFile,
+  message
 } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import {
+  ModalForm,
+  ProForm,
+  ProFormDateRangePicker,
+  ProFormDigit,
+  ProFormSelect,
+  ProFormText,
+  ProFormTextArea,
+  ProFormUploadButton
+} from '@ant-design/pro-components'
 import { useAppDispatch } from 'src/app/store'
 import { createPackage, deletePackage, getAllPackage, updatePackage } from 'src/features/action/package.action'
 import { useAppSelector } from 'src/app/hooks'
 import dayjs, { Dayjs } from 'dayjs'
-import { PlusOutlined } from '@ant-design/icons'
+import { PackageCreateRequest } from 'src/dtos/request/package.request'
 
 interface Item {
   key: string
   id: number
   packageNumber: string
   packageName: string
-  packageImgUrl: string
+  packageImgUrl: any
+  packageDescription: string
+  pricing: number
 }
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
@@ -48,6 +62,16 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
+  const inputNode =
+    dataIndex === 'packageImgUrl' ? (
+      <Upload maxCount={1}>
+        <Button icon={<PlusOutlined rev={undefined} />}>Click to Upload</Button>
+      </Upload>
+    ) : dataIndex === 'pricing' ? (
+      <InputNumber />
+    ) : (
+      <Input />
+    )
   return (
     <td {...restProps}>
       {editing ? (
@@ -60,13 +84,8 @@ const EditableCell: React.FC<EditableCellProps> = ({
               message: `Please Input ${title}!`
             }
           ]}
-          getValueProps={i => {
-            return { value: dayjs(i, 'HH:mm:ss') }
-          }}
-          getValueFromEvent={onChange => dayjs(onChange?.$d)?.format('HH:mm:ss')}
-          initialValue={dayjs('00:00:00', 'HH:mm:ss')}
         >
-          <TimePicker />
+          {inputNode}
         </Form.Item>
       ) : (
         children
@@ -75,8 +94,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
   )
 }
 
-const App: React.FC = () => {
+const Package: React.FC = () => {
   const [form] = Form.useForm()
+  const [formModal] = Form.useForm()
   const [data, setData] = useState<Item[]>([])
   const [editingKey, setEditingKey] = useState('')
   const [removingKey, setRemovingKey] = useState('')
@@ -85,7 +105,7 @@ const App: React.FC = () => {
   const isRemoving = (record: Item) => record.key === removingKey
 
   const edit = (record: Partial<Item> & { key: React.Key }) => {
-    form.setFieldsValue({ startTime: '', endTime: '', ...record })
+    form.setFieldsValue({ packageName: '', packageDescription: '', packageImgUrl: null, pricing: '', ...record })
     setEditingKey(record.key)
   }
 
@@ -93,15 +113,18 @@ const App: React.FC = () => {
     setEditingKey('')
   }
 
-  const save = async (id: number) => {
+  const save = async (record: Item) => {
     try {
       const row = (await form.validateFields()) as Item
+      console.log(row)
       if (row) {
         await updateOnePackage({
-          id,
+          id: record?.id,
           payload: {
-            timeStart: row?.packageName,
-            timeEnd: row?.packageImgUrl
+            packageName: row?.packageName,
+            packageDescription: row?.packageDescription || record?.packageDescription,
+            fileImage: row?.packageImgUrl?.file?.originFileObj,
+            pricing: String(row?.pricing)
           }
         }).then(() => {
           setEditingKey('')
@@ -109,6 +132,16 @@ const App: React.FC = () => {
       }
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)
+    }
+  }
+
+  const createOne = async (payload: PackageCreateRequest) => {
+    try {
+      const isCloseModal = await createOnePackage(payload)
+      return isCloseModal
+    } catch (errInfo) {
+      console.log('Error', errInfo)
+      message.error(errInfo)
     }
   }
 
@@ -125,7 +158,7 @@ const App: React.FC = () => {
     {
       title: 'Package No.',
       dataIndex: 'packageNumber',
-      width: '25%',
+      width: '10%',
       editable: false
     },
     {
@@ -135,12 +168,18 @@ const App: React.FC = () => {
       editable: true
     },
     {
+      title: 'Pricing',
+      dataIndex: 'pricing',
+      width: '20%',
+      editable: true
+    },
+    {
       title: 'Image',
       dataIndex: 'packageImgUrl',
       width: '20%',
       editable: true,
       render: (_: any, record: Item) => {
-        return <Image style={{borderRadius: 5}} width={100} src={record?.packageImgUrl} />
+        return <Image style={{ borderRadius: 5 }} width={200} height={100} src={record?.packageImgUrl} />
       }
     },
     {
@@ -150,7 +189,7 @@ const App: React.FC = () => {
         const editable = isEditing(record)
         return editable ? (
           <Space>
-            <Typography.Link onClick={() => save(record?.id)}>Save</Typography.Link>
+            <Typography.Link onClick={() => save(record)}>Save</Typography.Link>
             <Typography.Link onClick={() => cancel()}>Cancel</Typography.Link>
             <Popconfirm title='Sure to delete?' onConfirm={() => removeOne(record?.id)}>
               <a>Delete</a>
@@ -185,45 +224,16 @@ const App: React.FC = () => {
     }
   })
 
-  // ** Modal Display
-  const [loadingModal, setLoadingModal] = useState(false)
-  const [open, setOpen] = useState(false)
-
-  const showModal = () => {
-    setOpen(true)
-  }
-
-  const handleOk = () => {
-    setLoadingModal(true)
-    createOnePackage()
-    setTimeStart(null)
-    setTimeEnd(null)
-    setTimeout(() => {
-      setLoadingModal(false)
-      setOpen(false)
-    }, 1)
-  }
-
-  const handleCancel = () => {
-    setTimeStart(null)
-    setTimeEnd(null)
-    setOpen(false)
-  }
-
   // ** Dispatch API
   const dispatch = useAppDispatch()
   const loading = useAppSelector(state => state.packageReducer.loading)
   const packageList = useAppSelector(state => state.packageReducer.packageList)
   const packageListView: Item[] = []
 
-  // *** Hook
-  const [timeStart, setTimeStart] = useState<any>(null)
-  const [timeEnd, setTimeEnd] = useState<any>(null)
-
   const fetchAllPackage = async () => {
-    await dispatch(getAllPackage()).then(res => {
-      console.log(JSON.stringify(res, null, 2))
-    })
+    const res = await dispatch(getAllPackage())
+    console.log(JSON.stringify(res, null, 2))
+    return res
   }
   console.log('Mảng của tôi', packageListView)
   useEffect(() => {
@@ -231,35 +241,55 @@ const App: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    packageList?.map((pkg: any, index: number) => {
+    packageList?.map((item: any, index: number) => {
       packageListView.push({
         key: index.toString(),
-        id: 1,
+        id: item?.id,
         packageNumber: (index + 1).toString(),
-        packageName: pkg?.packageName,
-        packageImgUrl: pkg?.packageImgUrl
+        packageName: item?.packageName,
+        packageImgUrl: item?.packageImgUrl,
+        packageDescription: item?.packageDescription,
+        pricing: item?.pricing
       })
     })
     setData(packageListView)
   }, [packageList])
 
-  const createOnePackage = async () => {
-    await dispatch(createPackage({ timeStart, timeEnd })).then(res => {
+  const createOnePackage = async (payload: PackageCreateRequest) => {
+    let isCloseModal = false
+    await dispatch(
+      createPackage({
+        fileImage: payload.fileImage,
+        packageName: payload.packageName,
+        packageDescription: payload.packageDescription,
+        pricing: payload.pricing
+      })
+    ).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
-        fetchAllPackage()
+        await fetchAllPackage().then(res => {
+          if (res?.meta?.requestStatus === 'fulfilled') {
+            message.success('Create package success!')
+            isCloseModal = true
+          }
+        })
       }
     })
+    return isCloseModal
   }
 
   const deleteOnePackage = async (id: number) => {
     await dispatch(deletePackage(id)).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
-        await fetchAllPackage()
+        await fetchAllPackage().then(res => {
+          if (res?.meta?.requestStatus === 'fulfilled') {
+            message.success('Delete package success!')
+          }
+        })
       }
     })
   }
 
-  const updateOnePackage = async (request: { id: number; payload: any }) => {
+  const updateOnePackage = async (request: { id: number; payload: PackageCreateRequest }) => {
     await dispatch(updatePackage({ id: request?.id, payload: request?.payload })).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
         await fetchAllPackage()
@@ -267,55 +297,87 @@ const App: React.FC = () => {
     })
   }
 
-  // Format
-  const normFile = (e: any) => {
-    if (Array.isArray(e)) {
-      return e
-    }
-    return e?.fileList
-  }
-
   return (
     <Form form={form} component={false}>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button type='primary' onClick={showModal}>
-          Add new package
-        </Button>
-        <Modal
-          open={open}
-          title='Add new package'
-          onOk={handleOk}
-          onCancel={handleCancel}
-          footer={[
-            <Button key='back' onClick={handleCancel}>
-              Cancel
-            </Button>,
-            <Button key='submit' type='primary' loading={loadingModal} onClick={handleOk}>
-              Submit
+        <ModalForm
+          loading={loading}
+          title='Create A New Package'
+          trigger={
+            <Button type='primary'>
+              <PlusOutlined rev={undefined} />
+              Add new package
             </Button>
-          ]}
+          }
+          form={formModal}
+          autoFocusFirstInput
+          modalProps={{
+            destroyOnClose: true,
+            onCancel: () => console.log('run')
+          }}
+          submitTimeout={2000}
+          onFinish={async ({
+            name,
+            description,
+            fileImg,
+            pricing
+          }: {
+            name: string
+            description: string
+            fileImg: UploadFile[]
+            pricing: string
+          }) => {
+            console.log({ name, description, fileImg, pricing })
+            const isCloseModal = createOne({
+              packageName: name,
+              packageDescription: description,
+              fileImage: fileImg?.[0]?.originFileObj,
+              pricing: pricing
+            })
+            return isCloseModal
+          }}
+          submitter={{
+            searchConfig: {
+              submitText: 'Submit',
+              resetText: 'Cancel'
+            }
+          }}
         >
-          <Form>
-            <Form.Item label='packageName' name={'packageName'}>
-              <Input />
-            </Form.Item>
-            <Form.Item label='Upload' valuePropName='fileList'>
-              <Upload
-                type='select'
-                listType='picture-card'
-                maxCount={1}
-                onPreview={(file: UploadFile) => {
-                  console.log(file)
-                }}
-              >
-                <button style={{ border: 0, background: 'none' }} type='button'>
-                  <PlusOutlined rev={undefined} />
-                  <div style={{ marginTop: 8 }}>Upload</div>
-                </button>
-              </Upload>
-            </Form.Item>
-          </Form>
-        </Modal>
+          <ProFormText
+            rules={[{ required: true, message: 'Please input this' }]}
+            width='md'
+            name='name'
+            label='Name'
+            tooltip='Name is ok'
+            placeholder='Enter package name'
+          />
+          <ProFormTextArea
+            rules={[{ required: true, message: 'Please input this' }]}
+            width='md'
+            name='description'
+            label='Description'
+            placeholder='Enter package description'
+          />
+          <ProFormDigit
+            width={328}
+            rules={[{ required: true, message: 'Please input this' }]}
+            name='pricing'
+            label='Pricing'
+            placeholder='Enter package pricing'
+          />
+          <ProFormUploadButton
+            rules={[{ required: true, message: 'Please input this' }]}
+            name='fileImg'
+            label='Upload image'
+            title='Upload'
+            max={1}
+            fieldProps={{
+              name: 'file',
+              listType: 'picture-card',
+              progress: { showInfo: false }
+            }}
+          />
+        </ModalForm>
       </div>
       <Table
         style={{ marginTop: 10 }}
@@ -337,4 +399,4 @@ const App: React.FC = () => {
   )
 }
 
-export default App
+export default Package

@@ -3,6 +3,7 @@ import { AxiosError } from 'axios'
 import { SlotCreateRequest } from 'src/dtos/request/slot.request'
 import { slotService } from 'src/services/slot.service'
 import { packageService } from 'src/services/package.service'
+import { PackageCreateRequest } from 'src/dtos/request/package.request'
 
 export const getAllPackage = createAsyncThunk('package/getAllPackage', async (_, { rejectWithValue }) => {
   try {
@@ -28,7 +29,7 @@ export const getPackageById = createAsyncThunk('package/getPackageById', async (
 
 export const createPackage = createAsyncThunk(
   'package/createPackage',
-  async (payload: SlotCreateRequest, { rejectWithValue }) => {
+  async (payload: PackageCreateRequest, { rejectWithValue }) => {
     try {
       const response = await packageService.createPackage(payload)
       return response.data
@@ -42,7 +43,7 @@ export const createPackage = createAsyncThunk(
 
 export const updatePackage = createAsyncThunk(
   'package/updatePackage',
-  async (request: { id: number; payload: any }, { rejectWithValue }) => {
+  async (request: { id: number; payload: PackageCreateRequest }, { rejectWithValue }) => {
     try {
       const response = await packageService.updatePackage(request)
       return response.data
