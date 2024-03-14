@@ -12,20 +12,32 @@ import {
   TimePicker,
   Typography,
   Upload,
-  UploadFile
+  UploadFile,
+  message
 } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import {
+  ModalForm,
+  ProForm,
+  ProFormDateRangePicker,
+  ProFormSelect,
+  ProFormText,
+  ProFormTextArea,
+  ProFormUploadButton
+} from '@ant-design/pro-components'
 import { useAppDispatch } from 'src/app/store'
 import { createTheme, deleteTheme, getAllTheme, updateTheme } from 'src/features/action/theme.action'
 import { useAppSelector } from 'src/app/hooks'
 import dayjs, { Dayjs } from 'dayjs'
-import { PlusOutlined } from '@ant-design/icons'
+import { ThemeCreateRequest } from 'src/dtos/request/theme.request'
 
 interface Item {
   key: string
   id: number
   themeNumber: string
   themeName: string
-  themeImgUrl: string
+  themeImgUrl: any
+  themeDescription: string
 }
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
@@ -48,6 +60,14 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
+  const inputNode =
+    dataIndex === 'themeImgUrl' ? (
+      <Upload maxCount={1}>
+        <Button icon={<PlusOutlined rev={undefined} />}>Click to Upload</Button>
+      </Upload>
+    ) : (
+      <Input />
+    )
   return (
     <td {...restProps}>
       {editing ? (
@@ -60,13 +80,8 @@ const EditableCell: React.FC<EditableCellProps> = ({
               message: `Please Input ${title}!`
             }
           ]}
-          getValueProps={i => {
-            return { value: dayjs(i, 'HH:mm:ss') }
-          }}
-          getValueFromEvent={onChange => dayjs(onChange?.$d)?.format('HH:mm:ss')}
-          initialValue={dayjs('00:00:00', 'HH:mm:ss')}
         >
-          <TimePicker />
+          {inputNode}
         </Form.Item>
       ) : (
         children
@@ -75,8 +90,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
   )
 }
 
-const App: React.FC = () => {
+const Theme: React.FC = () => {
   const [form] = Form.useForm()
+  const [formModal] = Form.useForm()
   const [data, setData] = useState<Item[]>([])
   const [editingKey, setEditingKey] = useState('')
   const [removingKey, setRemovingKey] = useState('')
@@ -85,7 +101,7 @@ const App: React.FC = () => {
   const isRemoving = (record: Item) => record.key === removingKey
 
   const edit = (record: Partial<Item> & { key: React.Key }) => {
-    form.setFieldsValue({ startTime: '', endTime: '', ...record })
+    form.setFieldsValue({ themeName: '', themeDescription: '', themeImgUrl: null, ...record })
     setEditingKey(record.key)
   }
 
@@ -96,12 +112,14 @@ const App: React.FC = () => {
   const save = async (id: number) => {
     try {
       const row = (await form.validateFields()) as Item
+      console.log(row)
       if (row) {
         await updateOneTheme({
           id,
           payload: {
-            timeStart: row?.themeName,
-            timeEnd: row?.themeImgUrl
+            themeName: row?.themeName,
+            themeDescription: row?.themeDescription,
+            fileImage: row?.themeImgUrl?.file?.originFileObj
           }
         }).then(() => {
           setEditingKey('')
@@ -140,7 +158,7 @@ const App: React.FC = () => {
       width: '20%',
       editable: true,
       render: (_: any, record: Item) => {
-        return <Image style={{borderRadius: 5}} width={100} src='https://friendshipcakes.com/wp-content/uploads/2022/03/2-4-1.jpg' />
+        return <Image style={{ borderRadius: 5 }} width={200} height={100} src={record?.themeImgUrl} />
       }
     },
     {
@@ -185,45 +203,16 @@ const App: React.FC = () => {
     }
   })
 
-  // ** Modal Display
-  const [loadingModal, setLoadingModal] = useState(false)
-  const [open, setOpen] = useState(false)
-
-  const showModal = () => {
-    setOpen(true)
-  }
-
-  const handleOk = () => {
-    setLoadingModal(true)
-    createOneTheme()
-    setTimeStart(null)
-    setTimeEnd(null)
-    setTimeout(() => {
-      setLoadingModal(false)
-      setOpen(false)
-    }, 1)
-  }
-
-  const handleCancel = () => {
-    setTimeStart(null)
-    setTimeEnd(null)
-    setOpen(false)
-  }
-
   // ** Dispatch API
   const dispatch = useAppDispatch()
   const loading = useAppSelector(state => state.themeReducer.loading)
   const themeList = useAppSelector(state => state.themeReducer.themeList)
   const themeListView: Item[] = []
 
-  // *** Hook
-  const [timeStart, setTimeStart] = useState<any>(null)
-  const [timeEnd, setTimeEnd] = useState<any>(null)
-
   const fetchAllTheme = async () => {
-    await dispatch(getAllTheme()).then(res => {
-      console.log(JSON.stringify(res, null, 2))
-    })
+    const res = await dispatch(getAllTheme())
+    console.log(JSON.stringify(res, null, 2))
+    return res
   }
   console.log('Mảng của tôi', themeListView)
   useEffect(() => {
@@ -231,22 +220,33 @@ const App: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    themeList?.map((pkg: any, index: number) => {
+    themeList?.map((item: any, index: number) => {
       themeListView.push({
         key: index.toString(),
-        id: 1,
+        id: item?.id,
         themeNumber: (index + 1).toString(),
-        themeName: pkg?.themeName,
-        themeImgUrl: pkg?.themeImgUrl
+        themeName: item?.themeName,
+        themeImgUrl: item?.themeImgUrl,
+        themeDescription: item?.themeDescription
       })
     })
     setData(themeListView)
   }, [themeList])
 
-  const createOneTheme = async () => {
-    await dispatch(createTheme({ timeStart, timeEnd })).then(res => {
+  const createOneTheme = async (payload: ThemeCreateRequest) => {
+    await dispatch(
+      createTheme({
+        themeName: payload.themeName,
+        themeDescription: payload.themeDescription,
+        fileImage: payload.fileImage
+      })
+    ).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
-        fetchAllTheme()
+        await fetchAllTheme().then(res => {
+          if (res?.meta?.requestStatus === 'fulfilled') {
+            message.success('Create theme success!')
+          }
+        })
       }
     })
   }
@@ -254,12 +254,16 @@ const App: React.FC = () => {
   const deleteOneTheme = async (id: number) => {
     await dispatch(deleteTheme(id)).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
-        await fetchAllTheme()
+        await fetchAllTheme().then(res => {
+          if (res?.meta?.requestStatus === 'fulfilled') {
+            message.success('Delete theme success!')
+          }
+        })
       }
     })
   }
 
-  const updateOneTheme = async (request: { id: number; payload: any }) => {
+  const updateOneTheme = async (request: { id: number; payload: ThemeCreateRequest }) => {
     await dispatch(updateTheme({ id: request?.id, payload: request?.payload })).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
         await fetchAllTheme()
@@ -267,55 +271,72 @@ const App: React.FC = () => {
     })
   }
 
-  // Format
-  const normFile = (e: any) => {
-    if (Array.isArray(e)) {
-      return e
-    }
-    return e?.fileList
-  }
-
   return (
     <Form form={form} component={false}>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button type='primary' onClick={showModal}>
-          Add new theme
-        </Button>
-        <Modal
-          open={open}
-          title='Add new theme'
-          onOk={handleOk}
-          onCancel={handleCancel}
-          footer={[
-            <Button key='back' onClick={handleCancel}>
-              Cancel
-            </Button>,
-            <Button key='submit' type='primary' loading={loadingModal} onClick={handleOk}>
-              Submit
+        <ModalForm
+          title='Create A New Theme'
+          trigger={
+            <Button type='primary'>
+              <PlusOutlined rev={undefined} />
+              Add new theme
             </Button>
-          ]}
+          }
+          form={formModal}
+          autoFocusFirstInput
+          modalProps={{
+            destroyOnClose: true,
+            onCancel: () => console.log('run')
+          }}
+          submitTimeout={2000}
+          onFinish={async ({
+            name,
+            description,
+            fileImg
+          }: {
+            name: string
+            description: string
+            fileImg: UploadFile[]
+          }) => {
+            console.log({ name, description, fileImg })
+            createOneTheme({ themeName: name, themeDescription: description, fileImage: fileImg?.[0]?.originFileObj })
+            return true
+          }}
+          submitter={{
+            searchConfig: {
+              submitText: 'Submit',
+              resetText: 'Cancel'
+            }
+          }}
         >
-          <Form>
-            <Form.Item label='themeName' name={'themeName'}>
-              <Input />
-            </Form.Item>
-            <Form.Item label='Upload' valuePropName='fileList'>
-              <Upload
-                type='select'
-                listType='picture-card'
-                maxCount={1}
-                onPreview={(file: UploadFile) => {
-                  console.log(file)
-                }}
-              >
-                <button style={{ border: 0, background: 'none' }} type='button'>
-                  <PlusOutlined rev={undefined} />
-                  <div style={{ marginTop: 8 }}>Upload</div>
-                </button>
-              </Upload>
-            </Form.Item>
-          </Form>
-        </Modal>
+          <ProFormText
+            rules={[{ required: true, message: 'Please input this' }]}
+            width='md'
+            name='name'
+            label='Name'
+            tooltip='Name is ok'
+            placeholder='Enter theme name'
+          />
+          <ProFormText
+            rules={[{ required: true, message: 'Please input this' }]}
+            width='md'
+            name='description'
+            label='Description'
+            placeholder='Enter theme description'
+          />
+          <ProFormUploadButton
+            rules={[{ required: true, message: 'Please input this' }]}
+            name='fileImg'
+            label='Upload image'
+            title='Upload'
+            max={1}
+            fieldProps={{
+              name: 'file',
+              listType: 'picture-card',
+              progress: { showInfo: false }
+            }}
+          />
+        </ModalForm>
       </div>
       <Table
         style={{ marginTop: 10 }}
@@ -337,4 +358,4 @@ const App: React.FC = () => {
   )
 }
 
-export default App
+export default Theme

@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
 import { SlotCreateRequest } from 'src/dtos/request/slot.request'
+import { ThemeCreateRequest } from 'src/dtos/request/theme.request'
 import { slotService } from 'src/services/slot.service'
 import { themeService } from 'src/services/theme.service'
 
@@ -28,7 +29,7 @@ export const getThemeById = createAsyncThunk('theme/getThemeById', async (id: nu
 
 export const createTheme = createAsyncThunk(
   'theme/createTheme',
-  async (payload: SlotCreateRequest, { rejectWithValue }) => {
+  async (payload: ThemeCreateRequest, { rejectWithValue }) => {
     try {
       const response = await themeService.createTheme(payload)
       return response.data
@@ -42,7 +43,7 @@ export const createTheme = createAsyncThunk(
 
 export const updateTheme = createAsyncThunk(
   'theme/updateTheme',
-  async (request: { id: number; payload: SlotCreateRequest }, { rejectWithValue }) => {
+  async (request: { id: number; payload: ThemeCreateRequest }, { rejectWithValue }) => {
     try {
       const response = await themeService.updateTheme(request)
       return response.data

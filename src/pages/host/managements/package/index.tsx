@@ -140,7 +140,7 @@ const App: React.FC = () => {
       width: '20%',
       editable: true,
       render: (_: any, record: Item) => {
-        return <Image style={{borderRadius: 5}} width={100} src='https://friendshipcakes.com/wp-content/uploads/2022/03/2-4-1.jpg' />
+        return <Image style={{borderRadius: 5}} width={100} src={record?.packageImgUrl} />
       }
     },
     {
