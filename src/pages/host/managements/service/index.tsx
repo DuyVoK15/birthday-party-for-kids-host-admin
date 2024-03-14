@@ -12,20 +12,34 @@ import {
   TimePicker,
   Typography,
   Upload,
-  UploadFile
+  UploadFile,
+  message
 } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import {
+  ModalForm,
+  ProForm,
+  ProFormDateRangePicker,
+  ProFormDigit,
+  ProFormSelect,
+  ProFormText,
+  ProFormTextArea,
+  ProFormUploadButton
+} from '@ant-design/pro-components'
 import { useAppDispatch } from 'src/app/store'
 import { createService, deleteService, getAllService, updateService } from 'src/features/action/service.action'
 import { useAppSelector } from 'src/app/hooks'
 import dayjs, { Dayjs } from 'dayjs'
-import { PlusOutlined } from '@ant-design/icons'
+import { ServiceCreateRequest } from 'src/dtos/request/service.request'
 
 interface Item {
   key: string
   id: number
   serviceNumber: string
   serviceName: string
-  serviceImgUrl: string
+  serviceImgUrl: any
+  serviceDescription: string
+  pricing: number
 }
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
@@ -48,6 +62,16 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
+  const inputNode =
+    dataIndex === 'serviceImgUrl' ? (
+      <Upload maxCount={1}>
+        <Button icon={<PlusOutlined rev={undefined} />}>Click to Upload</Button>
+      </Upload>
+    ) : dataIndex === 'pricing' ? (
+      <InputNumber />
+    ) : (
+      <Input />
+    )
   return (
     <td {...restProps}>
       {editing ? (
@@ -60,13 +84,8 @@ const EditableCell: React.FC<EditableCellProps> = ({
               message: `Please Input ${title}!`
             }
           ]}
-          getValueProps={i => {
-            return { value: dayjs(i, 'HH:mm:ss') }
-          }}
-          getValueFromEvent={onChange => dayjs(onChange?.$d)?.format('HH:mm:ss')}
-          initialValue={dayjs('00:00:00', 'HH:mm:ss')}
         >
-          <TimePicker />
+          {inputNode}
         </Form.Item>
       ) : (
         children
@@ -75,8 +94,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
   )
 }
 
-const App: React.FC = () => {
+const Service: React.FC = () => {
   const [form] = Form.useForm()
+  const [formModal] = Form.useForm()
   const [data, setData] = useState<Item[]>([])
   const [editingKey, setEditingKey] = useState('')
   const [removingKey, setRemovingKey] = useState('')
@@ -85,7 +105,7 @@ const App: React.FC = () => {
   const isRemoving = (record: Item) => record.key === removingKey
 
   const edit = (record: Partial<Item> & { key: React.Key }) => {
-    form.setFieldsValue({ startTime: '', endTime: '', ...record })
+    form.setFieldsValue({ serviceName: '', serviceDescription: '', serviceImgUrl: null, pricing: '', ...record })
     setEditingKey(record.key)
   }
 
@@ -93,15 +113,18 @@ const App: React.FC = () => {
     setEditingKey('')
   }
 
-  const save = async (id: number) => {
+  const save = async (record: Item) => {
     try {
       const row = (await form.validateFields()) as Item
+      console.log(row)
       if (row) {
         await updateOneService({
-          id,
+          id: record?.id,
           payload: {
-            timeStart: row?.serviceName,
-            timeEnd: row?.serviceImgUrl
+            serviceName: row?.serviceName,
+            serviceDescription: row?.serviceDescription || record?.serviceDescription,
+            fileImage: row?.serviceImgUrl?.file?.originFileObj,
+            pricing: String(row?.pricing)
           }
         }).then(() => {
           setEditingKey('')
@@ -109,6 +132,16 @@ const App: React.FC = () => {
       }
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)
+    }
+  }
+
+  const createOne = async (payload: ServiceCreateRequest) => {
+    try {
+      const isCloseModal = await createOneService(payload)
+      return isCloseModal
+    } catch (errInfo) {
+      console.log('Error', errInfo)
+      message.error(errInfo)
     }
   }
 
@@ -125,7 +158,7 @@ const App: React.FC = () => {
     {
       title: 'Service No.',
       dataIndex: 'serviceNumber',
-      width: '25%',
+      width: '10%',
       editable: false
     },
     {
@@ -135,12 +168,18 @@ const App: React.FC = () => {
       editable: true
     },
     {
+      title: 'Pricing',
+      dataIndex: 'pricing',
+      width: '20%',
+      editable: true
+    },
+    {
       title: 'Image',
       dataIndex: 'serviceImgUrl',
       width: '20%',
       editable: true,
       render: (_: any, record: Item) => {
-        return <Image style={{borderRadius: 5}} width={100} src='https://friendshipcakes.com/wp-content/uploads/2022/03/2-4-1.jpg' />
+        return <Image style={{ borderRadius: 5 }} width={200} height={100} src={record?.serviceImgUrl} />
       }
     },
     {
@@ -150,7 +189,7 @@ const App: React.FC = () => {
         const editable = isEditing(record)
         return editable ? (
           <Space>
-            <Typography.Link onClick={() => save(record?.id)}>Save</Typography.Link>
+            <Typography.Link onClick={() => save(record)}>Save</Typography.Link>
             <Typography.Link onClick={() => cancel()}>Cancel</Typography.Link>
             <Popconfirm title='Sure to delete?' onConfirm={() => removeOne(record?.id)}>
               <a>Delete</a>
@@ -185,45 +224,16 @@ const App: React.FC = () => {
     }
   })
 
-  // ** Modal Display
-  const [loadingModal, setLoadingModal] = useState(false)
-  const [open, setOpen] = useState(false)
-
-  const showModal = () => {
-    setOpen(true)
-  }
-
-  const handleOk = () => {
-    setLoadingModal(true)
-    createOneService()
-    setTimeStart(null)
-    setTimeEnd(null)
-    setTimeout(() => {
-      setLoadingModal(false)
-      setOpen(false)
-    }, 1)
-  }
-
-  const handleCancel = () => {
-    setTimeStart(null)
-    setTimeEnd(null)
-    setOpen(false)
-  }
-
   // ** Dispatch API
   const dispatch = useAppDispatch()
   const loading = useAppSelector(state => state.serviceReducer.loading)
   const serviceList = useAppSelector(state => state.serviceReducer.serviceList)
   const serviceListView: Item[] = []
 
-  // *** Hook
-  const [timeStart, setTimeStart] = useState<any>(null)
-  const [timeEnd, setTimeEnd] = useState<any>(null)
-
   const fetchAllService = async () => {
-    await dispatch(getAllService()).then(res => {
-      console.log(JSON.stringify(res, null, 2))
-    })
+    const res = await dispatch(getAllService())
+    console.log(JSON.stringify(res, null, 2))
+    return res
   }
   console.log('Mảng của tôi', serviceListView)
   useEffect(() => {
@@ -231,35 +241,55 @@ const App: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    serviceList?.map((pkg: any, index: number) => {
+    serviceList?.map((item: any, index: number) => {
       serviceListView.push({
         key: index.toString(),
-        id: 1,
+        id: item?.id,
         serviceNumber: (index + 1).toString(),
-        serviceName: pkg?.serviceName,
-        serviceImgUrl: pkg?.serviceImgUrl
+        serviceName: item?.serviceName,
+        serviceImgUrl: item?.serviceImgUrl,
+        serviceDescription: item?.serviceDescription,
+        pricing: item?.pricing
       })
     })
     setData(serviceListView)
   }, [serviceList])
 
-  const createOneService = async () => {
-    await dispatch(createService({ timeStart, timeEnd })).then(res => {
+  const createOneService = async (payload: ServiceCreateRequest) => {
+    let isCloseModal = false
+    await dispatch(
+      createService({
+        fileImage: payload.fileImage,
+        serviceName: payload.serviceName,
+        serviceDescription: payload.serviceDescription,
+        pricing: payload.pricing
+      })
+    ).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
-        fetchAllService()
+        await fetchAllService().then(res => {
+          if (res?.meta?.requestStatus === 'fulfilled') {
+            message.success('Create service success!')
+            isCloseModal = true
+          }
+        })
       }
     })
+    return isCloseModal
   }
 
   const deleteOneService = async (id: number) => {
     await dispatch(deleteService(id)).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
-        await fetchAllService()
+        await fetchAllService().then(res => {
+          if (res?.meta?.requestStatus === 'fulfilled') {
+            message.success('Delete service success!')
+          }
+        })
       }
     })
   }
 
-  const updateOneService = async (request: { id: number; payload: any }) => {
+  const updateOneService = async (request: { id: number; payload: ServiceCreateRequest }) => {
     await dispatch(updateService({ id: request?.id, payload: request?.payload })).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
         await fetchAllService()
@@ -267,55 +297,87 @@ const App: React.FC = () => {
     })
   }
 
-  // Format
-  const normFile = (e: any) => {
-    if (Array.isArray(e)) {
-      return e
-    }
-    return e?.fileList
-  }
-
   return (
     <Form form={form} component={false}>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button type='primary' onClick={showModal}>
-          Add new service
-        </Button>
-        <Modal
-          open={open}
-          title='Add new service'
-          onOk={handleOk}
-          onCancel={handleCancel}
-          footer={[
-            <Button key='back' onClick={handleCancel}>
-              Cancel
-            </Button>,
-            <Button key='submit' type='primary' loading={loadingModal} onClick={handleOk}>
-              Submit
+        <ModalForm
+          loading={loading}
+          title='Create A New Service'
+          trigger={
+            <Button type='primary'>
+              <PlusOutlined rev={undefined} />
+              Add new service
             </Button>
-          ]}
+          }
+          form={formModal}
+          autoFocusFirstInput
+          modalProps={{
+            destroyOnClose: true,
+            onCancel: () => console.log('run')
+          }}
+          submitTimeout={2000}
+          onFinish={async ({
+            name,
+            description,
+            fileImg,
+            pricing
+          }: {
+            name: string
+            description: string
+            fileImg: UploadFile[]
+            pricing: string
+          }) => {
+            console.log({ name, description, fileImg, pricing })
+            const isCloseModal = createOne({
+              serviceName: name,
+              serviceDescription: description,
+              fileImage: fileImg?.[0]?.originFileObj,
+              pricing: pricing
+            })
+            return isCloseModal
+          }}
+          submitter={{
+            searchConfig: {
+              submitText: 'Submit',
+              resetText: 'Cancel'
+            }
+          }}
         >
-          <Form>
-            <Form.Item label='serviceName' name={'serviceName'}>
-              <Input />
-            </Form.Item>
-            <Form.Item label='Upload' valuePropName='fileList'>
-              <Upload
-                type='select'
-                listType='picture-card'
-                maxCount={1}
-                onPreview={(file: UploadFile) => {
-                  console.log(file)
-                }}
-              >
-                <button style={{ border: 0, background: 'none' }} type='button'>
-                  <PlusOutlined rev={undefined} />
-                  <div style={{ marginTop: 8 }}>Upload</div>
-                </button>
-              </Upload>
-            </Form.Item>
-          </Form>
-        </Modal>
+          <ProFormText
+            rules={[{ required: true, message: 'Please input this' }]}
+            width='md'
+            name='name'
+            label='Name'
+            tooltip='Name is ok'
+            placeholder='Enter service name'
+          />
+          <ProFormTextArea
+            rules={[{ required: true, message: 'Please input this' }]}
+            width='md'
+            name='description'
+            label='Description'
+            placeholder='Enter service description'
+          />
+          <ProFormDigit
+            width={328}
+            rules={[{ required: true, message: 'Please input this' }]}
+            name='pricing'
+            label='Pricing'
+            placeholder='Enter service pricing'
+          />
+          <ProFormUploadButton
+            rules={[{ required: true, message: 'Please input this' }]}
+            name='fileImg'
+            label='Upload image'
+            title='Upload'
+            max={1}
+            fieldProps={{
+              name: 'file',
+              listType: 'picture-card',
+              progress: { showInfo: false }
+            }}
+          />
+        </ModalForm>
       </div>
       <Table
         style={{ marginTop: 10 }}
@@ -337,4 +399,4 @@ const App: React.FC = () => {
   )
 }
 
-export default App
+export default Service

@@ -3,6 +3,7 @@ import { AxiosError } from 'axios'
 import { SlotCreateRequest } from 'src/dtos/request/slot.request'
 import { slotService } from 'src/services/slot.service'
 import { serviceService } from 'src/services/service.service'
+import { ServiceCreateRequest } from 'src/dtos/request/service.request'
 
 export const getAllService = createAsyncThunk('service/getAllService', async (_, { rejectWithValue }) => {
   try {
@@ -28,7 +29,7 @@ export const getServiceById = createAsyncThunk('service/getServiceById', async (
 
 export const createService = createAsyncThunk(
   'service/createService',
-  async (payload: SlotCreateRequest, { rejectWithValue }) => {
+  async (payload: ServiceCreateRequest, { rejectWithValue }) => {
     try {
       const response = await serviceService.createService(payload)
       return response.data
@@ -42,7 +43,7 @@ export const createService = createAsyncThunk(
 
 export const updateService = createAsyncThunk(
   'service/updateService',
-  async (request: { id: number; payload: any }, { rejectWithValue }) => {
+  async (request: { id: number; payload: ServiceCreateRequest }, { rejectWithValue }) => {
     try {
       const response = await serviceService.updateService(request)
       return response.data
