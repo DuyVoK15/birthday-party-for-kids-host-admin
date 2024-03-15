@@ -7,6 +7,10 @@ import ChatOutline from 'mdi-material-ui/ChatOutline'
 import CommentOutline from 'mdi-material-ui/CommentOutline'
 import CreditCardOutline from 'mdi-material-ui/CreditCardOutline'
 import GoogleCirclesExtended from 'mdi-material-ui/GoogleCirclesExtended'
+import ThemeLightDark from 'mdi-material-ui/ThemeLightDark'
+import TimelineClock from 'mdi-material-ui/TimelineClock'
+import PackageVariant from 'mdi-material-ui/PackageVariant'
+import AccountSupervisorCircle from 'mdi-material-ui/AccountSupervisorCircle'
 
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
@@ -67,28 +71,28 @@ const navigation = (): VerticalNavItemsType => {
           path: '/host/managements/customer'
         },
         {
-          title: 'Package Service',
+          title: 'Venue',
           icon: FormatLetterCase,
-          path: '/host/managements/package-service'
+          path: '/host/managements/venue'
         },
         {
           title: 'Slot',
-          icon: FormatLetterCase,
+          icon: TimelineClock,
           path: '/host/managements/slot'
         },
         {
           title: 'Service',
-          icon: FormatLetterCase,
+          icon: AccountSupervisorCircle,
           path: '/host/managements/service'
         },
         {
           title: 'Package',
-          icon: FormatLetterCase,
+          icon: PackageVariant,
           path: '/host/managements/package'
         },
         {
           title: 'Theme',
-          icon: FormatLetterCase,
+          icon: ThemeLightDark,
           path: '/host/managements/theme'
         },
         {
