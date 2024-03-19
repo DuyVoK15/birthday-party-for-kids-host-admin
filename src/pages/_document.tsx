@@ -22,7 +22,7 @@ class CustomDocument extends Document {
             href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
           />
           <link rel='icon' sizes='180x180' href='/images/icon.png' />
-          <link rel='shortcut icon' href='/images/favicon.png' />
+          <link rel='shortcut icon' sizes='1000x1000' href='/images/icon.png' />
         </Head>
         <body>
           <Main />
