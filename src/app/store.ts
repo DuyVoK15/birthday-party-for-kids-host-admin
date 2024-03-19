@@ -2,7 +2,7 @@
 
 import { configureStore } from '@reduxjs/toolkit'
 import { useDispatch } from 'react-redux'
-import authReducer from '../features/auth.slice'
+import authReducer from '../features/slice/auth.slice'
 import slotReducer from '../features/slice/slot.slice'
 import themeReducer from '../features/slice/theme.slice'
 import packageReducer from '../features/slice/package.slice'
