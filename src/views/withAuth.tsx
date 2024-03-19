@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { useAuthContext } from 'src/@core/context/AuthContext'
 import { useAppDispatch } from 'src/app/store'
 import AppConstants from 'src/enums/app'
-import { getUserInfo } from 'src/features/slice/auth.slice'
+import { getUserInfo } from 'src/features/action/auth.action'
 import { getRoleFromStorage } from 'src/utils/storage'
 
 export default function withAuth(Component: any) {
@@ -21,7 +21,7 @@ export default function withAuth(Component: any) {
       const fetchUserInfo = async () => {
         await dispatch(getUserInfo())
       }
-      fetchUserInfo();
+      fetchUserInfo()
       if (!auth && role !== 'HOST' && role !== 'ADMIN') {
         router.push('/pages')
       } else {
