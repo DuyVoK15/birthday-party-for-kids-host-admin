@@ -16,6 +16,7 @@
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\""
   },
   "dependencies": {
+    "@ant-design/icons": "^5.3.4",
     "@ant-design/pro-components": "^2.6.49",
     "@emotion/cache": "^11.6.0",
     "@emotion/react": "^11.7.0",

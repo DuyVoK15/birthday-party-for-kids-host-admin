@@ -95,34 +95,34 @@ const navigation = (): VerticalNavItemsType => {
           icon: ThemeLightDark,
           path: '/host/managements/theme'
         },
-        {
-          sectionTitle: 'User Interface'
-        },
-        {
-          title: 'Typography',
-          icon: FormatLetterCase,
-          path: '/host/typography'
-        },
-        {
-          title: 'Icons',
-          path: '/host/icons',
-          icon: GoogleCirclesExtended
-        },
-        {
-          title: 'Cards',
-          icon: CreditCardOutline,
-          path: '/host/cards'
-        },
-        {
-          title: 'Tables',
-          icon: Table,
-          path: '/host/tables'
-        },
-        {
-          icon: CubeOutline,
-          title: 'Form Layouts',
-          path: '/host/form-layouts'
-        }
+        // {
+        //   sectionTitle: 'User Interface'
+        // },
+        // {
+        //   title: 'Typography',
+        //   icon: FormatLetterCase,
+        //   path: '/host/typography'
+        // },
+        // {
+        //   title: 'Icons',
+        //   path: '/host/icons',
+        //   icon: GoogleCirclesExtended
+        // },
+        // {
+        //   title: 'Cards',
+        //   icon: CreditCardOutline,
+        //   path: '/host/cards'
+        // },
+        // {
+        //   title: 'Tables',
+        //   icon: Table,
+        //   path: '/host/tables'
+        // },
+        // {
+        //   icon: CubeOutline,
+        //   title: 'Form Layouts',
+        //   path: '/host/form-layouts'
+        // }
       ]
     : [
         {
