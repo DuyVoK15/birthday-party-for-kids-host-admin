@@ -5,31 +5,19 @@ import {
   Image,
   Input,
   InputNumber,
-  Modal,
   Popconfirm,
   Space,
   Table,
-  TimePicker,
   Typography,
   Upload,
   UploadFile,
   message
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import {
-  ModalForm,
-  ProForm,
-  ProFormDateRangePicker,
-  ProFormDigit,
-  ProFormSelect,
-  ProFormText,
-  ProFormTextArea,
-  ProFormUploadButton
-} from '@ant-design/pro-components'
+import { ModalForm, ProFormDigit, ProFormText, ProFormTextArea, ProFormUploadButton } from '@ant-design/pro-components'
 import { useAppDispatch } from 'src/app/store'
 import { createService, deleteService, getAllService, updateService } from 'src/features/action/service.action'
 import { useAppSelector } from 'src/app/hooks'
-import dayjs, { Dayjs } from 'dayjs'
 import { ServiceCreateRequest } from 'src/dtos/request/service.request'
 
 interface Item {
@@ -65,7 +53,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   const inputNode =
     dataIndex === 'serviceImgUrl' ? (
       <Upload maxCount={1}>
-        <Button icon={<PlusOutlined rev={undefined} />}>Click to Upload</Button>
+        <Button icon={<PlusOutlined />}>Click to Upload</Button>
       </Upload>
     ) : dataIndex === 'pricing' ? (
       <InputNumber />
@@ -305,7 +293,7 @@ const Service: React.FC = () => {
           title='Create A New Service'
           trigger={
             <Button type='primary'>
-              <PlusOutlined rev={undefined} />
+              <PlusOutlined />
               Add new service
             </Button>
           }

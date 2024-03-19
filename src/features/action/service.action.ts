@@ -1,7 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
-import { SlotCreateRequest } from 'src/dtos/request/slot.request'
-import { slotService } from 'src/services/slot.service'
 import { serviceService } from 'src/services/service.service'
 import { ServiceCreateRequest } from 'src/dtos/request/service.request'
 
