@@ -27,7 +27,7 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
-import { getUserInfo, loginAdmin } from 'src/features/auth.slice'
+import { getUserInfo, loginAdmin } from 'src/features/slice/auth.slice'
 import { useAppDispatch } from 'src/app/store'
 import { Avatar } from '@mui/material'
 
