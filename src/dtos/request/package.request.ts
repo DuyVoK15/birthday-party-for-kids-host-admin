@@ -1,6 +1,11 @@
+export interface PackageServiceRequest {
+  serviceId: number
+  count: number
+}
 export interface PackageCreateRequest {
   fileImage: any
   packageName: string
   packageDescription: string
-  pricing: string
+  percent: number
+  packageServiceRequests: PackageServiceRequest[] | []
 }

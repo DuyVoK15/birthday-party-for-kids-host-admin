@@ -5,11 +5,9 @@ import {
   Image,
   Input,
   InputNumber,
-  Modal,
   Popconfirm,
   Space,
   Table,
-  TimePicker,
   Typography,
   Upload,
   UploadFile,
@@ -19,18 +17,25 @@ import { PlusOutlined } from '@ant-design/icons'
 import {
   ModalForm,
   ProForm,
-  ProFormDateRangePicker,
   ProFormDigit,
+  ProFormList,
   ProFormSelect,
   ProFormText,
   ProFormTextArea,
   ProFormUploadButton
 } from '@ant-design/pro-components'
 import { useAppDispatch } from 'src/app/store'
-import { createPackage, deletePackage, getAllPackage, updatePackage } from 'src/features/action/package.action'
+import {
+  createPackage,
+  deletePackage,
+  getAllPackage,
+  getPackageById,
+  updatePackage
+} from 'src/features/action/package.action'
 import { useAppSelector } from 'src/app/hooks'
-import dayjs, { Dayjs } from 'dayjs'
 import { PackageCreateRequest } from 'src/dtos/request/package.request'
+import { useRouter } from 'next/router'
+import { getAllService } from 'src/features/action/service.action'
 
 interface Item {
   key: string
@@ -65,7 +70,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   const inputNode =
     dataIndex === 'packageImgUrl' ? (
       <Upload maxCount={1}>
-        <Button icon={<PlusOutlined rev={undefined} />}>Click to Upload</Button>
+        <Button icon={<PlusOutlined />}>Click to Upload</Button>
       </Upload>
     ) : dataIndex === 'pricing' ? (
       <InputNumber />
@@ -95,12 +100,13 @@ const EditableCell: React.FC<EditableCellProps> = ({
 }
 
 const Package: React.FC = () => {
+  const router = useRouter()
   const [form] = Form.useForm()
   const [formModal] = Form.useForm()
   const [data, setData] = useState<Item[]>([])
   const [editingKey, setEditingKey] = useState('')
   const [removingKey, setRemovingKey] = useState('')
-
+  const [serviceDataList, setServiceDataList] = useState<any[]>([])
   const isEditing = (record: Item) => record.key === editingKey
   const isRemoving = (record: Item) => record.key === removingKey
 
@@ -124,7 +130,8 @@ const Package: React.FC = () => {
             packageName: row?.packageName,
             packageDescription: row?.packageDescription || record?.packageDescription,
             fileImage: row?.packageImgUrl?.file?.originFileObj,
-            pricing: String(row?.pricing)
+            percent: 1,
+            packageServiceRequests: []
           }
         }).then(() => {
           setEditingKey('')
@@ -200,7 +207,7 @@ const Package: React.FC = () => {
             <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)}>
               Edit
             </Typography.Link>
-            <Typography.Link onClick={() => edit(record)}>View</Typography.Link>
+            <Typography.Link onClick={() => fetchPackageById(record?.id)}>View</Typography.Link>
           </Space>
         )
       }
@@ -228,6 +235,8 @@ const Package: React.FC = () => {
   const dispatch = useAppDispatch()
   const loading = useAppSelector(state => state.packageReducer.loading)
   const packageList = useAppSelector(state => state.packageReducer.packageList)
+  const serviceList = useAppSelector(state => state.serviceReducer.serviceList)
+
   const packageListView: Item[] = []
 
   const fetchAllPackage = async () => {
@@ -239,7 +248,12 @@ const Package: React.FC = () => {
   useEffect(() => {
     fetchAllPackage()
   }, [])
-
+  useEffect(() => {
+    setServiceDataList(serviceList)
+  }, [serviceList])
+  useEffect(() => {
+    fetchAllService()
+  }, [])
   useEffect(() => {
     packageList?.map((item: any, index: number) => {
       packageListView.push({
@@ -254,6 +268,11 @@ const Package: React.FC = () => {
     })
     setData(packageListView)
   }, [packageList])
+  const fetchAllService = async () => {
+    const res = await dispatch(getAllService())
+    console.log(JSON.stringify(res, null, 2))
+    return res
+  }
 
   const createOnePackage = async (payload: PackageCreateRequest) => {
     let isCloseModal = false
@@ -262,7 +281,8 @@ const Package: React.FC = () => {
         fileImage: payload.fileImage,
         packageName: payload.packageName,
         packageDescription: payload.packageDescription,
-        pricing: payload.pricing
+        percent: payload.percent,
+        packageServiceRequests: payload.packageServiceRequests
       })
     ).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
@@ -297,6 +317,21 @@ const Package: React.FC = () => {
     })
   }
 
+  const fetchPackageById = async (id: number) => {
+    try {
+      if (id !== undefined) {
+        await dispatch(getPackageById(Number(id))).then(res => {
+          router.push(router.pathname + `/${id}`)
+        })
+      }
+    } catch (error) {
+      message.error(error)
+    }
+  }
+  const hasDuplicates = (array: any) => {
+    return new Set(array).size !== array.length
+  }
+
   return (
     <Form form={form} component={false}>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -305,7 +340,7 @@ const Package: React.FC = () => {
           title='Create A New Package'
           trigger={
             <Button type='primary'>
-              <PlusOutlined rev={undefined} />
+              <PlusOutlined />
               Add new package
             </Button>
           }
@@ -320,22 +355,35 @@ const Package: React.FC = () => {
             name,
             description,
             fileImg,
-            pricing
+            percent,
+            packageServiceList
           }: {
             name: string
             description: string
+            percent: number
             fileImg: UploadFile[]
-            pricing: string
+            packageServiceList: []
           }) => {
-            console.log({ name, description, fileImg, pricing })
-            const isCloseModal = createOne({
-              packageName: name,
-              packageDescription: description,
-              fileImage: fileImg?.[0]?.originFileObj,
-              pricing: pricing
-            })
-            return isCloseModal
+            console.log({ name, description, fileImg, packageServiceList, percent })
+            const serviceIds = packageServiceList.map((item: any) => item.serviceId)
+
+            // Kiểm tra nếu có 3 giá trị trùng lặp
+            if (hasDuplicates(serviceIds)) {
+              message.error('Duplicated service selected, try again!')
+            } else {
+              // Xử lý logic khi không có lỗi
+              // Ví dụ: Gửi dữ liệu đi
+              const isCloseModal = createOne({
+                packageName: name,
+                packageDescription: description,
+                fileImage: fileImg?.[0]?.originFileObj,
+                percent: percent,
+                packageServiceRequests: packageServiceList
+              })
+              return isCloseModal
+            }
           }}
+          onChange={e => console.log(e)}
           submitter={{
             searchConfig: {
               submitText: 'Submit',
@@ -358,12 +406,62 @@ const Package: React.FC = () => {
             label='Description'
             placeholder='Enter package description'
           />
+          <ProFormList
+            name='packageServiceList'
+            creatorButtonProps={{
+              position: 'top',
+              creatorButtonText: 'Add new service'
+            }}
+            creatorRecord={{}}
+          >
+            <ProForm.Group>
+              <ProFormSelect
+                width={'lg'}
+                name='serviceId'
+                label='Service'
+                request={async () =>
+                  serviceDataList.map((item: any) => {
+                    return {
+                      label: `${item?.serviceName} - ${item?.pricing} VND `,
+                      value: item?.id
+                    }
+                  })
+                }
+                placeholder='Please select a service'
+                rules={[{ required: true, message: 'Please select a service!' }]}
+              />
+              <ProFormDigit
+                width={'sm'}
+                label='Amount'
+                name='count'
+                min={1}
+                max={1000}
+                fieldProps={{ precision: 0 }}
+                placeholder={'0'}
+                rules={[{ required: true, message: 'Please enter count!' }]}
+              />
+            </ProForm.Group>
+          </ProFormList>
+          {/* <ProFormCheckbox.Group
+            name='packageServiceList'
+            layout='vertical'
+            label='123'
+            options={serviceDataList.map((item: any) => {
+              return {
+                label: `${item?.serviceName} - ${item?.pricing} VND `,
+                value: JSON.stringify({ serviceId: item?.id, count: 1 })
+              }
+            })}
+          /> */}
           <ProFormDigit
-            width={328}
             rules={[{ required: true, message: 'Please input this' }]}
-            name='pricing'
-            label='Pricing'
-            placeholder='Enter package pricing'
+            width='md'
+            name='percent'
+            label='Percent'
+            tooltip='Please input this'
+            placeholder='Enter percent discount'
+            min={0.1}
+            max={0.5}
           />
           <ProFormUploadButton
             rules={[{ required: true, message: 'Please input this' }]}
