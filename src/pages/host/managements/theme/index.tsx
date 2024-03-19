@@ -63,7 +63,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   const inputNode =
     dataIndex === 'themeImgUrl' ? (
       <Upload maxCount={1}>
-        <Button icon={<PlusOutlined rev={undefined} />}>Click to Upload</Button>
+        <Button icon={<PlusOutlined />}>Click to Upload</Button>
       </Upload>
     ) : (
       <Input />
@@ -278,7 +278,7 @@ const Theme: React.FC = () => {
           title='Create A New Theme'
           trigger={
             <Button type='primary'>
-              <PlusOutlined rev={undefined} />
+              <PlusOutlined />
               Add new theme
             </Button>
           }

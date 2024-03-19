@@ -1,8 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
-import { SlotCreateRequest } from 'src/dtos/request/slot.request'
 import { ThemeCreateRequest } from 'src/dtos/request/theme.request'
-import { slotService } from 'src/services/slot.service'
 import { themeService } from 'src/services/theme.service'
 
 export const getAllTheme = createAsyncThunk('theme/getAllTheme', async (_, { rejectWithValue }) => {

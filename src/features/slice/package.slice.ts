@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { createSlot, deleteSlot, getAllSlot, getSlotById, updateSlot } from '../action/slot.action'
 import { createPackage, deletePackage, getAllPackage, getPackageById, updatePackage } from '../action/package.action'
 
 interface AuthState {
