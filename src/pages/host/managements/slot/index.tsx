@@ -271,8 +271,7 @@ const App: React.FC = () => {
           ]}
         >
           <TimePicker.RangePicker
-            width={'100%'}
-            onChange={(dates: [Dayjs | null, Dayjs | null], dateStrings: [string, string]) => {
+            onChange={(_dates: any, dateStrings: [string, string]) => {
               setTimeStart(dateStrings?.[0])
               setTimeEnd(dateStrings?.[1])
             }}
