@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
-import { SlotNotAddResponse, VenueCheckSlotByDateResponse } from 'src/dtos/response/venue.response'
+import { VenueCheckSlotByDateResponse } from 'src/dtos/response/venue.response'
+import { SlotNotAddResponse } from 'src/dtos/response/slot.response'
 
 export const venueService = {
   getAllVenue: (): Promise<AxiosResponse<VenueCheckSlotByDateResponse>> => {
