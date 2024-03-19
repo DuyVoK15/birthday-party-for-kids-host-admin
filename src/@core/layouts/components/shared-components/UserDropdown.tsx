@@ -25,8 +25,8 @@ import HelpCircleOutline from 'mdi-material-ui/HelpCircleOutline'
 import { useAppSelector } from 'src/app/hooks'
 import { ROLE_ENUM } from 'src/enums/roles'
 import { useAppDispatch } from 'src/app/store'
-import { getUserInfo, logout } from 'src/features/slice/auth.slice'
 import { getRoleFromStorage } from 'src/utils/storage'
+import { getUserInfo, logout } from 'src/features/action/auth.action'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
