@@ -23,6 +23,7 @@ import {
   DescriptionsProps,
   Dropdown,
   Form,
+  Image,
   Skeleton,
   Space,
   Tag,
@@ -48,7 +49,7 @@ export const currentDateFormat = dayjs(new Date()).format('YYYY-MM-DD')
 
 export interface TableListItem extends VenueResponse {
   key: string
-  emptySlot: number
+  inUseOfTotalSlot: string
 }
 
 export interface ExpandedRowTable extends SlotInVenueResponse {
@@ -67,6 +68,7 @@ export default function Venue() {
       const res = await dispatch(getAllVenueCheckSlotByDate(dateQuery))
       const resData = res.payload as VenueResponse[] | []
       console.log('AllVenue: ', JSON.stringify(res, null, 2))
+
       return resData
     } catch (error) {}
   }
@@ -75,9 +77,11 @@ export default function Venue() {
       const res = await dispatch(getAllSlotNotAdd(id))
       const resData = res.payload as VenueResponse[] | []
       console.log('AllVenue: ', JSON.stringify(res, null, 2))
+
       return resData
     } catch (error) {}
   }
+
   // ** ** Hook
   const [data, setData] = useState<TableListItem[]>([])
   const [dateQuery, setDateQuery] = useState(currentDateFormat)
@@ -92,7 +96,8 @@ export default function Venue() {
       tableListDataSource.push({
         ...obj,
         key: index.toString(),
-        emptySlot: obj?.slotInVenueList.filter(item => item?.status === false).length
+        inUseOfTotalSlot:
+          obj?.slotInVenueList.filter(item => item?.status === true).length + ' / ' + obj?.slotInVenueList.length
       })
     })
     setData(tableListDataSource)
@@ -147,18 +152,18 @@ export default function Venue() {
         id: item?.id,
         active: item?.active,
         status: item?.status,
-        partyDatedByDate: {
-          id: item?.partyDatedByDate?.id,
-          date: item?.partyDatedByDate?.date,
-          active: item?.partyDatedByDate?.active,
-          slotObject: item?.partyDatedByDate?.slotObject
-        },
-        slotObject: {
-          id: item?.slotObject?.id,
-          timeStart: item?.slotObject?.timeStart,
-          timeEnd: item?.slotObject?.timeEnd,
+        slot: {
+          id: item?.slot?.id,
+          timeStart: item?.slot?.timeStart,
+          timeEnd: item?.slot?.timeEnd,
           validTimeRange: false,
           active: false
+        },
+        partyDated: {
+          id: item?.partyDated?.id,
+          date: item?.partyDated?.date,
+          active: item?.partyDated?.active,
+          slotInVenue: item?.partyDated?.slotInVenue
         }
       })
     })
@@ -167,9 +172,9 @@ export default function Venue() {
       <ProTable
         columns={[
           { title: 'Slot No.', dataIndex: 'key', key: 'key' },
-          { title: 'Start Time', dataIndex: ['slotObject', 'timeStart'], key: 'slotObject.timeStart' },
+          { title: 'Start Time', dataIndex: ['slot', 'timeStart'], key: 'slot.timeStart' },
 
-          { title: 'End Time', dataIndex: ['slotObject', 'timeEnd'], key: 'slotObject.timeEnd' },
+          { title: 'End Time', dataIndex: ['slot', 'timeEnd'], key: 'slot.timeEnd' },
           {
             title: 'Status',
             dataIndex: 'status',
@@ -189,7 +194,7 @@ export default function Venue() {
                   key: '1',
                   icon: <EditOutlined />,
                   onClick: () => {
-                    fetchPartyBookingByPartyDateId(recordChild?.partyDatedByDate?.id)
+                    fetchPartyBookingByPartyDateId(recordChild?.partyDated?.id)
                     setVenue(record)
                     setDrawerBookingVisit(true)
                   },
@@ -216,6 +221,7 @@ export default function Venue() {
     )
   }
 
+  const [key, setKey] = useState<string | null>(null)
   const columns: ProColumns<TableListItem>[] = [
     {
       title: 'Name',
@@ -239,9 +245,9 @@ export default function Venue() {
       render: (_, record) => (record?.active ? <Tag color='success'>Active</Tag> : <Tag color='error'>Inactive</Tag>)
     },
     {
-      title: 'Empty Slot',
+      title: 'In use / Total slot',
       width: '20%',
-      dataIndex: 'emptySlot'
+      dataIndex: 'inUseOfTotalSlot'
     },
     {
       title: 'Action',
@@ -279,16 +285,13 @@ export default function Venue() {
           items
         }
         return (
-          <Dropdown menu={menuProps}>
-            <Button icon={<MoreOutlined />}></Button>
+          <Dropdown
+            menu={menuProps}
+            trigger={['click']}
+            onOpenChange={() => setKey(key === record.key ? null : record.key)}
+          >
+            <Button icon={<MoreOutlined spin={key === record.key ? true : false} />}></Button>
           </Dropdown>
-          // <Space>
-          //   <Typography.Link onClick={() => null}>Save</Typography.Link>
-          //   <Typography.Link onClick={() => null}>Cancel</Typography.Link>
-          //   <Popconfirm title='Sure to delete?' onConfirm={() => null}>
-          //     <a>Delete</a>
-          //   </Popconfirm>
-          // </Space>
         )
       }
     }
@@ -354,19 +357,30 @@ export default function Venue() {
           onFinish={async values => {
             return true
           }}
-        ></ModalForm>
+        >
+          <Image src={partyBooking?.packageInVenue?.aPackage?.packageImgUrl} style={{ width: 200, height: 200 }} />
+          <Typography>HOHOHO</Typography>
+        </ModalForm>
       )
     },
     {
       key: '4',
       label: 'Order time',
-      children: partyBooking?.partyDated?.date + ' ' + partyBooking?.partyDated?.slotObject?.timeStart
+      children: partyBooking?.createAt ? dayjs(partyBooking?.createAt).format('YYYY-MM-DD vào lúc HH:mm:ss') : 'null'
     },
     {
       key: '5',
       label: 'Usage Time',
-      span: 2,
-      children: partyBooking?.partyDated?.date + ' ' + partyBooking?.partyDated?.slotObject?.timeStart
+      children:
+        partyBooking?.slotInVenueObject?.partyDated?.date +
+        ' vào lúc ' +
+        partyBooking?.slotInVenueObject?.slot?.timeStart
+    },
+    {
+      key: '100',
+      label: 'Finish Time',
+      children:
+        partyBooking?.slotInVenueObject?.partyDated?.date + ' vào lúc ' + partyBooking?.slotInVenueObject?.slot?.timeEnd
     },
     {
       key: '6',

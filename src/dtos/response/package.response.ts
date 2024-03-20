@@ -1,7 +1,7 @@
 export interface PackageInVenueDataResponse {
   id: number
   active: boolean
-  packageObject: PackageDataResponse
+  aPackage: PackageDataResponse
 }
 
 export interface PackageDataResponse {

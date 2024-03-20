@@ -8,12 +8,11 @@ export interface SlotOnjectResponse {
   active: boolean
 }
 export interface SlotInVenueResponse {
-  // [x: string]: any
   id: number
   active: boolean
   status: boolean
-  partyDatedByDate: PartyDateObjectResponse
-  slotObject: SlotOnjectResponse
+  slot: SlotOnjectResponse
+  partyDated: PartyDateObjectResponse
 }
 export interface SlotNotAddResponse {
   status: string

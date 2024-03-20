@@ -1,5 +1,6 @@
 import { PackageInVenueDataResponse } from './package.response'
 import { PartyDateObjectResponse } from './partyDated.response'
+import { SlotInVenueResponse } from './slot.response'
 import { ThemeInVenueDataResponse } from './theme.response'
 
 export interface PartyBookingDataResponse {
@@ -11,11 +12,15 @@ export interface PartyBookingDataResponse {
   status: string
   upgradeServices: []
   partyDated: PartyDateObjectResponse
-  packageInVenueObject: PackageInVenueDataResponse
-  themeInVenueObject: ThemeInVenueDataResponse
+  packageInVenue: PackageInVenueDataResponse
+  themeInVenue: ThemeInVenueDataResponse
+  slotInVenueObject: SlotInVenueResponse
   paymentList: []
   reviewList: []
   active: boolean
+  createAt: string
+  updateAt: string
+  deleteAt: string
 }
 
 export interface PartyBookingObjectResponse {

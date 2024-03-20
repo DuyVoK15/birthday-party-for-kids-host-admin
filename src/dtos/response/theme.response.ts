@@ -1,7 +1,7 @@
 export interface ThemeInVenueDataResponse {
   id: number
   active: boolean
-  themeObject: ThemeDataResponse
+  theme: ThemeDataResponse
 }
 
 export interface ThemeDataResponse {
