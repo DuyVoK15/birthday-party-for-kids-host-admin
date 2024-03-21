@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
 import { SlotCreateRequest } from 'src/dtos/request/slot.request'
+import { ItemInVenueListCreateRequest } from 'src/dtos/request/theme.request'
 
 export const slotService = {
   getAllSlot: (): Promise<AxiosResponse<any>> => {
@@ -22,5 +23,9 @@ export const slotService = {
   deleteSlot: (id: number): Promise<AxiosResponse<any>> => {
     const url = `/api/slot/delete/${id}`
     return axiosClient.delete(url)
+  },
+  createSlotInVenueListByVenueId: (request: ItemInVenueListCreateRequest): Promise<AxiosResponse<any>> => {
+    const url = `/api/slot/add-slot-in-venue-by-slot-id?venueId=${request.venueId}`
+    return axiosClient.post(url, request.payload)
   }
 }

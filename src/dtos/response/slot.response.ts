@@ -1,21 +1,26 @@
-import { PartyDateObjectResponse } from './partyDated.response'
+import { PartyDatedDataResponse } from './partyDated.response'
 
-export interface SlotOnjectResponse {
+export interface SlotDataResponse {
   id: number
   timeStart: string
   timeEnd: string
   validTimeRange: boolean
   active: boolean
 }
-export interface SlotInVenueResponse {
+export interface SlotInVenueDataResponse {
   id: number
   active: boolean
   status: boolean
-  slot: SlotOnjectResponse
-  partyDated: PartyDateObjectResponse
+  slot: SlotDataResponse
+  partyDated: PartyDatedDataResponse
 }
-export interface SlotNotAddResponse {
+
+export interface SlotInVenueArrayResponse {
+  data: SlotInVenueDataResponse[] | []
+}
+
+export interface SlotNotAddArrayResponse {
   status: string
   message: string
-  data: SlotOnjectResponse[] | []
+  data: SlotDataResponse[] | []
 }
