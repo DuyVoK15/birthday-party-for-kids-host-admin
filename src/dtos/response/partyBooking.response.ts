@@ -1,6 +1,6 @@
 import { PackageInVenueDataResponse } from './package.response'
-import { PartyDateObjectResponse } from './partyDated.response'
-import { SlotInVenueResponse } from './slot.response'
+import { PartyDatedDataResponse } from './partyDated.response'
+import { SlotInVenueDataResponse } from './slot.response'
 import { ThemeInVenueDataResponse } from './theme.response'
 
 export interface PartyBookingDataResponse {
@@ -11,10 +11,10 @@ export interface PartyBookingDataResponse {
   phone: string
   status: string
   upgradeServices: []
-  partyDated: PartyDateObjectResponse
+  partyDated: PartyDatedDataResponse
   packageInVenue: PackageInVenueDataResponse
   themeInVenue: ThemeInVenueDataResponse
-  slotInVenueObject: SlotInVenueResponse
+  slotInVenueObject: SlotInVenueDataResponse
   paymentList: []
   reviewList: []
   active: boolean

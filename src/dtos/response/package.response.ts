@@ -1,9 +1,3 @@
-export interface PackageInVenueDataResponse {
-  id: number
-  active: boolean
-  aPackage: PackageDataResponse
-}
-
 export interface PackageDataResponse {
   id: number
   packageName: string
@@ -19,4 +13,22 @@ export interface PackageServiceDataResponse {
   count: number
   pricing: number
   active: boolean
+}
+
+export interface PackageInVenueDataResponse {
+  id: number
+  active: boolean
+  apackage: PackageDataResponse
+}
+
+export interface PackageInVenueArrayResponse {
+  data: PackageInVenueDataResponse[] | []
+}
+
+export interface PackageInVenueObjectResponse {
+  data: PackageInVenueDataResponse
+}
+
+export interface PackageNotAddArrayResponse {
+  data: PackageDataResponse[] | []
 }

@@ -1,8 +1,8 @@
-import { SlotInVenueResponse, SlotOnjectResponse } from './slot.response'
+import { SlotInVenueDataResponse } from './slot.response'
 
-export interface PartyDateObjectResponse {
+export interface PartyDatedDataResponse {
   id: number
   date: string
   active: boolean
-  slotInVenue: SlotInVenueResponse
+  slotInVenue: SlotInVenueDataResponse
 }

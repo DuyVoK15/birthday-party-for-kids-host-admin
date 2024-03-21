@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
 import { PackageCreateRequest } from 'src/dtos/request/package.request'
+import { ItemInVenueListCreateRequest } from 'src/dtos/request/theme.request'
 
 export const packageService = {
   getAllPackage: (): Promise<AxiosResponse<any>> => {
@@ -35,5 +36,9 @@ export const packageService = {
   deletePackage: (id: number): Promise<AxiosResponse<any>> => {
     const url = `/api/package/delete/${id}`
     return axiosClient.delete(url)
+  },
+  createPackageInVenueListByVenueId: (request: ItemInVenueListCreateRequest): Promise<AxiosResponse<any>> => {
+    const url = `/api/package/add-package-in-venue-by-venue-id?venueId=${request.venueId}`
+    return axiosClient.post(url, request.payload)
   }
 }
