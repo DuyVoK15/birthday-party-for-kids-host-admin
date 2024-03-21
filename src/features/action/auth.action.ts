@@ -1,4 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
+import { AxiosError } from 'axios'
 import { LoginRequest } from 'src/dtos/request/auth.request'
 import AppConstants from 'src/enums/app'
 import { authService } from 'src/services/auth.service'
@@ -11,7 +12,8 @@ export const loginHost = createAsyncThunk('auth/loginHost', async (payload: Logi
     localStorage.setItem(AppConstants.ACCESS_TOKEN, response.data?.data?.token)
     return response.data
   } catch (error: any) {
-    return rejectWithValue(error.message)
+    const axiosError = error as AxiosError;
+    return rejectWithValue(axiosError.response?.data)
   }
 })
 export const loginAdmin = createAsyncThunk('auth/loginAdmin', async (payload: LoginRequest, { rejectWithValue }) => {
