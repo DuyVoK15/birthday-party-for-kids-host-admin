@@ -1,4 +1,4 @@
-import { SlotInVenueResponse } from "./slot.response"
+import { SlotInVenueDataResponse } from './slot.response'
 
 export interface VenueResponse {
   id: number
@@ -7,7 +7,7 @@ export interface VenueResponse {
   venueImgUrl: string
   location: string
   capacity: number
-  slotInVenueList: SlotInVenueResponse[] | []
+  slotInVenueList: SlotInVenueDataResponse[] | []
   active: boolean
 }
 export interface VenueCheckSlotByDateResponse {

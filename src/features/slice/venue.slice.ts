@@ -1,25 +1,44 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, isAnyOf } from '@reduxjs/toolkit'
 import {
+  createPackageInVenueListByVenueId,
   createSlotInVenue,
+  createSlotInVenueListByVenueId,
+  createThemeInVenueListByVenueId,
+  createVenue,
+  getAllPackageInVenueByVenueId,
+  getAllPackageNotAdd,
+  getAllSlotInVenueByVenueId,
   getAllSlotNotAdd,
+  getAllThemeInVenueByVenueId,
+  getAllThemeNotAdd,
   getAllVenue,
   getAllVenueCheckSlotByDate,
   getPartyBookingByPartyDateId
 } from '../action/venue.action'
 import { VenueCheckSlotByDateResponse, VenueResponse } from 'src/dtos/response/venue.response'
 import { PartyBookingDataResponse } from 'src/dtos/response/partyBooking.response'
-import { SlotOnjectResponse } from 'src/dtos/response/slot.response'
+import { ThemeDataResponse, ThemeInVenueDataResponse } from 'src/dtos/response/theme.response'
+import { PackageDataResponse, PackageInVenueDataResponse } from 'src/dtos/response/package.response'
+import { SlotDataResponse, SlotInVenueDataResponse } from 'src/dtos/response/slot.response'
 
 interface VenueState {
   venueCheckSlotByDateResponse: VenueCheckSlotByDateResponse
   venueCheckSlotByDateList: VenueResponse[] | []
   venueList: VenueResponse[] | []
-  slotNotAddList: SlotOnjectResponse[] | []
+  themeNotAddList: ThemeDataResponse[] | []
+  packageNotAddList: PackageDataResponse[] | []
+  slotNotAddList: SlotDataResponse[] | []
   partyBooking: PartyBookingDataResponse | null
+  themeInVenueList: ThemeInVenueDataResponse[] | []
+  packageInVenueList: PackageInVenueDataResponse[] | []
+  slotInVenueList: SlotInVenueDataResponse[] | []
   loading: boolean
+  loadingCreateVenue: boolean
   loadingGetSlotNotAdd: boolean
   loadingCreateSlotInVenue: boolean
   loadingPartyBooking: boolean
+  loadingItemInVenueList: boolean
+  loadingCreateItemInVenueList: boolean
 }
 const initialState: VenueState = {
   venueCheckSlotByDateResponse: {
@@ -29,12 +48,20 @@ const initialState: VenueState = {
   },
   venueCheckSlotByDateList: [],
   venueList: [],
+  themeNotAddList: [],
+  packageNotAddList: [],
   slotNotAddList: [],
   partyBooking: null,
+  themeInVenueList: [],
+  packageInVenueList: [],
+  slotInVenueList: [],
   loading: false,
+  loadingCreateVenue: false,
   loadingGetSlotNotAdd: false,
   loadingCreateSlotInVenue: false,
-  loadingPartyBooking: false
+  loadingPartyBooking: false,
+  loadingItemInVenueList: false,
+  loadingCreateItemInVenueList: false
 }
 
 export const venueSlice = createSlice({
@@ -63,6 +90,26 @@ export const venueSlice = createSlice({
       .addCase(getAllVenueCheckSlotByDate.rejected, (state, action) => {
         state.loading = false
       })
+      .addCase(getAllThemeNotAdd.pending, state => {
+        state.loadingGetSlotNotAdd = true
+      })
+      .addCase(getAllThemeNotAdd.fulfilled, (state, action) => {
+        state.themeNotAddList = action.payload?.data || []
+        state.loadingGetSlotNotAdd = false
+      })
+      .addCase(getAllThemeNotAdd.rejected, (state, action) => {
+        state.loadingGetSlotNotAdd = false
+      })
+      .addCase(getAllPackageNotAdd.pending, state => {
+        state.loadingGetSlotNotAdd = true
+      })
+      .addCase(getAllPackageNotAdd.fulfilled, (state, action) => {
+        state.packageNotAddList = action.payload?.data || []
+        state.loadingGetSlotNotAdd = false
+      })
+      .addCase(getAllPackageNotAdd.rejected, (state, action) => {
+        state.loadingGetSlotNotAdd = false
+      })
       .addCase(getAllSlotNotAdd.pending, state => {
         state.loadingGetSlotNotAdd = true
       })
@@ -72,6 +119,15 @@ export const venueSlice = createSlice({
       })
       .addCase(getAllSlotNotAdd.rejected, (state, action) => {
         state.loadingGetSlotNotAdd = false
+      })
+      .addCase(createVenue.pending, state => {
+        state.loadingCreateVenue = true
+      })
+      .addCase(createVenue.fulfilled, (state, action) => {
+        state.loadingCreateVenue = false
+      })
+      .addCase(createVenue.rejected, (state, action) => {
+        state.loadingCreateVenue = false
       })
       .addCase(createSlotInVenue.pending, state => {
         state.loadingCreateSlotInVenue = true
@@ -92,6 +148,65 @@ export const venueSlice = createSlice({
       .addCase(getPartyBookingByPartyDateId.rejected, (state, action) => {
         state.loadingPartyBooking = false
       })
+      //
+      .addCase(getAllThemeInVenueByVenueId.pending, state => {
+        state.loadingItemInVenueList = true
+      })
+      .addCase(getAllThemeInVenueByVenueId.fulfilled, (state, action) => {
+        state.loadingItemInVenueList = false
+        state.themeInVenueList = action.payload?.data || []
+      })
+      .addCase(getAllThemeInVenueByVenueId.rejected, (state, action) => {
+        state.loadingItemInVenueList = false
+      })
+      //
+      .addCase(getAllPackageInVenueByVenueId.pending, state => {
+        state.loadingItemInVenueList = true
+      })
+      .addCase(getAllPackageInVenueByVenueId.fulfilled, (state, action) => {
+        state.loadingItemInVenueList = false
+        state.packageInVenueList = action.payload?.data || []
+      })
+      .addCase(getAllPackageInVenueByVenueId.rejected, (state, action) => {
+        state.loadingItemInVenueList = false
+      })
+      //
+      .addCase(getAllSlotInVenueByVenueId.pending, state => {
+        state.loadingItemInVenueList = true
+      })
+      .addCase(getAllSlotInVenueByVenueId.fulfilled, (state, action) => {
+        state.loadingItemInVenueList = false
+        state.slotInVenueList = action.payload?.data || []
+      })
+      .addCase(getAllSlotInVenueByVenueId.rejected, (state, action) => {
+        state.loadingItemInVenueList = false
+      })
+      //
+      .addCase(createThemeInVenueListByVenueId.pending, state => {
+        state.loadingCreateItemInVenueList = false
+      })
+      .addCase(createThemeInVenueListByVenueId.fulfilled, (state, action) => {
+        state.loadingCreateItemInVenueList = false
+      })
+      .addCase(createThemeInVenueListByVenueId.rejected, (state, action) => {
+        state.loadingCreateItemInVenueList = false
+      })
+      //
+      .addMatcher(isAnyOf(createPackageInVenueListByVenueId.pending, createSlotInVenueListByVenueId.pending), state => {
+        state.loadingCreateItemInVenueList = true
+      })
+      .addMatcher(
+        isAnyOf(createPackageInVenueListByVenueId.fulfilled, createSlotInVenueListByVenueId.fulfilled),
+        state => {
+          state.loadingCreateItemInVenueList = false
+        }
+      )
+      .addMatcher(
+        isAnyOf(createPackageInVenueListByVenueId.rejected, createSlotInVenueListByVenueId.rejected),
+        state => {
+          state.loadingCreateItemInVenueList = false
+        }
+      ) //
   }
 })
 
