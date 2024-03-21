@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
-import { ThemeCreateRequest } from 'src/dtos/request/theme.request'
+import { ItemInVenueListCreateRequest, ThemeCreateRequest } from 'src/dtos/request/theme.request'
 
 export const themeService = {
   getAllTheme: (): Promise<AxiosResponse<any>> => {
@@ -32,5 +32,9 @@ export const themeService = {
   deleteTheme: (id: number): Promise<AxiosResponse<any>> => {
     const url = `/api/theme/delete/${id}`
     return axiosClient.delete(url)
+  },
+  createThemeInVenueListByVenueId: (request: ItemInVenueListCreateRequest): Promise<AxiosResponse<any>> => {
+    const url = `/api/theme/add-theme-in-venue-by-venue-id?venueId=${request.venueId}`
+    return axiosClient.post(url, request.payload)
   }
 }

@@ -3,3 +3,8 @@ export interface ThemeCreateRequest {
   themeName: string
   themeDescription: string
 }
+
+export interface ItemInVenueListCreateRequest {
+  venueId: number
+  payload: number[] | []
+}
