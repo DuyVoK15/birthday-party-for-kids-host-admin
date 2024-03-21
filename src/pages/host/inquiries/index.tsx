@@ -4,24 +4,16 @@ import {
   Button,
   Flex,
   Form,
-  Image,
   Input,
-  InputNumber,
-  Modal,
   Popconfirm,
   Radio,
   Space,
   Table,
-  TimePicker,
   Typography,
-  Upload,
-  UploadFile
-} from 'antd'
+} from 'antd';
 import { useAppDispatch } from 'src/app/store'
 import { getAllInquiry, replyInquiryById } from 'src/features/action/inquiry.action'
 import { useAppSelector } from 'src/app/hooks'
-import dayjs, { Dayjs } from 'dayjs'
-import { PlusOutlined } from '@ant-design/icons'
 
 interface Item {
   key: string

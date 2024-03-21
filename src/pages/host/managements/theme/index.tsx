@@ -4,31 +4,19 @@ import {
   Form,
   Image,
   Input,
-  InputNumber,
-  Modal,
   Popconfirm,
   Space,
   Table,
-  TimePicker,
   Typography,
   Upload,
   UploadFile,
-  message
-} from 'antd'
+  message,
+} from 'antd';
 import { PlusOutlined } from '@ant-design/icons'
-import {
-  ModalForm,
-  ProForm,
-  ProFormDateRangePicker,
-  ProFormSelect,
-  ProFormText,
-  ProFormTextArea,
-  ProFormUploadButton
-} from '@ant-design/pro-components'
+import { ModalForm, ProFormText, ProFormUploadButton } from '@ant-design/pro-components';
 import { useAppDispatch } from 'src/app/store'
 import { createTheme, deleteTheme, getAllTheme, updateTheme } from 'src/features/action/theme.action'
 import { useAppSelector } from 'src/app/hooks'
-import dayjs, { Dayjs } from 'dayjs'
 import { ThemeCreateRequest } from 'src/dtos/request/theme.request'
 
 interface Item {

@@ -33,7 +33,6 @@ import { Provider } from 'react-redux'
 import { store } from 'src/app/store'
 import { SnackbarProvider } from 'notistack'
 import { AuthContextProvider } from 'src/@core/context/AuthContext'
-import { title } from 'process'
 import { ConfigProvider } from 'antd'
 import en_US from 'antd/locale/en_US'
 

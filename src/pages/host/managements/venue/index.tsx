@@ -1,13 +1,12 @@
 import {
-  DownOutlined,
   EditOutlined,
   MoreOutlined,
   PlusOutlined,
   DropboxOutlined,
   PrinterOutlined,
   EyeOutlined,
-  SolutionOutlined
-} from '@ant-design/icons'
+  SolutionOutlined,
+} from '@ant-design/icons';
 import type { ProColumns } from '@ant-design/pro-components'
 import {
   DrawerForm,
@@ -15,13 +14,12 @@ import {
   ProFormCheckbox,
   ProFormDatePicker,
   ProFormDigit,
-  ProFormSelect,
   ProFormText,
   ProFormTextArea,
   ProFormUploadButton,
   ProTable,
-  QueryFilter
-} from '@ant-design/pro-components'
+  QueryFilter,
+} from '@ant-design/pro-components';
 import {
   Badge,
   Button,
@@ -49,13 +47,12 @@ import dayjs from 'dayjs'
 import { Fragment, useEffect, useState } from 'react'
 import { useAppSelector } from 'src/app/hooks'
 import { useAppDispatch } from 'src/app/store'
-import { ItemInVenueListCreateRequest, ThemeCreateRequest } from 'src/dtos/request/theme.request'
+import { ItemInVenueListCreateRequest } from 'src/dtos/request/theme.request';
 import { VenueCreateRequest } from 'src/dtos/request/venue.request'
 import { SlotInVenueDataResponse } from 'src/dtos/response/slot.response'
 import { VenueResponse } from 'src/dtos/response/venue.response'
 import {
   createPackageInVenueListByVenueId,
-  createSlotInVenue,
   createSlotInVenueListByVenueId,
   createThemeInVenueListByVenueId,
   createVenue,
@@ -66,8 +63,8 @@ import {
   getAllThemeInVenueByVenueId,
   getAllThemeNotAdd,
   getAllVenueCheckSlotByDate,
-  getPartyBookingByPartyDateId
-} from 'src/features/action/venue.action'
+  getPartyBookingByPartyDateId,
+} from 'src/features/action/venue.action';
 
 export const currentDateFormat = dayjs(new Date()).format('YYYY-MM-DD')
 

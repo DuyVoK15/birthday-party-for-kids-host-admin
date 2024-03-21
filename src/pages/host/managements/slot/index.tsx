@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Form, Input, InputNumber, Modal, Popconfirm, Space, Table, TimePicker, Typography } from 'antd'
+import { Button, Form, Modal, Popconfirm, Space, Table, TimePicker, Typography } from 'antd';
 import { useAppDispatch } from 'src/app/store'
 import { createSlot, deleteSlot, getAllSlot, updateSlot } from 'src/features/action/slot.action'
 import { useAppSelector } from 'src/app/hooks'
-import dayjs, { Dayjs } from 'dayjs'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
+import dayjs from 'dayjs';
 import { SlotCreateRequest } from 'src/dtos/request/slot.request'
 
 interface Item {
