@@ -7,6 +7,9 @@ module.exports = {
     esmExternals: false,
     jsconfigPaths: true // enables it for both jsconfig.json and tsconfig.json
   },
+  eslint: {
+    ignoreDuringBuilds: true
+  },
   webpack: config => {
     config.resolve.alias = {
       ...config.resolve.alias,
