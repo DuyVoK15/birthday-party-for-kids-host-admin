@@ -12,7 +12,7 @@ export const loginHost = createAsyncThunk('auth/loginHost', async (payload: Logi
     localStorage.setItem(AppConstants.ACCESS_TOKEN, response.data?.data?.token)
     return response.data
   } catch (error: any) {
-    const axiosError = error as AxiosError;
+    const axiosError = error as AxiosError
     return rejectWithValue(axiosError.response?.data)
   }
 })
@@ -23,7 +23,8 @@ export const loginAdmin = createAsyncThunk('auth/loginAdmin', async (payload: Lo
     localStorage.setItem(AppConstants.ROLE, response.data?.data?.role?.name)
     return response.data
   } catch (error: any) {
-    return rejectWithValue(error.message)
+    const axiosError = error as AxiosError
+    return rejectWithValue(axiosError.response?.data)
   }
 })
 export const getUserInfo = createAsyncThunk('auth/getUserInfo', async (_, { rejectWithValue }) => {
@@ -31,7 +32,8 @@ export const getUserInfo = createAsyncThunk('auth/getUserInfo', async (_, { reje
     const response = await authService.getUserInfo()
     return response.data
   } catch (error: any) {
-    return rejectWithValue(error.message)
+    const axiosError = error as AxiosError
+    return rejectWithValue(axiosError.response?.data)
   }
 })
 export const logout = createAsyncThunk('auth/lgout', async (_, { rejectWithValue }) => {
@@ -40,6 +42,7 @@ export const logout = createAsyncThunk('auth/lgout', async (_, { rejectWithValue
     localStorage.removeItem(AppConstants.ROLE)
     return true
   } catch (error: any) {
-    return rejectWithValue(error.message)
+    const axiosError = error as AxiosError
+    return rejectWithValue(axiosError.response?.data)
   }
 })

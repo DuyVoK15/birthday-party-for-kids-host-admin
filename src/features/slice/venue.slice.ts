@@ -5,6 +5,8 @@ import {
   createSlotInVenueListByVenueId,
   createThemeInVenueListByVenueId,
   createVenue,
+  disableVenueById,
+  enableVenueById,
   getAllPackageInVenueByVenueId,
   getAllPackageNotAdd,
   getAllSlotInVenueByVenueId,
@@ -20,6 +22,7 @@ import { PartyBookingDataResponse } from 'src/dtos/response/partyBooking.respons
 import { ThemeDataResponse, ThemeInVenueDataResponse } from 'src/dtos/response/theme.response'
 import { PackageDataResponse, PackageInVenueDataResponse } from 'src/dtos/response/package.response'
 import { SlotDataResponse, SlotInVenueDataResponse } from 'src/dtos/response/slot.response'
+import { disableSlotInVenueById, enableSlotInVenueById } from '../action/slot.action'
 
 interface VenueState {
   venueCheckSlotByDateResponse: VenueCheckSlotByDateResponse
@@ -192,17 +195,41 @@ export const venueSlice = createSlice({
         state.loadingCreateItemInVenueList = false
       })
       //
-      .addMatcher(isAnyOf(createPackageInVenueListByVenueId.pending, createSlotInVenueListByVenueId.pending), state => {
-        state.loadingCreateItemInVenueList = true
-      })
       .addMatcher(
-        isAnyOf(createPackageInVenueListByVenueId.fulfilled, createSlotInVenueListByVenueId.fulfilled),
+        isAnyOf(
+          createPackageInVenueListByVenueId.pending,
+          createSlotInVenueListByVenueId.pending,
+          disableSlotInVenueById.pending,
+          enableSlotInVenueById.pending,
+          disableVenueById.pending,
+          enableVenueById.pending
+        ),
+        state => {
+          state.loadingCreateItemInVenueList = true
+        }
+      )
+      .addMatcher(
+        isAnyOf(
+          createPackageInVenueListByVenueId.fulfilled,
+          createSlotInVenueListByVenueId.fulfilled,
+          disableSlotInVenueById.fulfilled,
+          enableSlotInVenueById.fulfilled,
+          disableVenueById.fulfilled,
+          enableVenueById.fulfilled
+        ),
         state => {
           state.loadingCreateItemInVenueList = false
         }
       )
       .addMatcher(
-        isAnyOf(createPackageInVenueListByVenueId.rejected, createSlotInVenueListByVenueId.rejected),
+        isAnyOf(
+          createPackageInVenueListByVenueId.rejected,
+          createSlotInVenueListByVenueId.rejected,
+          disableSlotInVenueById.rejected,
+          enableSlotInVenueById.rejected,
+          disableVenueById.rejected,
+          enableVenueById.rejected
+        ),
         state => {
           state.loadingCreateItemInVenueList = false
         }

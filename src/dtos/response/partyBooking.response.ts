@@ -1,3 +1,4 @@
+import { AccountDataResponse } from './auth.response'
 import { PackageInVenueDataResponse } from './package.response'
 import { PartyDatedDataResponse } from './partyDated.response'
 import { SlotInVenueDataResponse } from './slot.response'
@@ -15,9 +16,11 @@ export interface PartyBookingDataResponse {
   packageInVenue: PackageInVenueDataResponse
   themeInVenue: ThemeInVenueDataResponse
   slotInVenueObject: SlotInVenueDataResponse
+  account: AccountDataResponse
   paymentList: []
   reviewList: []
   active: boolean
+  pricingTotal: number
   createAt: string
   updateAt: string
   deleteAt: string

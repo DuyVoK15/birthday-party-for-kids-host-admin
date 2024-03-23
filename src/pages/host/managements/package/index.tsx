@@ -8,6 +8,7 @@ import {
   Popconfirm,
   Space,
   Table,
+  Tag,
   Typography,
   Upload,
   UploadFile,
@@ -36,6 +37,8 @@ import { useAppSelector } from 'src/app/hooks'
 import { PackageCreateRequest } from 'src/dtos/request/package.request'
 import { useRouter } from 'next/router'
 import { getAllService } from 'src/features/action/service.action'
+import { PackageDataResponse, PackageServiceDataResponse } from 'src/dtos/response/package.response'
+import PackageDetail from 'src/views/host/managements/package/PackageDetail'
 
 interface Item {
   key: string
@@ -44,7 +47,9 @@ interface Item {
   packageName: string
   packageImgUrl: any
   packageDescription: string
+  active: boolean
   pricing: number
+  packageServiceList: PackageServiceDataResponse[] | []
 }
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
@@ -165,20 +170,28 @@ const Package: React.FC = () => {
     {
       title: 'Package No.',
       dataIndex: 'packageNumber',
-      width: '10%',
+      width: '7%',
       editable: false
     },
     {
       title: 'Name',
       dataIndex: 'packageName',
-      width: '20%',
+      width: '15%',
       editable: true
     },
     {
       title: 'Pricing',
       dataIndex: 'pricing',
-      width: '20%',
-      editable: true
+      width: '15%',
+      editable: false
+    },
+    {
+      title: 'Is Active',
+      dataIndex: 'active',
+      width: '13%',
+      editable: false,
+      render: (_: any, record: Item) =>
+        record?.active ? <Tag color='success'>Active</Tag> : <Tag color='error'>Inactive</Tag>
     },
     {
       title: 'Image',
@@ -186,7 +199,9 @@ const Package: React.FC = () => {
       width: '20%',
       editable: true,
       render: (_: any, record: Item) => {
-        return <Image style={{ borderRadius: 5 }} width={200} height={100} src={record?.packageImgUrl} />
+        return (
+          <Image style={{ borderRadius: 5, objectFit: 'cover' }} width={200} height={100} src={record?.packageImgUrl} />
+        )
       }
     },
     {
@@ -194,6 +209,7 @@ const Package: React.FC = () => {
       dataIndex: 'action',
       render: (_: any, record: Item) => {
         const editable = isEditing(record)
+        const packageObject: any = record
         return editable ? (
           <Space>
             <Typography.Link onClick={() => save(record)}>Save</Typography.Link>
@@ -207,7 +223,16 @@ const Package: React.FC = () => {
             <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)}>
               Edit
             </Typography.Link>
-            <Typography.Link onClick={() => fetchPackageById(record?.id)}>View</Typography.Link>
+            <ModalForm
+              title='Package Detail'
+              trigger={
+                <Button disabled={editingKey !== ''} type='link'>
+                  View
+                </Button>
+              }
+            >
+              <PackageDetail packageInVenue={packageObject} />
+            </ModalForm>
           </Space>
         )
       }
@@ -255,7 +280,7 @@ const Package: React.FC = () => {
     fetchAllService()
   }, [])
   useEffect(() => {
-    packageList?.map((item: any, index: number) => {
+    packageList?.map((item: PackageDataResponse, index: number) => {
       packageListView.push({
         key: index.toString(),
         id: item?.id,
@@ -263,7 +288,9 @@ const Package: React.FC = () => {
         packageName: item?.packageName,
         packageImgUrl: item?.packageImgUrl,
         packageDescription: item?.packageDescription,
-        pricing: item?.pricing
+        pricing: item?.pricing,
+        active: item?.active,
+        packageServiceList: item?.packageServiceList
       })
     })
     setData(packageListView)

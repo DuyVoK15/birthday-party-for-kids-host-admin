@@ -6,7 +6,9 @@ import {
   PrinterOutlined,
   EyeOutlined,
   SolutionOutlined,
-} from '@ant-design/icons';
+  CheckOutlined,
+  CloseOutlined
+} from '@ant-design/icons'
 import type { ProColumns } from '@ant-design/pro-components'
 import {
   DrawerForm,
@@ -18,8 +20,8 @@ import {
   ProFormTextArea,
   ProFormUploadButton,
   ProTable,
-  QueryFilter,
-} from '@ant-design/pro-components';
+  QueryFilter
+} from '@ant-design/pro-components'
 import {
   Badge,
   Button,
@@ -32,6 +34,7 @@ import {
   Flex,
   Form,
   Image,
+  Popconfirm,
   Row,
   Skeleton,
   Space,
@@ -47,15 +50,18 @@ import dayjs from 'dayjs'
 import { Fragment, useEffect, useState } from 'react'
 import { useAppSelector } from 'src/app/hooks'
 import { useAppDispatch } from 'src/app/store'
-import { ItemInVenueListCreateRequest } from 'src/dtos/request/theme.request';
+import { ItemInVenueListCreateRequest } from 'src/dtos/request/theme.request'
 import { VenueCreateRequest } from 'src/dtos/request/venue.request'
 import { SlotInVenueDataResponse } from 'src/dtos/response/slot.response'
 import { VenueResponse } from 'src/dtos/response/venue.response'
+import { disableSlotInVenueById, enableSlotInVenueById } from 'src/features/action/slot.action'
 import {
   createPackageInVenueListByVenueId,
   createSlotInVenueListByVenueId,
   createThemeInVenueListByVenueId,
   createVenue,
+  disableVenueById,
+  enableVenueById,
   getAllPackageInVenueByVenueId,
   getAllPackageNotAdd,
   getAllSlotInVenueByVenueId,
@@ -63,8 +69,11 @@ import {
   getAllThemeInVenueByVenueId,
   getAllThemeNotAdd,
   getAllVenueCheckSlotByDate,
-  getPartyBookingByPartyDateId,
-} from 'src/features/action/venue.action';
+  getPartyBookingByPartyDateId
+} from 'src/features/action/venue.action'
+import PackageInVenueDetail from 'src/views/host/managements/package/PackageInVenueDetail'
+import ThemeInVenueDetail from 'src/views/host/managements/theme/ThemeInVenueDetail'
+import UpgradeServiceBookingDetail from 'src/views/host/managements/upgrade-service/UpgradeServiceBookingDetail'
 
 export const currentDateFormat = dayjs(new Date()).format('YYYY-MM-DD')
 
@@ -158,12 +167,15 @@ export default function Venue() {
   const [drawerThemeInVenuegVisit, setDrawerThemeInVenueVisit] = useState(false)
   const [drawerPackageInVenueVisit, setDrawerPackageInVenueVisit] = useState(false)
   const [drawerSlotInVenueVisit, setDrawerslotInVenueVisit] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [confirmLoading, setConfirmLoading] = useState(false)
 
-  const loading = useAppSelector(state => state.venueReducer.loading)
+  const userInfo = useAppSelector(state => state.authReducer.userInfo)
   const venueList = useAppSelector(state => state.venueReducer.venueCheckSlotByDateList)
   const themeNotAddList = useAppSelector(state => state.venueReducer.themeNotAddList)
   const packageNotAddList = useAppSelector(state => state.venueReducer.packageNotAddList)
   const slotNotAddList = useAppSelector(state => state.venueReducer.slotNotAddList)
+  const loading = useAppSelector(state => state.venueReducer.loading)
   const loadingCreateVenue = useAppSelector(state => state.venueReducer.loadingCreateVenue)
   const loadingGetSlotNotAdd = useAppSelector(state => state.venueReducer.loadingGetSlotNotAdd)
   const loadingPartyBooking = useAppSelector(state => state.venueReducer.loadingPartyBooking)
@@ -172,6 +184,24 @@ export default function Venue() {
   const themeInVenueList = useAppSelector(state => state.venueReducer.themeInVenueList)
   const packageInVenueList = useAppSelector(state => state.venueReducer.packageInVenueList)
   const slotInVenueList = useAppSelector(state => state.venueReducer.slotInVenueList)
+
+  const showPopconfirm = () => {
+    setOpen(true)
+  }
+
+  const handleOk = () => {
+    setConfirmLoading(true)
+
+    setTimeout(() => {
+      setOpen(false)
+      setConfirmLoading(false)
+    }, 2000)
+  }
+
+  const handleCancel = () => {
+    console.log('Clicked cancel button')
+    setOpen(false)
+  }
 
   useEffect(() => {
     fetchGetAllVenue()
@@ -269,13 +299,52 @@ export default function Venue() {
   }
 
   const fetchPartyBookingByPartyDateId = async (id: number) => {
-    try {
-      const res = await dispatch(getPartyBookingByPartyDateId(id))
-      if (res?.meta?.requestStatus === 'fulfilled') {
-      }
-      console.log('res', JSON.stringify(res, null, 2))
-    } catch (error) {
-      message.error(error)
+    const res = await dispatch(getPartyBookingByPartyDateId(id))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+    } else {
+      const resData = res?.payload as any
+      message.error(resData?.message)
+    }
+    console.log('res', JSON.stringify(res, null, 2))
+  }
+
+  const enableOneVenue = async (id: number) => {
+    const res = await dispatch(enableVenueById(id))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchGetAllVenue()
+      message.success('Enable success!')
+    } else {
+      message.error('Error when enable venue!')
+    }
+  }
+
+  const disableOneVenue = async (id: number) => {
+    const res = await dispatch(disableVenueById(id))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchGetAllVenue()
+      message.success('Disable success!')
+    } else {
+      message.error('Error when disable venue!')
+    }
+  }
+
+  const enableOneSlotInVenue = async (id: number) => {
+    const res = await dispatch(enableSlotInVenueById(id))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchGetAllVenue()
+      message.success('Enable success!')
+    } else {
+      message.error('Error when enable slot!')
+    }
+  }
+
+  const disableOneSlotInVenue = async (id: number) => {
+    const res = await dispatch(disableSlotInVenueById(id))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchGetAllVenue()
+      message.success('Disable success!')
+    } else {
+      message.error('Error when disable slot!')
     }
   }
 
@@ -298,8 +367,7 @@ export default function Venue() {
         partyDated: {
           id: item?.partyDated?.id,
           date: item?.partyDated?.date,
-          active: item?.partyDated?.active,
-          slotInVenue: item?.partyDated?.slotInVenue
+          active: item?.partyDated?.active
         }
       })
     })
@@ -307,10 +375,17 @@ export default function Venue() {
     return (
       <ProTable
         columns={[
-          { title: 'Slot No.', dataIndex: 'key', key: 'key' },
+          { title: 'Slot No.', dataIndex: 'key', key: 'key', width: '10%' },
           { title: 'Start Time', dataIndex: ['slot', 'timeStart'], key: 'slot.timeStart' },
 
           { title: 'End Time', dataIndex: ['slot', 'timeEnd'], key: 'slot.timeEnd' },
+          {
+            title: 'Is Active?',
+            dataIndex: 'active',
+            key: 'active',
+            render: (_, recordChild) =>
+              recordChild?.active ? <Tag color='success'>Active</Tag> : <Tag color='error'>Inactive</Tag>
+          },
           {
             title: 'Status',
             dataIndex: 'status',
@@ -335,13 +410,34 @@ export default function Venue() {
                     setDrawerBookingVisit(true)
                   },
                   disabled: recordChild?.status ? false : true
+                },
+                {
+                  label: recordChild?.active ? (
+                    <Typography style={{ color: 'red' }}>Disable slot</Typography>
+                  ) : (
+                    <Typography style={{ color: 'green' }}>Enable slot</Typography>
+                  ),
+                  key: '2',
+                  icon: recordChild?.active ? (
+                    <CloseOutlined style={{ color: 'red' }} />
+                  ) : (
+                    <CheckOutlined style={{ color: 'green' }} />
+                  ),
+                  disabled: record?.active ? false : true,
+                  onClick: () => {
+                    if (recordChild?.active) {
+                      disableOneSlotInVenue(recordChild?.id)
+                    } else {
+                      enableOneSlotInVenue(recordChild?.id)
+                    }
+                  }
                 }
               ]
               const menuProps = {
                 items
               }
               return (
-                <Dropdown menu={menuProps}>
+                <Dropdown menu={menuProps} trigger={['click']}>
                   <Button icon={<MoreOutlined />}></Button>
                 </Dropdown>
               )
@@ -375,7 +471,7 @@ export default function Venue() {
       dataIndex: 'capacity'
     },
     {
-      title: 'Status',
+      title: 'Is Active?',
       width: '10%',
       dataIndex: 'active',
       render: (_, record) => (record?.active ? <Tag color='success'>Active</Tag> : <Tag color='error'>Inactive</Tag>)
@@ -407,6 +503,26 @@ export default function Venue() {
             key: '3',
             icon: <SolutionOutlined />,
             onClick: () => handleOpenSlotDrawer(record)
+          },
+          {
+            label: record?.active ? (
+              <Typography style={{ color: 'red' }}>Disable venue</Typography>
+            ) : (
+              <Typography style={{ color: 'green' }}>Enable venue</Typography>
+            ),
+            key: '4',
+            icon: record?.active ? (
+              <CloseOutlined style={{ color: 'red' }} />
+            ) : (
+              <CheckOutlined style={{ color: 'green' }} />
+            ),
+            onClick: () => {
+              if (record?.active) {
+                disableOneVenue(record?.id)
+              } else {
+                enableOneVenue(record?.id)
+              }
+            }
           }
         ]
         const menuProps = {
@@ -460,7 +576,7 @@ export default function Venue() {
           onFinish={async values => {
             return true
           }}
-        ></ModalForm>
+        ><ThemeInVenueDetail themeInVenue={partyBooking?.themeInVenue} /></ModalForm>
       )
     },
     {
@@ -486,8 +602,7 @@ export default function Venue() {
             return true
           }}
         >
-          <Image src={partyBooking?.packageInVenue?.apackage?.packageImgUrl} style={{ width: 200, height: 200 }} />
-          <Typography>HOHOHO</Typography>
+          <PackageInVenueDetail packageInVenue={partyBooking?.packageInVenue} />
         </ModalForm>
       )
     },
@@ -499,54 +614,78 @@ export default function Venue() {
     {
       key: '5',
       label: 'Usage Time',
-      children:
-        partyBooking?.slotInVenueObject?.partyDated?.date +
-        ' vào lúc ' +
-        partyBooking?.slotInVenueObject?.slot?.timeStart
+      children: partyBooking?.partyDated?.date + ' at ' + partyBooking?.slotInVenueObject?.slot?.timeStart
     },
     {
       key: '100',
       label: 'Finish Time',
-      children:
-        partyBooking?.slotInVenueObject?.partyDated?.date + ' vào lúc ' + partyBooking?.slotInVenueObject?.slot?.timeEnd
+      children: partyBooking?.partyDated?.date + ' at ' + partyBooking?.slotInVenueObject?.slot?.timeEnd
     },
     {
       key: '6',
       label: 'Status',
-      span: 3,
+      span: 1,
       children: (
         <Badge status={partyBooking?.status === 'PENDING' ? 'processing' : 'success'} text={partyBooking?.status} />
       )
     },
     {
+      key: '60',
+      label: 'Upgrade service',
+      span: 2,
+      children: (
+        <ModalForm
+          title='Upgrade service'
+          trigger={
+            <Button type='primary'>
+              <EyeOutlined />
+              View upgrade service
+            </Button>
+          }
+          form={form}
+          autoFocusFirstInput
+          modalProps={{
+            destroyOnClose: true,
+            onCancel: () => console.log('run')
+          }}
+          submitTimeout={2000}
+          onFinish={async values => {
+            return true
+          }}
+        >
+         <UpgradeServiceBookingDetail upgradeServices={partyBooking?.upgradeServices} />
+        </ModalForm>
+      )
+    },
+    {
       key: '7',
       label: 'Negotiated Amount',
-      children: (80000000).toLocaleString()
+      children: partyBooking?.pricingTotal?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
     },
     {
       key: '8',
       label: 'Discount',
-      children: (0).toLocaleString()
+      children: 0
     },
     {
       key: '9',
       label: 'Official Receipts',
-      children: (80000000).toLocaleString()
+      children: partyBooking?.pricingTotal?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
     },
     {
       key: '10',
       label: 'Booking Info',
       children: (
         <>
-          Name booking: Võ Thanh Duy
+          Name booking: {userInfo?.data?.fullName}
           <br />
-          Email: duybpz@gmail.com
+          Email: {partyBooking?.email}
           <br />
-          Phone: 0334416510
+          Phone: {partyBooking?.phone}
           <br />
-          Kid Name: Võ Ngọc Nhi
+          Kid Name: {partyBooking?.kidName}
           <br />
-          Kid DOB: 2024-03-19
+          Kid DOB: {partyBooking?.kidDOB}
         </>
       )
     }
@@ -571,7 +710,7 @@ export default function Venue() {
       </QueryFilter>
 
       <ProTable<TableListItem>
-        loading={loading}
+        loading={loading || loadingCreateItemInVenueList}
         columns={columns}
         // request={(params, sorter, filter) => {
         //   console.log(params, sorter, filter)
@@ -815,7 +954,10 @@ export default function Venue() {
                       />
                     }
                   >
-                    <Meta title={item?.theme?.themeName} description={item?.theme?.themeDescription} />
+                    <Space direction='vertical'>
+                      <Tag color={item?.active ? 'success' : 'error'}>{item?.active ? 'Active' : 'Inactive'}</Tag>
+                      <Meta title={item?.theme?.themeName} description={item?.theme?.themeDescription} />
+                    </Space>
                   </Card>
                 </Col>
               )
@@ -895,7 +1037,10 @@ export default function Venue() {
                         />
                       }
                     >
-                      <Meta title={item?.packageName} />
+                      <Space direction='vertical'>
+                        <Tag color={item?.active ? 'success' : 'error'}>{item?.active ? 'Active' : 'Inactive'}</Tag>
+                        <Meta title={item?.packageName} />
+                      </Space>
                     </Card>
                   ),
                   value: item?.id
@@ -922,7 +1067,10 @@ export default function Venue() {
                       />
                     }
                   >
-                    <Meta title={item?.apackage?.packageName} description={item?.apackage?.packageDescription} />
+                    <Space direction='vertical'>
+                      <Tag color={item?.active ? 'success' : 'error'}>{item?.active ? 'Active' : 'Inactive'}</Tag>
+                      <Meta title={item?.apackage?.packageName} />
+                    </Space>
                   </Card>
                 </Col>
               )

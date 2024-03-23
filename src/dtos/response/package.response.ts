@@ -1,3 +1,5 @@
+import { ServiceDataResponse } from "./service.response"
+
 export interface PackageDataResponse {
   id: number
   packageName: string
@@ -13,6 +15,7 @@ export interface PackageServiceDataResponse {
   count: number
   pricing: number
   active: boolean
+  services: ServiceDataResponse;
 }
 
 export interface PackageInVenueDataResponse {

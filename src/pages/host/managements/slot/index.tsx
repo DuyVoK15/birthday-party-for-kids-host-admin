@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Form, Modal, Popconfirm, Space, Table, TimePicker, Typography } from 'antd';
+import { Button, Form, Modal, Popconfirm, Space, Table, TimePicker, Typography, message } from 'antd'
 import { useAppDispatch } from 'src/app/store'
 import { createSlot, deleteSlot, getAllSlot, updateSlot } from 'src/features/action/slot.action'
 import { useAppSelector } from 'src/app/hooks'
-import dayjs from 'dayjs';
+import dayjs from 'dayjs'
 import { SlotCreateRequest } from 'src/dtos/request/slot.request'
+import { ModalForm, ProFormTimePicker } from '@ant-design/pro-components'
+import { PlusOutlined } from '@ant-design/icons'
 
 interface Item {
   key: string
@@ -89,8 +91,10 @@ const App: React.FC = () => {
             timeStart: row?.startTime,
             timeEnd: row?.endTime
           }
-        }).then(() => {
-          setEditingKey('')
+        }).then(res => {
+          if (res) {
+            setEditingKey('')
+          }
         })
       }
     } catch (errInfo) {
@@ -167,31 +171,6 @@ const App: React.FC = () => {
     }
   })
 
-  // ** Modal Display
-  const [loadingModal, setLoadingModal] = useState(false)
-  const [open, setOpen] = useState(false)
-
-  const showModal = () => {
-    setOpen(true)
-  }
-
-  const handleOk = () => {
-    setLoadingModal(true)
-    createOneSlot()
-    setTimeStart(null)
-    setTimeEnd(null)
-    setTimeout(() => {
-      setLoadingModal(false)
-      setOpen(false)
-    }, 1)
-  }
-
-  const handleCancel = () => {
-    setTimeStart(null)
-    setTimeEnd(null)
-    setOpen(false)
-  }
-
   // ** Dispatch API
   const dispatch = useAppDispatch()
   const loading = useAppSelector(state => state.slotReducer.loading)
@@ -225,10 +204,13 @@ const App: React.FC = () => {
     setData(slotListView)
   }, [slotList])
 
-  const createOneSlot = async () => {
-    await dispatch(createSlot({ timeStart, timeEnd })).then(res => {
+  const createOneSlot = async (value: any) => {
+    await dispatch(createSlot({ timeStart: value?.[0], timeEnd: value?.[1] })).then(res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
+        message.success('Add slot success!')
         fetchAllSlot()
+      } else {
+        message.error(res?.payload?.message)
       }
     })
   }
@@ -242,41 +224,36 @@ const App: React.FC = () => {
   }
 
   const updateOneSlot = async (request: { id: number; payload: SlotCreateRequest }) => {
-    await dispatch(updateSlot({ id: request?.id, payload: request?.payload })).then(async res => {
-      if (res?.meta?.requestStatus === 'fulfilled') {
-        await fetchAllSlot()
-      }
-    })
+    const res = await dispatch(updateSlot({ id: request?.id, payload: request?.payload }))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchAllSlot()
+      message.success('Update slot success!')
+      return true
+    } else {
+      message.error(res?.payload?.message)
+      return false
+    }
   }
 
   return (
     <Form form={form} component={false}>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button type='primary' onClick={showModal}>
-          Add new slot
-        </Button>
-        <Modal
-          open={open}
-          title='Add new slot'
-          onOk={handleOk}
-          onCancel={handleCancel}
-          footer={[
-            <Button key='back' onClick={handleCancel}>
-              Cancel
-            </Button>,
-            <Button key='submit' type='primary' loading={loadingModal} onClick={handleOk}>
-              Submit
+        <ModalForm
+          title='Add a new slot'
+          trigger={
+            <Button type='primary'>
+              <PlusOutlined />
+              Add new slot
             </Button>
-          ]}
+          }
+          onFinish={async (value: any) => createOneSlot(value.timeRange)}
         >
-          <TimePicker.RangePicker
-            onChange={(_dates: any, dateStrings: [string, string]) => {
-              setTimeStart(dateStrings?.[0])
-              setTimeEnd(dateStrings?.[1])
-            }}
-            defaultOpenValue={dayjs('00:00:00', 'HH:mm:ss')}
+          <ProFormTimePicker.RangePicker
+            name='timeRange'
+            label='Select time range'
+            rules={[{ required: true, message: 'Please choose a range time!' }]}
           />
-        </Modal>
+        </ModalForm>
       </div>
       <Table
         style={{ marginTop: 10 }}

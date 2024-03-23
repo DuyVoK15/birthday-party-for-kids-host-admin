@@ -26,11 +26,11 @@ const navigation = (): VerticalNavItemsType => {
           icon: HomeOutline,
           path: '/'
         },
-        {
-          title: 'Account Settings',
-          icon: AccountCogOutline,
-          path: '/host/account-settings'
-        },
+        // {
+        //   title: 'Account Settings',
+        //   icon: AccountCogOutline,
+        //   path: '/host/account-settings'
+        // },
         {
           title: 'Chat',
           icon: ChatOutline,
@@ -65,11 +65,11 @@ const navigation = (): VerticalNavItemsType => {
         {
           sectionTitle: 'Management'
         },
-        {
-          title: 'Customer',
-          icon: FormatLetterCase,
-          path: '/host/managements/customer'
-        },
+        // {
+        //   title: 'Customer',
+        //   icon: FormatLetterCase,
+        //   path: '/host/managements/customer'
+        // },
         {
           title: 'Venue',
           icon: FormatLetterCase,

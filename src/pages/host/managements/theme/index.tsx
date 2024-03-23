@@ -18,6 +18,7 @@ import { useAppDispatch } from 'src/app/store'
 import { createTheme, deleteTheme, getAllTheme, updateTheme } from 'src/features/action/theme.action'
 import { useAppSelector } from 'src/app/hooks'
 import { ThemeCreateRequest } from 'src/dtos/request/theme.request'
+import ThemeDetail from 'src/views/host/managements/theme/ThemeDetail';
 
 interface Item {
   key: string
@@ -154,6 +155,7 @@ const Theme: React.FC = () => {
       dataIndex: 'action',
       render: (_: any, record: Item) => {
         const editable = isEditing(record)
+        const theme: any = record
         return editable ? (
           <Space>
             <Typography.Link onClick={() => save(record?.id)}>Save</Typography.Link>
@@ -167,7 +169,16 @@ const Theme: React.FC = () => {
             <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)}>
               Edit
             </Typography.Link>
-            <Typography.Link onClick={() => edit(record)}>View</Typography.Link>
+            <ModalForm
+              title='Theme Detail'
+              trigger={
+                <Button disabled={editingKey !== ''} type='link'>
+                  View
+                </Button>
+              }
+            >
+              <ThemeDetail themeInVenue={theme} />
+            </ModalForm>
           </Space>
         )
       }

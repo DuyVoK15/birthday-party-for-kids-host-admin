@@ -25,7 +25,15 @@ export const slotService = {
     return axiosClient.delete(url)
   },
   createSlotInVenueListByVenueId: (request: ItemInVenueListCreateRequest): Promise<AxiosResponse<any>> => {
-    const url = `/api/slot/add-slot-in-venue-by-slot-id?venueId=${request.venueId}`
+    const url = `/api/slot/add-slot-in-venue-by-venue-id?venueId=${request.venueId}`
     return axiosClient.post(url, request.payload)
+  },
+  enableSlotInVenueById: (id: number): Promise<AxiosResponse<any>> => {
+    const url = `/slot-in-venue/active/${id}`
+    return axiosClient.put(url)
+  },
+  disableSlotInVenueById: (id: number): Promise<AxiosResponse<any>> => {
+    const url = `/slot-in-venue/disable/${id}`
+    return axiosClient.delete(url)
   }
 }

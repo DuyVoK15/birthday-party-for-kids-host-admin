@@ -195,3 +195,25 @@ export const createSlotInVenueListByVenueId = createAsyncThunk(
     }
   }
 )
+
+export const enableVenueById = createAsyncThunk('slot/enableVenueById', async (id: number, { rejectWithValue }) => {
+  try {
+    const response = await venueService.enableVenueById(id)
+    return response.data
+  } catch (error: any) {
+    const axiosError = error as AxiosError
+    console.log(axiosError)
+    return rejectWithValue(axiosError.response?.data)
+  }
+})
+
+export const disableVenueById = createAsyncThunk('slot/disableVenueById', async (id: number, { rejectWithValue }) => {
+  try {
+    const response = await venueService.disableVenueById(id)
+    return response.data
+  } catch (error: any) {
+    const axiosError = error as AxiosError
+    console.log(axiosError)
+    return rejectWithValue(axiosError.response?.data)
+  }
+})

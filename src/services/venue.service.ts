@@ -62,5 +62,13 @@ export const venueService = {
   getAllSlotInVenueByVenueId: (id: number): Promise<AxiosResponse<SlotInVenueArrayResponse>> => {
     const url = `/api/venue/get-slot-in-venue-by-venue/${id}`
     return axiosClient.get(url)
+  },
+  enableVenueById: (id: number): Promise<AxiosResponse<any>> => {
+    const url = `/api/venue/set-active-venue/${id}`
+    return axiosClient.put(url)
+  },
+  disableVenueById: (id: number): Promise<AxiosResponse<any>> => {
+    const url = `/api/venue/delete/${id}`
+    return axiosClient.delete(url)
   }
 }

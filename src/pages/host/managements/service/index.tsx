@@ -164,10 +164,10 @@ const Service: React.FC = () => {
     {
       title: 'Image',
       dataIndex: 'serviceImgUrl',
-      width: '20%',
+      width: '30%',
       editable: true,
       render: (_: any, record: Item) => {
-        return <Image style={{ borderRadius: 5 }} width={200} height={100} src={record?.serviceImgUrl} />
+        return <Image style={{ borderRadius: 5, objectFit: 'cover' }} width={'100%'} height={200} src={record?.serviceImgUrl} />
       }
     },
     {
@@ -188,7 +188,7 @@ const Service: React.FC = () => {
             <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)}>
               Edit
             </Typography.Link>
-            <Typography.Link onClick={() => edit(record)}>View</Typography.Link>
+            {/* <Typography.Link onClick={() => edit(record)}>View</Typography.Link> */}
           </Space>
         )
       }
@@ -380,7 +380,8 @@ const Service: React.FC = () => {
         columns={mergedColumns}
         rowClassName='editable-row'
         pagination={{
-          onChange: cancel
+          onChange: cancel,
+          pageSize: 5
         }}
       />
     </Form>

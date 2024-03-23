@@ -52,7 +52,19 @@ export const updatePackage = createAsyncThunk(
     }
   }
 )
-
+export const updatePercentOfPackage = createAsyncThunk(
+  'package/updatePercentOfPackage',
+  async (request: { id: number; payload: { percent: number } }, { rejectWithValue }) => {
+    try {
+      const response = await packageService.updatePercentOfPackage(request)
+      return response.data
+    } catch (error: any) {
+      const axiosError = error as AxiosError
+      console.log(axiosError)
+      return rejectWithValue(axiosError.response?.data)
+    }
+  }
+)
 export const deletePackage = createAsyncThunk('package/deletePackage', async (id: number, { rejectWithValue }) => {
   try {
     const response = await packageService.deletePackage(id)

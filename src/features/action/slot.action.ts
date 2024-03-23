@@ -63,3 +63,31 @@ export const deleteSlot = createAsyncThunk('slot/deleteSlot', async (id: number,
     return rejectWithValue(axiosError.response?.data)
   }
 })
+
+export const enableSlotInVenueById = createAsyncThunk(
+  'slot/enableSlotInVenueById',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await slotService.enableSlotInVenueById(id)
+      return response.data
+    } catch (error: any) {
+      const axiosError = error as AxiosError
+      console.log(axiosError)
+      return rejectWithValue(axiosError.response?.data)
+    }
+  }
+)
+
+export const disableSlotInVenueById = createAsyncThunk(
+  'slot/disableSlotInVenueById',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await slotService.disableSlotInVenueById(id)
+      return response.data
+    } catch (error: any) {
+      const axiosError = error as AxiosError
+      console.log(axiosError)
+      return rejectWithValue(axiosError.response?.data)
+    }
+  }
+)

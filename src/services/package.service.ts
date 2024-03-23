@@ -5,7 +5,7 @@ import { ItemInVenueListCreateRequest } from 'src/dtos/request/theme.request'
 
 export const packageService = {
   getAllPackage: (): Promise<AxiosResponse<any>> => {
-    const url = `/api/package/get-all`
+    const url = `/api/package/get-all-package-for-host`
     return axiosClient.get(url)
   },
   getPackageById: (id: number): Promise<AxiosResponse<any>> => {
@@ -32,6 +32,13 @@ export const packageService = {
     formData.append(`packageServiceRequests`, JSON.stringify(request.payload.packageServiceRequests))
 
     return axiosClient.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+  },
+  updatePercentOfPackage: (request: { id: number; payload: { percent: number } }): Promise<AxiosResponse<any>> => {
+    const url = `/api/package/update-percent-package/${request.id}`
+    const formData = new FormData()
+    formData.append('percent', request.payload.percent.toString())
+
+    return axiosClient.patch(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
   deletePackage: (id: number): Promise<AxiosResponse<any>> => {
     const url = `/api/package/delete/${id}`
