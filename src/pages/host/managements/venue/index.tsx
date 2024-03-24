@@ -277,6 +277,7 @@ export default function Venue() {
       return false
     }
   }
+
   const createSlotInVenueList = async (request: ItemInVenueListCreateRequest) => {
     const res = await dispatch(createSlotInVenueListByVenueId(request))
     if (res?.meta?.requestStatus === 'fulfilled') {
@@ -651,66 +652,69 @@ export default function Venue() {
           >
             <ThemeInVenueDetail themeInVenue={partyBooking?.themeInVenue} />
           </ModalForm>
-          <ModalForm
-            title='Change theme'
-            trigger={
-              <Button type='default'>
-                <SwapOutlined />
-                Change theme
-              </Button>
-            }
-            // form={form}
-            autoFocusFirstInput
-            modalProps={{
-              destroyOnClose: true,
-              onCancel: () => console.log('run')
-            }}
-            onFinish={async values => {
-              let result: boolean | undefined = false
-              if (typeof partyBooking?.id !== 'undefined') {
-                result = await updateOneThemeInVenueInBooking({
-                  partyBookingId: partyBooking?.id,
-                  themeInVenueId: values?.themeInVenueId
-                })
-              }
+          {partyBooking?.status === 'PENDING' ||
+            (partyBooking?.status === 'CONFIRMED' && (
+              <ModalForm
+                title='Change theme'
+                trigger={
+                  <Button type='default'>
+                    <SwapOutlined />
+                    Change theme
+                  </Button>
+                }
+                // form={form}
+                autoFocusFirstInput
+                modalProps={{
+                  destroyOnClose: true,
+                  onCancel: () => console.log('run')
+                }}
+                onFinish={async values => {
+                  let result: boolean | undefined = false
+                  if (typeof partyBooking?.id !== 'undefined') {
+                    result = await updateOneThemeInVenueInBooking({
+                      partyBookingId: partyBooking?.id,
+                      themeInVenueId: values?.themeInVenueId
+                    })
+                  }
 
-              return result
-            }}
-          >
-            {themeInVenueNotChooseList?.length > 0 ? (
-              <ProFormRadio.Group
-                name='themeInVenueId'
-                layout='horizontal'
-                // label='Industry Distribution'
-                style={{ marginBottom: 10 }}
-                options={themeInVenueNotChooseList?.map((item, index) => ({
-                  label: (
-                    <Card
-                      key={index}
-                      hoverable
-                      style={{ width: 200, marginBottom: 10 }}
-                      cover={
-                        <Image
-                          style={{
-                            width: '100%',
-                            height: 100,
-                            objectFit: 'cover'
-                          }}
-                          alt='example'
-                          src={item?.theme?.themeImgUrl}
-                        />
-                      }
-                    >
-                      <Card.Meta title={item?.theme?.themeName} />
-                    </Card>
-                  ),
-                  value: item?.id
-                }))}
-              />
-            ) : (
-              <Empty style={{ margin: 'auto' }} />
-            )}
-          </ModalForm>
+                  return result
+                }}
+              >
+                {themeInVenueNotChooseList?.length > 0 ? (
+                  <ProFormRadio.Group
+                    name='themeInVenueId'
+                    layout='horizontal'
+                    // label='Industry Distribution'
+                    style={{ marginBottom: 10 }}
+                    options={themeInVenueNotChooseList?.map((item, index) => ({
+                      label: (
+                        <Card
+                          key={index}
+                          hoverable
+                          style={{ width: 200, marginBottom: 10 }}
+                          cover={
+                            <Image
+                              style={{
+                                width: '100%',
+                                height: 100,
+                                objectFit: 'cover'
+                              }}
+                              alt='example'
+                              src={item?.theme?.themeImgUrl}
+                            />
+                          }
+                        >
+                          <Card.Meta title={item?.theme?.themeName} />
+                        </Card>
+                      ),
+                      value: item?.id
+                    }))}
+                  />
+                ) : (
+                  <Empty style={{ margin: 'auto' }} />
+                )}
+              </ModalForm>
+            ))}
         </Space>
       )
     },
@@ -739,79 +743,82 @@ export default function Venue() {
           >
             <PackageInVenueDetail packageInVenue={partyBooking?.packageInVenue} />
           </ModalForm>
-          <ModalForm
-            title='Package'
-            trigger={
-              <Button type='default'>
-                <SwapOutlined />
-                Change package
-              </Button>
-            }
-            form={form}
-            autoFocusFirstInput
-            modalProps={{
-              destroyOnClose: true,
-              onCancel: () => console.log('run')
-            }}
-            onFinish={async values => {
-              let result: boolean | undefined = false
-              if (typeof partyBooking?.id !== 'undefined') {
-                result = await updateOnePackageInVenueInBooking({
-                  partyBookingId: partyBooking?.id,
-                  packageInVenueId: values?.packageInVenueId
-                })
-              }
 
-              return result
-            }}
-          >
-            {packageInVenueNotChooseList?.length > 0 ? (
-              <ProFormRadio.Group
-                name='packageInVenueId'
-                layout='horizontal'
-                style={{ marginBottom: 10 }}
-                options={packageInVenueNotChooseList?.map((item, index) => ({
-                  label: (
-                    <Card
-                      key={index}
-                      hoverable
-                      style={{ width: 300, marginBottom: 10 }}
-                      cover={
-                        <Image
-                          style={{
-                            width: '100%',
-                            height: 100,
-                            objectFit: 'cover'
-                          }}
-                          alt='example'
-                          src={item?.apackage?.packageImgUrl}
-                        />
-                      }
-                    >
-                      <Space direction='vertical'>
-                        <Card.Meta title={item?.apackage?.packageName} />
-                        <ModalForm
-                          title='Chi tiết gói dịch vụ'
-                          trigger={
-                            <Button style={{ padding: 0 }} type='link'>
-                              <EyeOutlined />
-                              Chi tiết gói dịch vụ
-                            </Button>
-                          }
-                          style={{ padding: 0 }}
-                        >
-                          <PackageInVenueDetail packageInVenue={item} />
-                        </ModalForm>
-                      </Space>
-                    </Card>
-                  ),
-                  value: item?.id
-                }))}
-              />
-            ) : (
-              <Empty style={{ margin: 'auto' }} />
-            )}
-          </ModalForm>
+          {partyBooking?.status === 'PENDING' && partyBooking?.isPayment === false && (
+            <ModalForm
+              title='Package'
+              trigger={
+                <Button type='default'>
+                  <SwapOutlined />
+                  Change package
+                </Button>
+              }
+              form={form}
+              autoFocusFirstInput
+              modalProps={{
+                destroyOnClose: true,
+                onCancel: () => console.log('run')
+              }}
+              onFinish={async values => {
+                let result: boolean | undefined = false
+                if (typeof partyBooking?.id !== 'undefined') {
+                  result = await updateOnePackageInVenueInBooking({
+                    partyBookingId: partyBooking?.id,
+                    packageInVenueId: values?.packageInVenueId
+                  })
+                }
+
+                return result
+              }}
+            >
+              {packageInVenueNotChooseList?.length > 0 ? (
+                <ProFormRadio.Group
+                  name='packageInVenueId'
+                  layout='horizontal'
+                  style={{ marginBottom: 10 }}
+                  options={packageInVenueNotChooseList?.map((item, index) => ({
+                    label: (
+                      <Card
+                        key={index}
+                        hoverable
+                        style={{ width: 300, marginBottom: 10 }}
+                        cover={
+                          <Image
+                            style={{
+                              width: '100%',
+                              height: 100,
+                              objectFit: 'cover'
+                            }}
+                            alt='example'
+                            src={item?.apackage?.packageImgUrl}
+                          />
+                        }
+                      >
+                        <Space direction='vertical'>
+                          <Card.Meta title={item?.apackage?.packageName} />
+                          <ModalForm
+                            title='Chi tiết gói dịch vụ'
+                            trigger={
+                              <Button style={{ padding: 0 }} type='link'>
+                                <EyeOutlined />
+                                Chi tiết gói dịch vụ
+                              </Button>
+                            }
+                            style={{ padding: 0 }}
+                          >
+                            <PackageInVenueDetail packageInVenue={item} />
+                          </ModalForm>
+                        </Space>
+                      </Card>
+                    ),
+                    value: item?.id
+                  }))}
+                />
+              ) : (
+                <Empty style={{ margin: 'auto' }} />
+              )}
+            </ModalForm>
+          )}
         </Space>
       )
     },
@@ -1074,26 +1081,32 @@ export default function Venue() {
             <Flex justify='space-between' align='center'>
               <Typography.Title level={3}>{`Booking ID: ${partyBooking?.id}`}</Typography.Title>
               <Flex gap={10}>
-                <Popconfirm
-                  title='Delete the task'
-                  description='Are you sure to delete this task?'
-                  onConfirm={() => completeOneBooking(partyBooking?.id)}
-                  onCancel={() => null}
-                  okText='Yes'
-                  cancelText='No'
-                >
-                  <Button type='primary'>Complete</Button>
-                </Popconfirm>
-                <Popconfirm
-                  title='Delete the task'
-                  description='Are you sure to delete this task?'
-                  onConfirm={() => cancelOneBooking(partyBooking?.id)}
-                  onCancel={() => null}
-                  okText='Yes'
-                  cancelText='No'
-                >
-                  <Button danger>Cancel</Button>
-                </Popconfirm>
+                {partyBooking?.status !== 'COMPLETED' && (
+                  <Popconfirm
+                    title='Action'
+                    description='Are you sure to COMPLETE this booking?'
+                    onConfirm={() => completeOneBooking(partyBooking?.id)}
+                    onCancel={() => null}
+                    okText='Yes'
+                    cancelText='No'
+                  >
+                    <Button type='primary'>Complete</Button>
+                  </Popconfirm>
+                )}
+
+                {partyBooking?.status === 'PENDING' ||
+                  (partyBooking?.status === 'CONFIRMED' && (
+                    <Popconfirm
+                      title='Action'
+                      description='Are you sure to CANCEL this booking?'
+                      onConfirm={() => cancelOneBooking(partyBooking?.id)}
+                      onCancel={() => null}
+                      okText='Yes'
+                      cancelText='No'
+                    >
+                      <Button danger>Cancel</Button>
+                    </Popconfirm>
+                  ))}
               </Flex>
             </Flex>
 

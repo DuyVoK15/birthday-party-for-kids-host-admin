@@ -18,7 +18,8 @@ export interface PartyBookingDataResponse {
   slotInVenueObject: SlotInVenueDataResponse
   account: AccountDataResponse
   paymentList: []
-  reviewList: []
+  review: any;
+  isPayment: boolean
   active: boolean
   pricingTotal: number
   createAt: string

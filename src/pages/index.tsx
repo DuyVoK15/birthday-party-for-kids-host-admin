@@ -35,11 +35,11 @@ const Dashboard = () => {
 
   const dashboard = useAppSelector(state => state.dashboardReducer.dashboard)
 
-  let newServiceList = dashboard?.serviceList.slice(0, 5)
+  let newServiceList = dashboard?.serviceList.slice(0, 100)
 
   let newThemeList = dashboard?.themeList.slice(0, 5)
 
-  let newPackageList = dashboard?.apackageList.slice(0, 100)
+  let newPackageList = dashboard?.apackageList.slice(0, 5)
 
   const fetchDashBoard = async () => {
     await dispatch(getDashboard())

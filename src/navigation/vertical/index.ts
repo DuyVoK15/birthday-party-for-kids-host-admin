@@ -11,6 +11,7 @@ import ThemeLightDark from 'mdi-material-ui/ThemeLightDark'
 import TimelineClock from 'mdi-material-ui/TimelineClock'
 import PackageVariant from 'mdi-material-ui/PackageVariant'
 import AccountSupervisorCircle from 'mdi-material-ui/AccountSupervisorCircle'
+import LocationEnter from 'mdi-material-ui/LocationEnter'
 
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
@@ -73,7 +74,7 @@ const navigation = (): VerticalNavItemsType => {
         // },
         {
           title: 'Venue',
-          icon: FormatLetterCase,
+          icon: LocationEnter,
           path: '/host/managements/venue'
         },
         {
