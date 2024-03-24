@@ -16,5 +16,9 @@ export const authService = {
   getUserInfo: (): Promise<AxiosResponse<UserInfoResponse>> => {
     const url = '/api/account/information'
     return axiosClient.get(url)
-  }
+  },
+  getAllUser: (): Promise<AxiosResponse<any>> => {
+    const url = '/api/account/get-all'
+    return axiosClient.get(url)
+  },
 }

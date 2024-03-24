@@ -31,7 +31,7 @@ interface DataType {
   avatarColor: ThemeColor
 }
 
-const SalesByCountries = ({ newArr }: { newArr?: ListDataResponse[] | [] }) => {
+const Theme = ({ newArr }: { newArr?: ListDataResponse[] | [] }) => {
   // console.log('newArr', JSON.stringify(newArr, null, 2))
 
   const data: DataType[] = [
@@ -153,4 +153,4 @@ const SalesByCountries = ({ newArr }: { newArr?: ListDataResponse[] | [] }) => {
   )
 }
 
-export default SalesByCountries
+export default Theme

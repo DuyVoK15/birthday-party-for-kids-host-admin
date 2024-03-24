@@ -21,8 +21,34 @@ import StatisticsCard from 'src/views/dashboard/StatisticsCard'
 import WeeklyOverview from 'src/views/dashboard/WeeklyOverview'
 import DepositWithdraw from 'src/views/dashboard/DepositWithdraw'
 import SalesByCountries from 'src/views/dashboard/SalesByCountries'
+import { DashBoardDataResponse } from 'src/dtos/response/dashboard.response'
+import { useAppDispatch } from 'src/app/store'
+import { getDashboard } from 'src/features/action/dashboard.action'
+import { useEffect } from 'react'
+import { useAppSelector } from 'src/app/hooks'
+import { Star } from 'mdi-material-ui'
+import Theme from 'src/views/dashboard/Theme'
+import Package from 'src/views/dashboard/Package'
 
 const Dashboard = () => {
+  const dispatch = useAppDispatch()
+
+  const dashboard = useAppSelector(state => state.dashboardReducer.dashboard)
+
+  let newServiceList = dashboard?.serviceList.slice(0, 5)
+
+  let newThemeList = dashboard?.themeList.slice(0, 5)
+
+  let newPackageList = dashboard?.apackageList.slice(0, 100)
+
+  const fetchDashBoard = async () => {
+    await dispatch(getDashboard())
+  }
+
+  useEffect(() => {
+    fetchDashBoard()
+  }, [])
+
   return (
     <ApexChartWrapper>
       <Grid container spacing={6}>
@@ -32,12 +58,12 @@ const Dashboard = () => {
         <Grid item xs={12} md={8}>
           <StatisticsCard />
         </Grid>
-        <Grid item xs={12} md={6} lg={4}>
+        {/* <Grid item xs={12} md={6} lg={4}>
           <WeeklyOverview />
         </Grid>
         <Grid item xs={12} md={6} lg={4}>
           <TotalEarning />
-        </Grid>
+        </Grid> */}
         <Grid item xs={12} md={6} lg={4}>
           <Grid container spacing={6}>
             <Grid item xs={6}>
@@ -52,46 +78,36 @@ const Dashboard = () => {
             </Grid>
             <Grid item xs={6}>
               <CardStatisticsVerticalComponent
-                stats='$78'
-                title='Refunds'
-                trend='negative'
-                color='secondary'
-                trendNumber='-15%'
-                subtitle='Past Month'
+                stats={dashboard?.partyCancellationRate.toString() ?? '0'}
+                title='Cancelled Booking Rate'
                 icon={<CurrencyUsd />}
               />
             </Grid>
             <Grid item xs={6}>
               <CardStatisticsVerticalComponent
-                stats='862'
-                trend='negative'
-                trendNumber='-18%'
-                title='New Project'
-                subtitle='Yearly Project'
+                stats={dashboard?.averageValueOfOrders.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                title='Average Of Booking'
                 icon={<BriefcaseVariantOutline />}
               />
             </Grid>
             <Grid item xs={6}>
               <CardStatisticsVerticalComponent
-                stats='15'
+                stats={dashboard?.averageRate.toString() + ' stars' ?? '0' + ' stars'}
                 color='warning'
-                trend='negative'
-                trendNumber='-18%'
-                subtitle='Last Week'
-                title='Sales Queries'
-                icon={<HelpCircleOutline />}
+                title='Average Rating Rate'
+                icon={<Star />}
               />
             </Grid>
           </Grid>
         </Grid>
         <Grid item xs={12} md={6} lg={4}>
-          <SalesByCountries />
+          <Theme newArr={newThemeList} />
         </Grid>
-        <Grid item xs={12} md={12} lg={8}>
-          <DepositWithdraw />
+        <Grid item xs={6} md={6} lg={4}>
+          <Package newArr={newPackageList} />
         </Grid>
         <Grid item xs={12}>
-          <Table />
+          <SalesByCountries newArr={newServiceList} />
         </Grid>
       </Grid>
     </ApexChartWrapper>

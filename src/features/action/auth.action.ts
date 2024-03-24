@@ -46,3 +46,13 @@ export const logout = createAsyncThunk('auth/lgout', async (_, { rejectWithValue
     return rejectWithValue(axiosError.response?.data)
   }
 })
+
+export const getAllUser = createAsyncThunk('auth/getAllUser', async (_, { rejectWithValue }) => {
+  try {
+    const response = await authService.getAllUser()
+    return response.data
+  } catch (error: any) {
+    const axiosError = error as AxiosError
+    return rejectWithValue(axiosError.response?.data)
+  }
+})

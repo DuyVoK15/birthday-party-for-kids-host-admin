@@ -14,6 +14,7 @@ import DotsVertical from 'mdi-material-ui/DotsVertical'
 
 // ** Types
 import { ThemeColor } from 'src/@core/layouts/types'
+import { useAppSelector } from 'src/app/hooks'
 
 interface DataType {
   title: string
@@ -25,37 +26,41 @@ interface DataType {
   imgHeight: number
 }
 
-const data: DataType[] = [
-  {
-    progress: 75,
-    imgHeight: 20,
-    title: 'Zipcar',
-    color: 'primary',
-    amount: '$24,895.65',
-    subtitle: 'Vuejs, React & HTML',
-    imgSrc: '/images/cards/logo-zipcar.png'
-  },
-  {
-    progress: 50,
-    color: 'info',
-    imgHeight: 27,
-    title: 'Bitbank',
-    amount: '$8,650.20',
-    subtitle: 'Sketch, Figma & XD',
-    imgSrc: '/images/cards/logo-bitbank.png'
-  },
-  {
-    progress: 20,
-    imgHeight: 20,
-    title: 'Aviato',
-    color: 'secondary',
-    amount: '$1,245.80',
-    subtitle: 'HTML & Angular',
-    imgSrc: '/images/cards/logo-aviato.png'
-  }
-]
+
 
 const TotalEarning = () => {
+
+  const dashboard = useAppSelector(state => state.dashboardReducer.dashboard)
+
+  const data: DataType[] = [
+    {
+      progress: 75,
+      imgHeight: 20,
+      title: 'Zipcar',
+      color: 'primary',
+      amount: '$24,895.65',
+      subtitle: 'Vuejs, React & HTML',
+      imgSrc: '/images/cards/logo-zipcar.png'
+    },
+    {
+      progress: 50,
+      color: 'info',
+      imgHeight: 27,
+      title: 'Bitbank',
+      amount: '$8,650.20',
+      subtitle: 'Sketch, Figma & XD',
+      imgSrc: '/images/cards/logo-bitbank.png'
+    },
+    {
+      progress: 20,
+      imgHeight: 20,
+      title: 'Aviato',
+      color: 'secondary',
+      amount: '$1,245.80',
+      subtitle: 'HTML & Angular',
+      imgSrc: '/images/cards/logo-aviato.png'
+    }
+  ]
   return (
     <Card>
       <CardHeader

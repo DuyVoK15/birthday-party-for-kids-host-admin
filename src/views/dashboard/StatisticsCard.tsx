@@ -20,68 +20,46 @@ import AccountOutline from 'mdi-material-ui/AccountOutline'
 
 // ** Types
 import { ThemeColor } from 'src/@core/layouts/types'
+import { useAppSelector } from 'src/app/hooks'
+import { OrderAlphabeticalAscending } from 'mdi-material-ui'
 
 interface DataType {
-  stats: string
+  stats: string | undefined
   title: string
   color: ThemeColor
   icon: ReactElement
 }
 
-const salesData: DataType[] = [
-  {
-    stats: '245k',
-    title: 'Sales',
-    color: 'primary',
-    icon: <TrendingUp sx={{ fontSize: '1.75rem' }} />
-  },
-  {
-    stats: '12.5k',
-    title: 'Customers',
-    color: 'success',
-    icon: <AccountOutline sx={{ fontSize: '1.75rem' }} />
-  },
-  {
-    stats: '1.54k',
-    color: 'warning',
-    title: 'Products',
-    icon: <CellphoneLink sx={{ fontSize: '1.75rem' }} />
-  },
-  {
-    stats: '$88k',
-    color: 'info',
-    title: 'Revenue',
-    icon: <CurrencyUsd sx={{ fontSize: '1.75rem' }} />
-  }
-]
-
-const renderStats = () => {
-  return salesData.map((item: DataType, index: number) => (
-    <Grid item xs={12} sm={3} key={index}>
-      <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
-        <Avatar
-          variant='rounded'
-          sx={{
-            mr: 3,
-            width: 44,
-            height: 44,
-            boxShadow: 3,
-            color: 'common.white',
-            backgroundColor: `${item.color}.main`
-          }}
-        >
-          {item.icon}
-        </Avatar>
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-          <Typography variant='caption'>{item.title}</Typography>
-          <Typography variant='h6'>{item.stats}</Typography>
-        </Box>
-      </Box>
-    </Grid>
-  ))
-}
-
 const StatisticsCard = () => {
+  // ** Dispatch API
+  const dashboard = useAppSelector(state => state.dashboardReducer.dashboard)
+  const salesData: DataType[] = [
+    {
+      stats: dashboard?.venueList?.length.toString() ?? '0',
+      title: 'Venues',
+      color: 'primary',
+      icon: <TrendingUp sx={{ fontSize: '1.75rem' }} />
+    },
+
+    {
+      stats: dashboard?.totalBooking.toString() ?? '0',
+      color: 'warning',
+      title: 'Bookings',
+      icon: <OrderAlphabeticalAscending sx={{ fontSize: '1.75rem' }} />
+    },
+    {
+      stats: dashboard?.customerList?.length.toString() ?? '0',
+      title: 'Customers',
+      color: 'success',
+      icon: <AccountOutline sx={{ fontSize: '1.75rem' }} />
+    },
+    {
+      stats: dashboard?.totalRevenue.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) ?? '0',
+      color: 'info',
+      title: 'Revenue',
+      icon: <CurrencyUsd sx={{ fontSize: '1.75rem' }} />
+    }
+  ]
   return (
     <Card>
       <CardHeader
@@ -109,7 +87,29 @@ const StatisticsCard = () => {
       />
       <CardContent sx={{ pt: theme => `${theme.spacing(3)} !important` }}>
         <Grid container spacing={[5, 0]}>
-          {renderStats()}
+          {salesData.map((item: DataType, index: number) => (
+            <Grid item xs={12} sm={3} key={index}>
+              <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Avatar
+                  variant='rounded'
+                  sx={{
+                    mr: 3,
+                    width: 44,
+                    height: 44,
+                    boxShadow: 3,
+                    color: 'common.white',
+                    backgroundColor: `${item.color}.main`
+                  }}
+                >
+                  {item.icon}
+                </Avatar>
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <Typography variant='caption'>{item.title}</Typography>
+                  <Typography variant='h6'>{item.stats}</Typography>
+                </Box>
+              </Box>
+            </Grid>
+          ))}
         </Grid>
       </CardContent>
     </Card>

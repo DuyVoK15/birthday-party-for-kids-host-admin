@@ -31,7 +31,7 @@ interface DataType {
   avatarColor: ThemeColor
 }
 
-const SalesByCountries = ({ newArr }: { newArr?: ListDataResponse[] | [] }) => {
+const Package = ({ newArr }: { newArr?: ListDataResponse[] | [] }) => {
   // console.log('newArr', JSON.stringify(newArr, null, 2))
 
   const data: DataType[] = [
@@ -89,7 +89,7 @@ const SalesByCountries = ({ newArr }: { newArr?: ListDataResponse[] | [] }) => {
   return (
     <Card>
       <CardHeader
-        title='Services'
+        title='Packages'
         titleTypographyProps={{ sx: { lineHeight: '1.2 !important', letterSpacing: '0.31px !important' } }}
         action={
           <IconButton size='small' aria-label='settings' className='card-more-options' sx={{ color: 'text.secondary' }}>
@@ -153,4 +153,4 @@ const SalesByCountries = ({ newArr }: { newArr?: ListDataResponse[] | [] }) => {
   )
 }
 
-export default SalesByCountries
+export default Package
