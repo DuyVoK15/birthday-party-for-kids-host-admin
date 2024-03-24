@@ -23,6 +23,7 @@ import { ThemeDataResponse, ThemeInVenueDataResponse } from 'src/dtos/response/t
 import { PackageDataResponse, PackageInVenueDataResponse } from 'src/dtos/response/package.response'
 import { SlotDataResponse, SlotInVenueDataResponse } from 'src/dtos/response/slot.response'
 import { disableSlotInVenueById, enableSlotInVenueById } from '../action/slot.action'
+import { updatePackageInVenueInBooking, updateThemeInVenueInBooking } from '../action/partyBooking.action'
 
 interface VenueState {
   venueCheckSlotByDateResponse: VenueCheckSlotByDateResponse
@@ -202,7 +203,9 @@ export const venueSlice = createSlice({
           disableSlotInVenueById.pending,
           enableSlotInVenueById.pending,
           disableVenueById.pending,
-          enableVenueById.pending
+          enableVenueById.pending,
+          updateThemeInVenueInBooking.pending,
+          updatePackageInVenueInBooking.pending
         ),
         state => {
           state.loadingCreateItemInVenueList = true
@@ -215,7 +218,9 @@ export const venueSlice = createSlice({
           disableSlotInVenueById.fulfilled,
           enableSlotInVenueById.fulfilled,
           disableVenueById.fulfilled,
-          enableVenueById.fulfilled
+          enableVenueById.fulfilled,
+          updateThemeInVenueInBooking.fulfilled,
+          updatePackageInVenueInBooking.fulfilled
         ),
         state => {
           state.loadingCreateItemInVenueList = false
@@ -228,7 +233,9 @@ export const venueSlice = createSlice({
           disableSlotInVenueById.rejected,
           enableSlotInVenueById.rejected,
           disableVenueById.rejected,
-          enableVenueById.rejected
+          enableVenueById.rejected,
+          updateThemeInVenueInBooking.rejected,
+          updatePackageInVenueInBooking.rejected
         ),
         state => {
           state.loadingCreateItemInVenueList = false

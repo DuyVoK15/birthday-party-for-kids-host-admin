@@ -57,6 +57,7 @@ import { VenueCreateRequest } from 'src/dtos/request/venue.request'
 import { SlotInVenueDataResponse } from 'src/dtos/response/slot.response'
 import { VenueResponse } from 'src/dtos/response/venue.response'
 import { getAllPackageInVenueNotChoose } from 'src/features/action/package.action'
+import { updatePackageInVenueInBooking, updateThemeInVenueInBooking } from 'src/features/action/partyBooking.action'
 import { disableSlotInVenueById, enableSlotInVenueById } from 'src/features/action/slot.action'
 import { getAllThemeInVenueNotChoose } from 'src/features/action/theme.action'
 import {
@@ -365,6 +366,30 @@ export default function Venue() {
     }
   }
 
+  const updateOneThemeInVenueInBooking = async (payload: { partyBookingId: number; themeInVenueId: number }) => {
+    const res = await dispatch(updateThemeInVenueInBooking(payload))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchPartyBookingByPartyDateId(payload.partyBookingId)
+      message.success('Update theme success!')
+      return true;
+    } else {
+      message.error('Error when update theme!')
+      return false;
+    }
+  }
+
+  const updateOnePackageInVenueInBooking = async (payload: { partyBookingId: number; packageInVenueId: number }) => {
+    const res = await dispatch(updatePackageInVenueInBooking(payload))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchPartyBookingByPartyDateId(payload.partyBookingId)
+      message.success('Update package success!');
+      return true;
+    } else {
+      message.error('Error when update package!')
+      return false;
+    }
+  }
+
   const expandedRowRender = (record: TableListItem) => {
     const data: ExpandedRowTable[] = []
 
@@ -613,14 +638,19 @@ export default function Venue() {
             }}
             onFinish={async values => {
               let result: boolean | undefined = false
-              // result = await createOneInquiryForChangeThemeInVenue(values?.themeId)
+              if (typeof partyBooking?.id !== 'undefined') {
+               result = await updateOneThemeInVenueInBooking({
+                  partyBookingId: partyBooking?.id,
+                  themeInVenueId: values?.themeInVenueId
+                })
+              }
 
               return result
             }}
           >
             {themeInVenueNotChooseList?.length > 0 ? (
               <ProFormRadio.Group
-                name='themeId'
+                name='themeInVenueId'
                 layout='horizontal'
                 // label='Industry Distribution'
                 style={{ marginBottom: 10 }}
@@ -695,12 +725,20 @@ export default function Venue() {
               onCancel: () => console.log('run')
             }}
             onFinish={async values => {
-              return true
+              let result: boolean | undefined = false
+              if (typeof partyBooking?.id !== 'undefined') {
+                result = await updateOnePackageInVenueInBooking({
+                  partyBookingId: partyBooking?.id,
+                  packageInVenueId: values?.packageInVenueId
+                })
+              }
+
+              return result
             }}
           >
             {packageInVenueNotChooseList?.length > 0 ? (
               <ProFormRadio.Group
-                name='id'
+                name='packageInVenueId'
                 layout='horizontal'
                 style={{ marginBottom: 10 }}
                 options={packageInVenueNotChooseList?.map((item, index) => ({
@@ -708,7 +746,7 @@ export default function Venue() {
                     <Card
                       key={index}
                       hoverable
-                      style={{ width: 200, marginBottom: 10 }}
+                      style={{ width: 300, marginBottom: 10 }}
                       cover={
                         <Image
                           style={{
