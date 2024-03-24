@@ -32,11 +32,11 @@ const navigation = (): VerticalNavItemsType => {
         //   icon: AccountCogOutline,
         //   path: '/host/account-settings'
         // },
-        {
-          title: 'Chat',
-          icon: ChatOutline,
-          path: '/host/chats'
-        },
+        // {
+        //   title: 'Chat',
+        //   icon: ChatOutline,
+        //   path: '/host/chats'
+        // },
         {
           title: 'Inquiry',
           icon: CommentOutline,
