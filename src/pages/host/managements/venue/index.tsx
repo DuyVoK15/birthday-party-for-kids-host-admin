@@ -652,69 +652,68 @@ export default function Venue() {
           >
             <ThemeInVenueDetail themeInVenue={partyBooking?.themeInVenue} />
           </ModalForm>
-          {partyBooking?.status === 'PENDING' ||
-            (partyBooking?.status === 'CONFIRMED' && (
-              <ModalForm
-                title='Change theme'
-                trigger={
-                  <Button type='default'>
-                    <SwapOutlined />
-                    Change theme
-                  </Button>
+          {partyBooking?.status === 'PENDING' && (
+            <ModalForm
+              title='Change theme'
+              trigger={
+                <Button type='default'>
+                  <SwapOutlined />
+                  Change theme
+                </Button>
+              }
+              // form={form}
+              autoFocusFirstInput
+              modalProps={{
+                destroyOnClose: true,
+                onCancel: () => console.log('run')
+              }}
+              onFinish={async values => {
+                let result: boolean | undefined = false
+                if (typeof partyBooking?.id !== 'undefined') {
+                  result = await updateOneThemeInVenueInBooking({
+                    partyBookingId: partyBooking?.id,
+                    themeInVenueId: values?.themeInVenueId
+                  })
                 }
-                // form={form}
-                autoFocusFirstInput
-                modalProps={{
-                  destroyOnClose: true,
-                  onCancel: () => console.log('run')
-                }}
-                onFinish={async values => {
-                  let result: boolean | undefined = false
-                  if (typeof partyBooking?.id !== 'undefined') {
-                    result = await updateOneThemeInVenueInBooking({
-                      partyBookingId: partyBooking?.id,
-                      themeInVenueId: values?.themeInVenueId
-                    })
-                  }
 
-                  return result
-                }}
-              >
-                {themeInVenueNotChooseList?.length > 0 ? (
-                  <ProFormRadio.Group
-                    name='themeInVenueId'
-                    layout='horizontal'
-                    // label='Industry Distribution'
-                    style={{ marginBottom: 10 }}
-                    options={themeInVenueNotChooseList?.map((item, index) => ({
-                      label: (
-                        <Card
-                          key={index}
-                          hoverable
-                          style={{ width: 200, marginBottom: 10 }}
-                          cover={
-                            <Image
-                              style={{
-                                width: '100%',
-                                height: 100,
-                                objectFit: 'cover'
-                              }}
-                              alt='example'
-                              src={item?.theme?.themeImgUrl}
-                            />
-                          }
-                        >
-                          <Card.Meta title={item?.theme?.themeName} />
-                        </Card>
-                      ),
-                      value: item?.id
-                    }))}
-                  />
-                ) : (
-                  <Empty style={{ margin: 'auto' }} />
-                )}
-              </ModalForm>
-            ))}
+                return result
+              }}
+            >
+              {themeInVenueNotChooseList?.length > 0 ? (
+                <ProFormRadio.Group
+                  name='themeInVenueId'
+                  layout='horizontal'
+                  // label='Industry Distribution'
+                  style={{ marginBottom: 10 }}
+                  options={themeInVenueNotChooseList?.map((item, index) => ({
+                    label: (
+                      <Card
+                        key={index}
+                        hoverable
+                        style={{ width: 200, marginBottom: 10 }}
+                        cover={
+                          <Image
+                            style={{
+                              width: '100%',
+                              height: 100,
+                              objectFit: 'cover'
+                            }}
+                            alt='example'
+                            src={item?.theme?.themeImgUrl}
+                          />
+                        }
+                      >
+                        <Card.Meta title={item?.theme?.themeName} />
+                      </Card>
+                    ),
+                    value: item?.id
+                  }))}
+                />
+              ) : (
+                <Empty style={{ margin: 'auto' }} />
+              )}
+            </ModalForm>
+          )}
         </Space>
       )
     },
