@@ -57,7 +57,12 @@ import { VenueCreateRequest } from 'src/dtos/request/venue.request'
 import { SlotInVenueDataResponse } from 'src/dtos/response/slot.response'
 import { VenueResponse } from 'src/dtos/response/venue.response'
 import { getAllPackageInVenueNotChoose } from 'src/features/action/package.action'
-import { updatePackageInVenueInBooking, updateThemeInVenueInBooking } from 'src/features/action/partyBooking.action'
+import {
+  cancelBooking,
+  completeBooking,
+  updatePackageInVenueInBooking,
+  updateThemeInVenueInBooking
+} from 'src/features/action/partyBooking.action'
 import { disableSlotInVenueById, enableSlotInVenueById } from 'src/features/action/slot.action'
 import { getAllThemeInVenueNotChoose } from 'src/features/action/theme.action'
 import {
@@ -371,10 +376,10 @@ export default function Venue() {
     if (res?.meta?.requestStatus === 'fulfilled') {
       await fetchPartyBookingByPartyDateId(payload.partyBookingId)
       message.success('Update theme success!')
-      return true;
+      return true
     } else {
       message.error('Error when update theme!')
-      return false;
+      return false
     }
   }
 
@@ -382,11 +387,35 @@ export default function Venue() {
     const res = await dispatch(updatePackageInVenueInBooking(payload))
     if (res?.meta?.requestStatus === 'fulfilled') {
       await fetchPartyBookingByPartyDateId(payload.partyBookingId)
-      message.success('Update package success!');
-      return true;
+      message.success('Update package success!')
+      return true
     } else {
       message.error('Error when update package!')
-      return false;
+      return false
+    }
+  }
+
+  const completeOneBooking = async (id: number) => {
+    const res = await dispatch(completeBooking(id))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchPartyBookingByPartyDateId(id)
+      message.success('Complete booking success!')
+      return true
+    } else {
+      message.error(res?.payload?.message)
+      return false
+    }
+  }
+
+  const cancelOneBooking = async (id: number) => {
+    const res = await dispatch(cancelBooking(id))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchPartyBookingByPartyDateId(id)
+      message.success('Cancel booking success!')
+      return true
+    } else {
+      message.error(res?.payload?.message)
+      return false
     }
   }
 
@@ -639,7 +668,7 @@ export default function Venue() {
             onFinish={async values => {
               let result: boolean | undefined = false
               if (typeof partyBooking?.id !== 'undefined') {
-               result = await updateOneThemeInVenueInBooking({
+                result = await updateOneThemeInVenueInBooking({
                   partyBookingId: partyBooking?.id,
                   themeInVenueId: values?.themeInVenueId
                 })
@@ -806,7 +835,18 @@ export default function Venue() {
       label: 'Status',
       span: 1,
       children: (
-        <Badge status={partyBooking?.status === 'PENDING' ? 'processing' : 'success'} text={partyBooking?.status} />
+        <Badge
+          status={
+            partyBooking?.status === 'PENDING'
+              ? 'processing'
+              : partyBooking?.status === 'CANCELLED'
+              ? 'error'
+              : partyBooking?.status === 'COMPLETED'
+              ? 'success'
+              : 'warning'
+          }
+          text={partyBooking?.status}
+        />
       )
     },
     {
@@ -1027,11 +1067,36 @@ export default function Venue() {
         open={drawerBookingVisit}
         onOpenChange={setDrawerBookingVisit}
         disabled={loadingGetSlotNotAdd}
-        submitter={{ searchConfig: { submitText: 'Submit', resetText: 'Cancel' } }}
+        submitter={{ render: false }}
       >
         {partyBooking !== null && (
           <Fragment>
-            <Typography.Title level={3}>{`Booking ID: ${partyBooking?.id}`}</Typography.Title>
+            <Flex justify='space-between' align='center'>
+              <Typography.Title level={3}>{`Booking ID: ${partyBooking?.id}`}</Typography.Title>
+              <Flex gap={10}>
+                <Popconfirm
+                  title='Delete the task'
+                  description='Are you sure to delete this task?'
+                  onConfirm={() => completeOneBooking(partyBooking?.id)}
+                  onCancel={() => null}
+                  okText='Yes'
+                  cancelText='No'
+                >
+                  <Button type='primary'>Complete</Button>
+                </Popconfirm>
+                <Popconfirm
+                  title='Delete the task'
+                  description='Are you sure to delete this task?'
+                  onConfirm={() => cancelOneBooking(partyBooking?.id)}
+                  onCancel={() => null}
+                  okText='Yes'
+                  cancelText='No'
+                >
+                  <Button danger>Cancel</Button>
+                </Popconfirm>
+              </Flex>
+            </Flex>
+
             <Descriptions title='User Info' layout='vertical' bordered items={items} />
           </Fragment>
         )}

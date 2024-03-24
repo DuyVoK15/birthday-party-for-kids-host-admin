@@ -15,5 +15,13 @@ export const partyBookingService = {
   }): Promise<AxiosResponse<any>> => {
     const url = `/api/party-booking/update-package-in-venue/${payload.partyBookingId}/${payload.packageInVenueId}`
     return axiosClient.patch(url)
+  },
+  completeBooking: (id: number): Promise<AxiosResponse<any>> => {
+    const url = `/api/party-booking/complete-booking-for-host/${id}`
+    return axiosClient.put(url)
+  },
+  cancelBooking: (id: number): Promise<AxiosResponse<any>> => {
+    const url = `/api/party-booking/party-booking-cancel-for-host/${id}`
+    return axiosClient.put(url)
   }
 }

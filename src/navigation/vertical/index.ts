@@ -15,6 +15,7 @@ import AccountSupervisorCircle from 'mdi-material-ui/AccountSupervisorCircle'
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
 import AppConstants from 'src/enums/app'
+import { PayCircleOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons'
 
 const navigation = (): VerticalNavItemsType => {
   const role = typeof window !== 'undefined' ? window.localStorage.getItem(AppConstants.ROLE) : false
@@ -130,11 +131,11 @@ const navigation = (): VerticalNavItemsType => {
           icon: HomeOutline,
           path: '/admin/dashboard'
         },
-        {
-          title: 'Account Settings',
-          icon: AccountCogOutline,
-          path: '/admin/account-settings'
-        },
+        // {
+        //   title: 'Account Settings',
+        //   icon: AccountCogOutline,
+        //   path: '/admin/account-settings'
+        // },
         // {
         //   sectionTitle: 'Pages'
         // },
@@ -161,22 +162,22 @@ const navigation = (): VerticalNavItemsType => {
         },
         {
           title: 'Customer',
-          icon: FormatLetterCase,
+          icon: UserOutlined,
           path: '/admin/managements/customer'
         },
         {
-          title: 'Venue',
-          icon: FormatLetterCase,
-          path: '/admin/managements/venue'
+          title: 'Host',
+          icon: UserAddOutlined,
+          path: '/admin/managements/host'
         },
-        {
-          title: 'Slot',
-          icon: FormatLetterCase,
-          path: '/admin/managements/slot'
-        },
+        // {
+        //   title: 'Slot',
+        //   icon: FormatLetterCase,
+        //   path: '/admin/managements/slot'
+        // },
         {
           title: 'Payment',
-          icon: FormatLetterCase,
+          icon: PayCircleOutlined,
           path: '/admin/managements/payment'
         }
       ]

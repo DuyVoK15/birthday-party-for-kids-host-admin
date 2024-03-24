@@ -1,6 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit'
 import { LoginResponse, UserInfoResponse } from 'src/dtos/response/auth.response'
-import { getUserInfo, loginAdmin, loginHost, logout } from '../action/auth.action'
+import { getUserInfo, loginAdmin, loginHost, logout, registerAccountForHost } from '../action/auth.action'
 
 interface AuthState {
   isAuthenticated: boolean
@@ -72,6 +72,15 @@ export const authSlice = createSlice({
         state.loading = false
       })
       .addCase(logout.rejected, (state, action) => {
+        state.loading = false
+      })
+      .addCase(registerAccountForHost.pending, (state, action) => {
+        state.loading = true
+      })
+      .addCase(registerAccountForHost.fulfilled, (state, action) => {
+        state.loading = false
+      })
+      .addCase(registerAccountForHost.rejected, (state, action) => {
         state.loading = false
       })
   }

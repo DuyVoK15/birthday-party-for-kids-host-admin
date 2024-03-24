@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
-import { LoginRequest } from 'src/dtos/request/auth.request'
+import { LoginRequest, Register } from 'src/dtos/request/auth.request'
 import AppConstants from 'src/enums/app'
 import { authService } from 'src/services/auth.service'
 
@@ -56,3 +56,16 @@ export const getAllUser = createAsyncThunk('auth/getAllUser', async (_, { reject
     return rejectWithValue(axiosError.response?.data)
   }
 })
+
+export const registerAccountForHost = createAsyncThunk(
+  'auth/registerAccountForHost',
+  async (payload: Register, { rejectWithValue }) => {
+    try {
+      const response = await authService.registerAccountForHost(payload)
+      return response.data
+    } catch (error: any) {
+      const axiosError = error as AxiosError
+      return rejectWithValue(axiosError.response?.data)
+    }
+  }
+)
