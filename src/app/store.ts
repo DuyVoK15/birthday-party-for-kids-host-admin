@@ -10,6 +10,7 @@ import serviceReducer from '../features/slice/service.slice'
 import inquiryReducer from '../features/slice/inquiry.slice'
 import venueReducer from '../features/slice/venue.slice'
 import dashboardReducer from '../features/slice/dashboard.slice'
+import paymentReducer from '../features/slice/payment.slice'
 
 export const store = configureStore({
   reducer: {
@@ -20,7 +21,8 @@ export const store = configureStore({
     serviceReducer,
     inquiryReducer,
     venueReducer,
-    dashboardReducer
+    dashboardReducer,
+    paymentReducer
   }
 })
 
