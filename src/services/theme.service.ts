@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
 import { ItemInVenueListCreateRequest, ThemeCreateRequest } from 'src/dtos/request/theme.request'
+import { ThemeInVenueArrayResponse } from 'src/dtos/response/theme.response'
 
 export const themeService = {
   getAllTheme: (): Promise<AxiosResponse<any>> => {
@@ -36,5 +37,11 @@ export const themeService = {
   createThemeInVenueListByVenueId: (request: ItemInVenueListCreateRequest): Promise<AxiosResponse<any>> => {
     const url = `/api/theme/add-theme-in-venue-by-venue-id?venueId=${request.venueId}`
     return axiosClient.post(url, request.payload)
-  }
+  },
+  getAllThemeInVenueNotChoose: (id: number): Promise<
+    AxiosResponse<ThemeInVenueArrayResponse>
+  > => {
+    const url = `/api/themeInVenue/get-theme-in-venue-id-not-choose/${id}`;
+    return axiosClient.get(url);
+  },
 }

@@ -75,3 +75,17 @@ export const deletePackage = createAsyncThunk('package/deletePackage', async (id
     return rejectWithValue(axiosError.response?.data)
   }
 })
+
+export const getAllPackageInVenueNotChoose = createAsyncThunk(
+  "package/getAllPackageInVenueNotChoose",
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await packageService.getAllPackageInVenueNotChoose(id);
+      return response.data;
+    } catch (error: any) {
+      const axiosError = error as AxiosError;
+      console.log(axiosError);
+      return rejectWithValue(axiosError.response?.data);
+    }
+  },
+);

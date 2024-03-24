@@ -63,3 +63,17 @@ export const deleteTheme = createAsyncThunk('theme/deleteTheme', async (id: numb
     return rejectWithValue(axiosError.response?.data)
   }
 })
+
+export const getAllThemeInVenueNotChoose = createAsyncThunk(
+  "theme/getAllThemeInVenueNotChoose",
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await themeService.getAllThemeInVenueNotChoose(id);
+      return response.data;
+    } catch (error: any) {
+      const axiosError = error as AxiosError;
+      console.log(axiosError);
+      return rejectWithValue(axiosError.response?.data);
+    }
+  },
+);

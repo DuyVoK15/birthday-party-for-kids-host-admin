@@ -1,10 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { createTheme, deleteTheme, getAllTheme, getThemeById, updateTheme } from '../action/theme.action'
+import { createTheme, deleteTheme, getAllTheme, getAllThemeInVenueNotChoose, getThemeById, updateTheme } from '../action/theme.action'
+import { ThemeInVenueDataResponse } from 'src/dtos/response/theme.response'
 
 interface AuthState {
   themeReponse: any
   themeList: any
   themeById: any
+  themeInVenueNotChooseList: ThemeInVenueDataResponse[] | []
   createTheme: any
   updateTheme: any
   loading: boolean
@@ -14,6 +16,7 @@ const initialState: AuthState = {
   themeReponse: null,
   themeList: [],
   themeById: null,
+  themeInVenueNotChooseList: [],
   createTheme: null,
   updateTheme: null,
   loading: false
@@ -79,6 +82,18 @@ export const themeSlice = createSlice({
       .addCase(deleteTheme.rejected, (state, action) => {
         state.loading = false
       })
+      //
+      .addCase(getAllThemeInVenueNotChoose.pending, (state, action) => {
+        state.loading = true;
+        state.themeInVenueNotChooseList = [];
+      })
+      .addCase(getAllThemeInVenueNotChoose.fulfilled, (state, action) => {
+        state.themeInVenueNotChooseList = action.payload.data;
+        state.loading = false;
+      })
+      .addCase(getAllThemeInVenueNotChoose.rejected, (state, action) => {
+        state.loading = false;
+      });
     //
   }
 })

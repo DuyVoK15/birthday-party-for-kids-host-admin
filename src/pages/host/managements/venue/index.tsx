@@ -7,7 +7,8 @@ import {
   EyeOutlined,
   SolutionOutlined,
   CheckOutlined,
-  CloseOutlined
+  CloseOutlined,
+  SwapOutlined
 } from '@ant-design/icons'
 import type { ProColumns } from '@ant-design/pro-components'
 import {
@@ -16,6 +17,7 @@ import {
   ProFormCheckbox,
   ProFormDatePicker,
   ProFormDigit,
+  ProFormRadio,
   ProFormText,
   ProFormTextArea,
   ProFormUploadButton,
@@ -54,7 +56,9 @@ import { ItemInVenueListCreateRequest } from 'src/dtos/request/theme.request'
 import { VenueCreateRequest } from 'src/dtos/request/venue.request'
 import { SlotInVenueDataResponse } from 'src/dtos/response/slot.response'
 import { VenueResponse } from 'src/dtos/response/venue.response'
+import { getAllPackageInVenueNotChoose } from 'src/features/action/package.action'
 import { disableSlotInVenueById, enableSlotInVenueById } from 'src/features/action/slot.action'
+import { getAllThemeInVenueNotChoose } from 'src/features/action/theme.action'
 import {
   createPackageInVenueListByVenueId,
   createSlotInVenueListByVenueId,
@@ -184,24 +188,8 @@ export default function Venue() {
   const themeInVenueList = useAppSelector(state => state.venueReducer.themeInVenueList)
   const packageInVenueList = useAppSelector(state => state.venueReducer.packageInVenueList)
   const slotInVenueList = useAppSelector(state => state.venueReducer.slotInVenueList)
-
-  const showPopconfirm = () => {
-    setOpen(true)
-  }
-
-  const handleOk = () => {
-    setConfirmLoading(true)
-
-    setTimeout(() => {
-      setOpen(false)
-      setConfirmLoading(false)
-    }, 2000)
-  }
-
-  const handleCancel = () => {
-    console.log('Clicked cancel button')
-    setOpen(false)
-  }
+  const themeInVenueNotChooseList = useAppSelector(state => state.themeReducer.themeInVenueNotChooseList)
+  const packageInVenueNotChooseList = useAppSelector(state => state.packageReducer.packageInVenueNotChooseList)
 
   useEffect(() => {
     fetchGetAllVenue()
@@ -307,6 +295,35 @@ export default function Venue() {
     }
     console.log('res', JSON.stringify(res, null, 2))
   }
+
+  const fetchAllThemeInVenueNotChoose = async () => {
+    if (typeof partyBooking?.themeInVenue?.id !== 'undefined') {
+      const res = await dispatch(getAllThemeInVenueNotChoose(partyBooking?.themeInVenue?.id))
+      if (res?.meta?.requestStatus === 'fulfilled') {
+        return true
+      }
+      return false
+    }
+  }
+
+  const fetchAllPackageInVenueNotChoose = async () => {
+    if (typeof partyBooking?.packageInVenue?.id !== 'undefined') {
+      const res = await dispatch(getAllPackageInVenueNotChoose(partyBooking?.packageInVenue?.id))
+      if (res?.meta?.requestStatus === 'fulfilled') {
+        return true
+      }
+      return false
+    }
+  }
+
+  const fetchInQueue = async () => {
+    await fetchAllThemeInVenueNotChoose()
+    await fetchAllPackageInVenueNotChoose()
+  }
+
+  useEffect(() => {
+    fetchInQueue()
+  }, [partyBooking])
 
   const enableOneVenue = async (id: number) => {
     const res = await dispatch(enableVenueById(id))
@@ -558,52 +575,177 @@ export default function Venue() {
       key: '2',
       label: 'Theme',
       children: (
-        <ModalForm
-          title='Theme'
-          trigger={
-            <Button type='primary'>
-              <EyeOutlined />
-              View theme
-            </Button>
-          }
-          form={form}
-          autoFocusFirstInput
-          modalProps={{
-            destroyOnClose: true,
-            onCancel: () => console.log('run')
-          }}
-          submitTimeout={2000}
-          onFinish={async values => {
-            return true
-          }}
-        ><ThemeInVenueDetail themeInVenue={partyBooking?.themeInVenue} /></ModalForm>
+        <Space direction='vertical'>
+          <ModalForm
+            title='Theme'
+            trigger={
+              <Button type='primary'>
+                <EyeOutlined />
+                View theme
+              </Button>
+            }
+            form={form}
+            autoFocusFirstInput
+            modalProps={{
+              destroyOnClose: true,
+              onCancel: () => console.log('run')
+            }}
+            submitTimeout={2000}
+            onFinish={async values => {
+              return true
+            }}
+          >
+            <ThemeInVenueDetail themeInVenue={partyBooking?.themeInVenue} />
+          </ModalForm>
+          <ModalForm
+            title='Change theme'
+            trigger={
+              <Button type='default'>
+                <SwapOutlined />
+                Change theme
+              </Button>
+            }
+            // form={form}
+            autoFocusFirstInput
+            modalProps={{
+              destroyOnClose: true,
+              onCancel: () => console.log('run')
+            }}
+            onFinish={async values => {
+              let result: boolean | undefined = false
+              // result = await createOneInquiryForChangeThemeInVenue(values?.themeId)
+
+              return result
+            }}
+          >
+            {themeInVenueNotChooseList?.length > 0 ? (
+              <ProFormRadio.Group
+                name='themeId'
+                layout='horizontal'
+                // label='Industry Distribution'
+                style={{ marginBottom: 10 }}
+                options={themeInVenueNotChooseList?.map((item, index) => ({
+                  label: (
+                    <Card
+                      key={index}
+                      hoverable
+                      style={{ width: 200, marginBottom: 10 }}
+                      cover={
+                        <Image
+                          style={{
+                            width: '100%',
+                            height: 100,
+                            objectFit: 'cover'
+                          }}
+                          alt='example'
+                          src={item?.theme?.themeImgUrl}
+                        />
+                      }
+                    >
+                      <Card.Meta title={item?.theme?.themeName} />
+                    </Card>
+                  ),
+                  value: item?.id
+                }))}
+              />
+            ) : (
+              <Empty style={{ margin: 'auto' }} />
+            )}
+          </ModalForm>
+        </Space>
       )
     },
     {
       key: '3',
       label: 'Package',
       children: (
-        <ModalForm
-          title='Package'
-          trigger={
-            <Button type='primary'>
-              <EyeOutlined />
-              View package
-            </Button>
-          }
-          form={form}
-          autoFocusFirstInput
-          modalProps={{
-            destroyOnClose: true,
-            onCancel: () => console.log('run')
-          }}
-          submitTimeout={2000}
-          onFinish={async values => {
-            return true
-          }}
-        >
-          <PackageInVenueDetail packageInVenue={partyBooking?.packageInVenue} />
-        </ModalForm>
+        <Space direction='vertical'>
+          <ModalForm
+            title='Package'
+            trigger={
+              <Button type='primary'>
+                <EyeOutlined />
+                View package
+              </Button>
+            }
+            form={form}
+            autoFocusFirstInput
+            modalProps={{
+              destroyOnClose: true,
+              onCancel: () => console.log('run')
+            }}
+            onFinish={async values => {
+              return true
+            }}
+          >
+            <PackageInVenueDetail packageInVenue={partyBooking?.packageInVenue} />
+          </ModalForm>
+          <ModalForm
+            title='Package'
+            trigger={
+              <Button type='default'>
+                <SwapOutlined />
+                Change package
+              </Button>
+            }
+            form={form}
+            autoFocusFirstInput
+            modalProps={{
+              destroyOnClose: true,
+              onCancel: () => console.log('run')
+            }}
+            onFinish={async values => {
+              return true
+            }}
+          >
+            {packageInVenueNotChooseList?.length > 0 ? (
+              <ProFormRadio.Group
+                name='id'
+                layout='horizontal'
+                style={{ marginBottom: 10 }}
+                options={packageInVenueNotChooseList?.map((item, index) => ({
+                  label: (
+                    <Card
+                      key={index}
+                      hoverable
+                      style={{ width: 200, marginBottom: 10 }}
+                      cover={
+                        <Image
+                          style={{
+                            width: '100%',
+                            height: 100,
+                            objectFit: 'cover'
+                          }}
+                          alt='example'
+                          src={item?.apackage?.packageImgUrl}
+                        />
+                      }
+                    >
+                      <Space direction='vertical'>
+                        <Card.Meta title={item?.apackage?.packageName} />
+                        <ModalForm
+                          title='Chi tiết gói dịch vụ'
+                          trigger={
+                            <Button style={{ padding: 0 }} type='link'>
+                              <EyeOutlined />
+                              Chi tiết gói dịch vụ
+                            </Button>
+                          }
+                          style={{ padding: 0 }}
+                        >
+                          <PackageInVenueDetail packageInVenue={item} />
+                        </ModalForm>
+                      </Space>
+                    </Card>
+                  ),
+                  value: item?.id
+                }))}
+              />
+            ) : (
+              <Empty style={{ margin: 'auto' }} />
+            )}
+          </ModalForm>
+        </Space>
       )
     },
     {
@@ -653,7 +795,7 @@ export default function Venue() {
             return true
           }}
         >
-         <UpgradeServiceBookingDetail upgradeServices={partyBooking?.upgradeServices} />
+          <UpgradeServiceBookingDetail upgradeServices={partyBooking?.upgradeServices} />
         </ModalForm>
       )
     },
@@ -982,10 +1124,6 @@ export default function Venue() {
         }}
         submitTimeout={2000}
         onFinish={async values => {
-          // if (venueId !== null) {
-          //   const res = await createOneSlotInVenue({ venue_id: venueId, slot_id: values?.slotId })
-          //   return res
-          // }
           return true
         }}
         open={drawerPackageInVenueVisit}
@@ -1070,6 +1208,18 @@ export default function Venue() {
                     <Space direction='vertical'>
                       <Tag color={item?.active ? 'success' : 'error'}>{item?.active ? 'Active' : 'Inactive'}</Tag>
                       <Meta title={item?.apackage?.packageName} />
+                      <ModalForm
+                        title='Chi tiết gói dịch vụ'
+                        trigger={
+                          <Button type='default'>
+                            <EyeOutlined />
+                            Chi tiết
+                          </Button>
+                        }
+                        style={{ padding: 0 }}
+                      >
+                        <PackageInVenueDetail packageInVenue={item} />
+                      </ModalForm>
                     </Space>
                   </Card>
                 </Col>
@@ -1095,10 +1245,6 @@ export default function Venue() {
         }}
         submitTimeout={2000}
         onFinish={async values => {
-          // if (venueId !== null) {
-          //   const res = await createOneSlotInVenue({ venue_id: venueId, slot_id: values?.slotId })
-          //   return res
-          // }
           return true
         }}
         open={drawerSlotInVenueVisit}

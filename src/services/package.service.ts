@@ -2,6 +2,7 @@ import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
 import { PackageCreateRequest } from 'src/dtos/request/package.request'
 import { ItemInVenueListCreateRequest } from 'src/dtos/request/theme.request'
+import { PackageInVenueArrayResponse } from 'src/dtos/response/package.response'
 
 export const packageService = {
   getAllPackage: (): Promise<AxiosResponse<any>> => {
@@ -47,5 +48,9 @@ export const packageService = {
   createPackageInVenueListByVenueId: (request: ItemInVenueListCreateRequest): Promise<AxiosResponse<any>> => {
     const url = `/api/package/add-package-in-venue-by-venue-id?venueId=${request.venueId}`
     return axiosClient.post(url, request.payload)
+  },
+  getAllPackageInVenueNotChoose: (id: number): Promise<AxiosResponse<PackageInVenueArrayResponse>> => {
+    const url = `/api/packageInVenue/get-package-in-venue-id-not-choose/${id}`
+    return axiosClient.get(url)
   }
 }
