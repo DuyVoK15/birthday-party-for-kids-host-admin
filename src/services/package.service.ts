@@ -10,7 +10,7 @@ export const packageService = {
     return axiosClient.get(url)
   },
   getPackageById: (id: number): Promise<AxiosResponse<any>> => {
-    const url = `/api/package/get-id/${id}`
+    const url = `/api/package/get-package-for-host/${id}`
     return axiosClient.get(url)
   },
   createPackage: (payload: PackageCreateRequest): Promise<AxiosResponse<any>> => {
@@ -20,7 +20,8 @@ export const packageService = {
     formData.append('packageName', payload.packageName)
     formData.append('packageDescription', payload.packageDescription)
     formData.append('percent', JSON.stringify(payload.percent))
-    formData.append(`packageServiceRequests`, JSON.stringify(payload.packageServiceRequests))
+    formData.append('packageServiceRequests', JSON.stringify(payload.packageServiceRequests))
+    formData.append('packageType', payload.packageType)
 
     return axiosClient.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
@@ -30,7 +31,8 @@ export const packageService = {
     formData.append('fileImg', request.payload.fileImage)
     formData.append('packageName', request.payload.packageName)
     formData.append('packageDescription', request.payload.packageDescription)
-    formData.append(`packageServiceRequests`, JSON.stringify(request.payload.packageServiceRequests))
+    formData.append('packageServiceRequests', JSON.stringify(request.payload.packageServiceRequests))
+    formData.append('packageType', request.payload.packageType)
 
     return axiosClient.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
@@ -41,16 +43,12 @@ export const packageService = {
 
     return axiosClient.patch(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
+  enablePackage: (id: number): Promise<AxiosResponse<any>> => {
+    const url = `/api/package/enable/${id}`
+    return axiosClient.put(url)
+  },
   deletePackage: (id: number): Promise<AxiosResponse<any>> => {
     const url = `/api/package/delete/${id}`
     return axiosClient.delete(url)
-  },
-  createPackageInVenueListByVenueId: (request: ItemInVenueListCreateRequest): Promise<AxiosResponse<any>> => {
-    const url = `/api/package/add-package-in-venue-by-venue-id?venueId=${request.venueId}`
-    return axiosClient.post(url, request.payload)
-  },
-  getAllPackageInVenueNotChoose: (id: number): Promise<AxiosResponse<PackageInVenueArrayResponse>> => {
-    const url = `/api/packageInVenue/get-package-in-venue-id-not-choose/${id}`
-    return axiosClient.get(url)
   }
 }

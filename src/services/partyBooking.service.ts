@@ -2,26 +2,24 @@ import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
 
 export const partyBookingService = {
-  updateThemeInVenueInBooking: (payload: {
-    partyBookingId: number
-    themeInVenueId: number
-  }): Promise<AxiosResponse<any>> => {
-    const url = `/api/party-booking/update-theme-in-venue/${payload.partyBookingId}/${payload.themeInVenueId}`
-    return axiosClient.patch(url)
+  getAllBooking: (): Promise<AxiosResponse<any>> => {
+    const url = `/api/party-booking/get-all-party-booking-for-host`
+    return axiosClient.get(url)
   },
-  updatePackageInVenueInBooking: (payload: {
-    partyBookingId: number
-    packageInVenueId: number
-  }): Promise<AxiosResponse<any>> => {
-    const url = `/api/party-booking/update-package-in-venue/${payload.partyBookingId}/${payload.packageInVenueId}`
-    return axiosClient.patch(url)
+  getBookingById: (id: number): Promise<AxiosResponse<any>> => {
+    const url = `/api/party-booking/get-by-id-for-host/${id}`
+    return axiosClient.get(url)
+  },
+  getAllBookingCompleted: (): Promise<AxiosResponse<any>> => {
+    const url = `/api/party-booking/get-all-completed`
+    return axiosClient.get(url)
   },
   completeBooking: (id: number): Promise<AxiosResponse<any>> => {
-    const url = `/api/party-booking/complete-booking-for-host/${id}`
+    const url = `/api/party-booking/complete-party-booking-for-host/${id}`
     return axiosClient.put(url)
   },
   cancelBooking: (id: number): Promise<AxiosResponse<any>> => {
-    const url = `/api/party-booking/party-booking-cancel-for-host/${id}`
+    const url = `/api/party-booking/cancel-party-booking-for-host/${id}`
     return axiosClient.put(url)
   }
 }

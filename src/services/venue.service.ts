@@ -1,6 +1,7 @@
+import { VenueArrayResponse, VenueObjectResponse } from './../dtos/response/venue.response'
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
-import { VenueCheckSlotByDateResponse } from 'src/dtos/response/venue.response'
+import {} from 'src/dtos/response/venue.response'
 import { VenueCreateRequest } from 'src/dtos/request/venue.request'
 import {
   ThemeInVenueArrayResponse,
@@ -12,15 +13,15 @@ import {
   PackageInVenueDataResponse,
   PackageNotAddArrayResponse
 } from 'src/dtos/response/package.response'
-import { SlotInVenueArrayResponse, SlotNotAddArrayResponse } from 'src/dtos/response/slot.response'
+import { SlotNotAddArrayResponse } from 'src/dtos/response/slot.response'
 
 export const venueService = {
-  getAllVenue: (): Promise<AxiosResponse<VenueCheckSlotByDateResponse>> => {
+  getAllVenue: (): Promise<AxiosResponse<VenueArrayResponse>> => {
     const url = `/api/venue/get-all`
     return axiosClient.get(url)
   },
-  getAllVenueCheckSlotByDate: (date: string | null): Promise<AxiosResponse<VenueCheckSlotByDateResponse>> => {
-    const url = `/api/venue/check-slot-in-venue-for-host?date=${date}`
+  getAllVenueCheckSlotByDate: (): Promise<AxiosResponse<VenueObjectResponse>> => {
+    const url = `/api/venue/get-all-venue-for-host`
     return axiosClient.get(url)
   },
   getAllThemeNotAdd: (id: number): Promise<AxiosResponse<ThemeNotAddArrayResponse>> => {
@@ -41,27 +42,12 @@ export const venueService = {
     formData.append('fileImg', payload.fileImage)
     formData.append('venueName', payload.venueName)
     formData.append('venueDescription', payload.venueDescription)
-    formData.append('location', payload.location)
-    formData.append('capacity', payload.capacity.toString())
+    formData.append('street', payload.street)
+    formData.append('ward', payload.ward)
+    formData.append('district', payload.district)
+    formData.append('city', payload.city)
 
     return axiosClient.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-  },
-
-  createSlotInVenue: (payload: { venue_id: number; slot_id: number }): Promise<AxiosResponse<any>> => {
-    const url = `/slot-in-venue/create`
-    return axiosClient.post(url, { ...payload })
-  },
-  getAllThemeInVenueByVenueId: (id: number): Promise<AxiosResponse<ThemeInVenueArrayResponse>> => {
-    const url = `/api/venue/get-theme-by-venue/${id}`
-    return axiosClient.get(url)
-  },
-  getAllPackageInVenueByVenueId: (id: number): Promise<AxiosResponse<PackageInVenueArrayResponse>> => {
-    const url = `/api/venue/get-package-by-venue/${id}`
-    return axiosClient.get(url)
-  },
-  getAllSlotInVenueByVenueId: (id: number): Promise<AxiosResponse<SlotInVenueArrayResponse>> => {
-    const url = `/api/venue/get-slot-in-venue-by-venue/${id}`
-    return axiosClient.get(url)
   },
   enableVenueById: (id: number): Promise<AxiosResponse<any>> => {
     const url = `/api/venue/set-active-venue/${id}`
