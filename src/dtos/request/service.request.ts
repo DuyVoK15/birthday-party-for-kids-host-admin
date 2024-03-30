@@ -3,4 +3,5 @@ export interface ServiceCreateRequest {
   serviceName: string
   serviceDescription: string
   pricing: string
+  serviceType: string
 }
