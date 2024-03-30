@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Form, Modal, Popconfirm, Space, Table, TimePicker, Typography, message } from 'antd'
 import { useAppDispatch } from 'src/app/store'
-import { createSlot, deleteSlot, getAllSlot, updateSlot } from 'src/features/action/slot.action'
+import { createSlot, getAllSlot, updateSlot } from 'src/features/action/slot.action'
 import { useAppSelector } from 'src/app/hooks'
 import dayjs from 'dayjs'
 import { SlotCreateRequest } from 'src/dtos/request/slot.request'
@@ -104,7 +104,7 @@ const App: React.FC = () => {
 
   const removeOne = async (id: number) => {
     try {
-      await deleteOneSlot(id)
+      // await deleteOneSlot(id)
       setEditingKey('')
     } catch (errInfo) {
       console.log('Error', errInfo)
@@ -211,14 +211,6 @@ const App: React.FC = () => {
         fetchAllSlot()
       } else {
         message.error(res?.payload?.message)
-      }
-    })
-  }
-
-  const deleteOneSlot = async (id: number) => {
-    await dispatch(deleteSlot(id)).then(async res => {
-      if (res?.meta?.requestStatus === 'fulfilled') {
-        await fetchAllSlot()
       }
     })
   }

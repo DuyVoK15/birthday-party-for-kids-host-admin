@@ -1,11 +1,8 @@
 import {
-  EditOutlined,
   MoreOutlined,
   PlusOutlined,
-  DropboxOutlined,
   PrinterOutlined,
   EyeOutlined,
-  SolutionOutlined,
   CheckOutlined,
   CloseOutlined,
   SwapOutlined
@@ -19,7 +16,6 @@ import {
   ProFormDigit,
   ProFormRadio,
   ProFormText,
-  ProFormTextArea,
   ProFormUploadButton,
   ProTable,
   QueryFilter
@@ -43,82 +39,59 @@ import {
   Tag,
   Tooltip,
   Typography,
-  UploadFile,
   message
 } from 'antd'
 import { MenuProps } from 'antd/lib'
 import Meta from 'antd/lib/card/Meta'
 import dayjs from 'dayjs'
-import { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import { useAppSelector } from 'src/app/hooks'
 import { useAppDispatch } from 'src/app/store'
-import { ItemInVenueListCreateRequest } from 'src/dtos/request/theme.request'
-import { VenueCreateRequest } from 'src/dtos/request/venue.request'
-import { SlotInVenueDataResponse } from 'src/dtos/response/slot.response'
-import { VenueResponse } from 'src/dtos/response/venue.response'
-import { getAllPackageInVenueNotChoose } from 'src/features/action/package.action'
 import {
-  cancelBooking,
-  completeBooking,
-  updatePackageInVenueInBooking,
-  updateThemeInVenueInBooking
-} from 'src/features/action/partyBooking.action'
-import { disableSlotInVenueById, enableSlotInVenueById } from 'src/features/action/slot.action'
-import { getAllThemeInVenueNotChoose } from 'src/features/action/theme.action'
+  RoomDataCreateRequest,
+  RoomGetSlotNotAddRequest,
+  SlotInRoomListCreateRequest
+} from 'src/dtos/request/room.request'
+import { RoomDataResponse } from 'src/dtos/response/room.response'
+import { SlotInRoomDataResponse } from 'src/dtos/response/slot.response'
+import { VenueDataResponse } from 'src/dtos/response/venue.response'
+import { cancelBooking, completeBooking } from 'src/features/action/partyBooking.action'
 import {
-  createPackageInVenueListByVenueId,
-  createSlotInVenueListByVenueId,
-  createThemeInVenueListByVenueId,
-  createVenue,
-  disableVenueById,
-  enableVenueById,
-  getAllPackageInVenueByVenueId,
-  getAllPackageNotAdd,
-  getAllSlotInVenueByVenueId,
-  getAllSlotNotAdd,
-  getAllThemeInVenueByVenueId,
-  getAllThemeNotAdd,
-  getAllVenueCheckSlotByDate,
-  getPartyBookingByPartyDateId
-} from 'src/features/action/venue.action'
+  createRoom,
+  createSlotInRoomListByRoomId,
+  disableRoom,
+  enableRoom,
+  getAllRoom,
+  getSlotNotAddByRoomId
+} from 'src/features/action/room.action'
+import { disableSlotInRoom, enableSlotInRoom } from 'src/features/action/slot.action'
+import { getAllPackageNotAdd, getAllVenueCheckSlotByDate } from 'src/features/action/venue.action'
 import PackageInVenueDetail from 'src/views/host/managements/package/PackageInVenueDetail'
-import ThemeInVenueDetail from 'src/views/host/managements/theme/ThemeInVenueDetail'
 import UpgradeServiceBookingDetail from 'src/views/host/managements/upgrade-service/UpgradeServiceBookingDetail'
 
 export const currentDateFormat = dayjs(new Date()).format('YYYY-MM-DD')
 
-export interface TableListItem extends VenueResponse {
+export interface TableListItem extends RoomDataResponse {
   key: string
-  inUseOfTotalSlot: string
+  inUseInTotal: string
 }
 
-export interface ExpandedRowTable extends SlotInVenueDataResponse {
+export interface ExpandedRowTable extends SlotInRoomDataResponse {
+  slotInRoomList: any
   key: string
+  inUseInTotal: string
 }
 
-export default function Venue() {
+export interface ExpandedRowTableChild extends SlotInRoomDataResponse {
+  key: string
+  inUseInTotal: string
+}
+
+const Venue: React.FC = () => {
   // ** Dispatch API
   const dispatch = useAppDispatch()
   const tableListDataSource: TableListItem[] = []
 
-  const fetchGetAllVenue = async () => {
-    try {
-      const res = await dispatch(getAllVenueCheckSlotByDate(dateQuery))
-      const resData = res.payload as VenueResponse[] | []
-      console.log('AllVenue: ', JSON.stringify(res, null, 2))
-
-      return resData
-    } catch (error) {}
-  }
-  const fetchGetAllThemeNotAdd = async (id: number) => {
-    try {
-      const res = await dispatch(getAllThemeNotAdd(id))
-      const resData = res.payload
-      console.log('AllVenue: ', JSON.stringify(res, null, 2))
-
-      return resData
-    } catch (error) {}
-  }
   const fetchGetAllPackageNotAdd = async (id: number) => {
     try {
       const res = await dispatch(getAllPackageNotAdd(id))
@@ -128,38 +101,11 @@ export default function Venue() {
       return resData
     } catch (error) {}
   }
-  const fetchGetAllSlotNotAdd = async (id: number) => {
+  const fetchGetAllSlotNotAdd = async (payload: RoomGetSlotNotAddRequest) => {
     try {
-      const res = await dispatch(getAllSlotNotAdd(id))
+      const res = await dispatch(getSlotNotAddByRoomId(payload))
       const resData = res.payload
-      console.log('AllVenue: ', JSON.stringify(res, null, 2))
-
-      return resData
-    } catch (error) {}
-  }
-  const fetchGetAllThemeInVenueByVenueId = async (id: number) => {
-    try {
-      const res = await dispatch(getAllThemeInVenueByVenueId(id))
-      const resData = res.payload
-      console.log('AllVenue: ', JSON.stringify(res, null, 2))
-
-      return resData
-    } catch (error) {}
-  }
-  const fetchGetAllPackageInVenueByVenueId = async (id: number) => {
-    try {
-      const res = await dispatch(getAllPackageInVenueByVenueId(id))
-      const resData = res.payload
-      console.log('AllVenue: ', JSON.stringify(res, null, 2))
-
-      return resData
-    } catch (error) {}
-  }
-  const fetchGetAllSlotInVenueByVenueId = async (id: number) => {
-    try {
-      const res = await dispatch(getAllSlotInVenueByVenueId(id))
-      const resData = res.payload as VenueResponse[] | []
-      console.log('AllVenue: ', JSON.stringify(res, null, 2))
+      console.log('SlotAddNot: ', JSON.stringify(res, null, 2))
 
       return resData
     } catch (error) {}
@@ -169,237 +115,137 @@ export default function Venue() {
   const [data, setData] = useState<TableListItem[]>([])
   const [dateQuery, setDateQuery] = useState(currentDateFormat)
   const [form] = Form.useForm()
+  const [modalRoomForm] = Form.useForm()
+  const [modalSlotForm] = Form.useForm()
 
   // Handle Form
-  const [venue, setVenue] = useState<VenueResponse | null>(null)
+  const [venue, setVenue] = useState<VenueDataResponse | null>(null)
   const [venueId, setVenueId] = useState<number | null>(null)
+  const [room, setRoom] = useState<RoomDataResponse | null>(null)
+
   const [drawerBookingVisit, setDrawerBookingVisit] = useState(false)
-  const [drawerThemeInVenuegVisit, setDrawerThemeInVenueVisit] = useState(false)
+  const [drawerRoomListVisit, setDrawerRoomListVisit] = useState(false)
   const [drawerPackageInVenueVisit, setDrawerPackageInVenueVisit] = useState(false)
   const [drawerSlotInVenueVisit, setDrawerslotInVenueVisit] = useState(false)
+  const [modalRoomVisit, setModalRoomVisit] = useState(false)
+  const [modalSlotNotAddVisit, setModalSlotNotAddVisit] = useState(false)
+
   const [open, setOpen] = useState(false)
   const [confirmLoading, setConfirmLoading] = useState(false)
 
   const userInfo = useAppSelector(state => state.authReducer.userInfo)
   const venueList = useAppSelector(state => state.venueReducer.venueCheckSlotByDateList)
-  const themeNotAddList = useAppSelector(state => state.venueReducer.themeNotAddList)
+  const venueObject = useAppSelector(state => state.venueReducer.venueCheckSlotByDate)
+  const roomList = useAppSelector(state => state.venueReducer.roomList)
+
   const packageNotAddList = useAppSelector(state => state.venueReducer.packageNotAddList)
   const slotNotAddList = useAppSelector(state => state.venueReducer.slotNotAddList)
   const loading = useAppSelector(state => state.venueReducer.loading)
+  const loadingCreate = useAppSelector(state => state.venueReducer.loadingCreate)
   const loadingCreateVenue = useAppSelector(state => state.venueReducer.loadingCreateVenue)
   const loadingGetSlotNotAdd = useAppSelector(state => state.venueReducer.loadingGetSlotNotAdd)
   const loadingPartyBooking = useAppSelector(state => state.venueReducer.loadingPartyBooking)
   const loadingCreateItemInVenueList = useAppSelector(state => state.venueReducer.loadingCreateItemInVenueList)
   const partyBooking = useAppSelector(state => state.venueReducer.partyBooking)
-  const themeInVenueList = useAppSelector(state => state.venueReducer.themeInVenueList)
   const packageInVenueList = useAppSelector(state => state.venueReducer.packageInVenueList)
-  const slotInVenueList = useAppSelector(state => state.venueReducer.slotInVenueList)
-  const themeInVenueNotChooseList = useAppSelector(state => state.themeReducer.themeInVenueNotChooseList)
   const packageInVenueNotChooseList = useAppSelector(state => state.packageReducer.packageInVenueNotChooseList)
 
+  const fetchVenue = async () => {
+    const res = await dispatch(getAllVenueCheckSlotByDate())
+    const resData = res.payload as VenueDataResponse
+
+    return resData
+  }
+
+  const fetchAllRoom = async () => {
+    const res = await dispatch(getAllRoom(dateQuery))
+    const resData = res.payload as VenueDataResponse
+
+    return resData
+  }
+
   useEffect(() => {
-    fetchGetAllVenue()
+    fetchVenue()
+  }, [])
+
+  useEffect(() => {
+    setVenue(venueObject)
+    setVenueId(venueObject.id)
+  }, [venueObject])
+
+  useEffect(() => {
+    fetchAllRoom()
   }, [dateQuery])
 
   useEffect(() => {
-    venueList.map((obj, index) => {
+    roomList?.map((obj, index) => {
       tableListDataSource.push({
         ...obj,
-        key: index.toString(),
-        inUseOfTotalSlot:
-          obj?.slotInVenueList.filter(item => item?.status === true).length + ' / ' + obj?.slotInVenueList.length
+        key: (index + 1).toString(),
+        inUseInTotal: ''
       })
     })
     setData(tableListDataSource)
-  }, [venueList])
+  }, [roomList])
 
-  const handleOpenThemeDrawer = async (record: TableListItem) => {
-    await fetchGetAllThemeInVenueByVenueId(record?.id)
-    setDrawerThemeInVenueVisit(true)
-    setVenueId(record?.id)
-    setVenue(record)
-    await fetchGetAllThemeNotAdd(record?.id)
+  // const handleOpenRoomModal = async (record: TableListItem) => {
+  //   setModalRoomVisit(true)
+  //   setVenueId(record?.id)
+  //   setVenue(record)
+  // }
+
+  const handleOpenSlotNotAddModal = async (record: TableListItem) => {
+    if (venueId !== null) {
+      await fetchGetAllSlotNotAdd({ roomId: record?.id })
+      setModalSlotNotAddVisit(true)
+      setRoom(record)
+    }
   }
 
-  const handleOpenPackageDrawer = async (record: TableListItem) => {
-    await fetchGetAllPackageInVenueByVenueId(record?.id)
-    setDrawerPackageInVenueVisit(true)
-    setVenueId(record?.id)
-    setVenue(record)
-    await fetchGetAllPackageNotAdd(record?.id)
-  }
-
-  const handleOpenSlotDrawer = async (record: TableListItem) => {
-    await fetchGetAllSlotInVenueByVenueId(record?.id)
-    setDrawerslotInVenueVisit(true)
-    setVenueId(record?.id)
-    setVenue(record)
-    await fetchGetAllSlotNotAdd(record?.id)
-  }
-
-  const createOneVenue = async (payload: VenueCreateRequest) => {
-    const res = await dispatch(createVenue(payload))
+  const enableOneSlotInRoom = async (id: number) => {
+    const res = await dispatch(enableSlotInRoom(id))
     if (res?.meta?.requestStatus === 'fulfilled') {
-      fetchGetAllVenue()
-      message.success('Create venue success!')
-      return true
+      await fetchAllRoom()
+      message.success('Enable room success!')
     } else {
-      message.error('Error when create!')
-      return false
+      message.error('Error when enable room!')
     }
   }
 
-  const createThemeInVenueList = async (request: ItemInVenueListCreateRequest) => {
-    const res = await dispatch(createThemeInVenueListByVenueId(request))
+  const disableOneSlotInRoom = async (id: number) => {
+    const res = await dispatch(disableSlotInRoom(id))
     if (res?.meta?.requestStatus === 'fulfilled') {
-      if (venueId !== null) {
-        await fetchGetAllThemeInVenueByVenueId(venueId)
-        await fetchGetAllThemeNotAdd(venueId)
-        message.success('Create theme in venue list success!')
-      }
-      return true
+      await fetchAllRoom()
+      message.success('Disable room success!')
     } else {
-      message.error('Error when create!')
-      return false
+      message.error('Error when disable room!')
     }
   }
-  const createPackageInVenueList = async (request: ItemInVenueListCreateRequest) => {
-    const res = await dispatch(createPackageInVenueListByVenueId(request))
+
+  const enableOneRoom = async (payload: RoomGetSlotNotAddRequest) => {
+    const res = await dispatch(enableRoom(payload))
     if (res?.meta?.requestStatus === 'fulfilled') {
-      if (venueId !== null) {
-        await fetchGetAllPackageInVenueByVenueId(venueId)
-        await fetchGetAllPackageNotAdd(venueId)
-        message.success('Create package in venue list success!')
-      }
-      return true
+      await fetchAllRoom()
+      message.success('Enable room success!')
     } else {
-      message.error('Error when create!')
-      return false
+      message.error('Error when enable room!')
     }
   }
 
-  const createSlotInVenueList = async (request: ItemInVenueListCreateRequest) => {
-    const res = await dispatch(createSlotInVenueListByVenueId(request))
+  const disableOneRoom = async (payload: RoomGetSlotNotAddRequest) => {
+    const res = await dispatch(disableRoom(payload))
     if (res?.meta?.requestStatus === 'fulfilled') {
-      if (venueId !== null) {
-        await fetchGetAllSlotInVenueByVenueId(venueId)
-        await fetchGetAllSlotNotAdd(venueId)
-        message.success('Create slot in venue list success!')
-      }
-      return true
+      await fetchAllRoom()
+      message.success('Disable room success!')
     } else {
-      message.error('Error when create!')
-      return false
+      message.error('Error when disable room!')
     }
   }
 
-  const fetchPartyBookingByPartyDateId = async (id: number) => {
-    const res = await dispatch(getPartyBookingByPartyDateId(id))
-    if (res?.meta?.requestStatus === 'fulfilled') {
-    } else {
-      const resData = res?.payload as any
-      message.error(resData?.message)
-    }
-    console.log('res', JSON.stringify(res, null, 2))
-  }
-
-  const fetchAllThemeInVenueNotChoose = async () => {
-    if (typeof partyBooking?.themeInVenue?.id !== 'undefined') {
-      const res = await dispatch(getAllThemeInVenueNotChoose(partyBooking?.themeInVenue?.id))
-      if (res?.meta?.requestStatus === 'fulfilled') {
-        return true
-      }
-      return false
-    }
-  }
-
-  const fetchAllPackageInVenueNotChoose = async () => {
-    if (typeof partyBooking?.packageInVenue?.id !== 'undefined') {
-      const res = await dispatch(getAllPackageInVenueNotChoose(partyBooking?.packageInVenue?.id))
-      if (res?.meta?.requestStatus === 'fulfilled') {
-        return true
-      }
-      return false
-    }
-  }
-
-  const fetchInQueue = async () => {
-    await fetchAllThemeInVenueNotChoose()
-    await fetchAllPackageInVenueNotChoose()
-  }
-
-  useEffect(() => {
-    fetchInQueue()
-  }, [partyBooking])
-
-  const enableOneVenue = async (id: number) => {
-    const res = await dispatch(enableVenueById(id))
-    if (res?.meta?.requestStatus === 'fulfilled') {
-      await fetchGetAllVenue()
-      message.success('Enable success!')
-    } else {
-      message.error('Error when enable venue!')
-    }
-  }
-
-  const disableOneVenue = async (id: number) => {
-    const res = await dispatch(disableVenueById(id))
-    if (res?.meta?.requestStatus === 'fulfilled') {
-      await fetchGetAllVenue()
-      message.success('Disable success!')
-    } else {
-      message.error('Error when disable venue!')
-    }
-  }
-
-  const enableOneSlotInVenue = async (id: number) => {
-    const res = await dispatch(enableSlotInVenueById(id))
-    if (res?.meta?.requestStatus === 'fulfilled') {
-      await fetchGetAllVenue()
-      message.success('Enable success!')
-    } else {
-      message.error('Error when enable slot!')
-    }
-  }
-
-  const disableOneSlotInVenue = async (id: number) => {
-    const res = await dispatch(disableSlotInVenueById(id))
-    if (res?.meta?.requestStatus === 'fulfilled') {
-      await fetchGetAllVenue()
-      message.success('Disable success!')
-    } else {
-      message.error('Error when disable slot!')
-    }
-  }
-
-  const updateOneThemeInVenueInBooking = async (payload: { partyBookingId: number; themeInVenueId: number }) => {
-    const res = await dispatch(updateThemeInVenueInBooking(payload))
-    if (res?.meta?.requestStatus === 'fulfilled') {
-      await fetchPartyBookingByPartyDateId(payload.partyBookingId)
-      message.success('Update theme success!')
-      return true
-    } else {
-      message.error('Error when update theme!')
-      return false
-    }
-  }
-
-  const updateOnePackageInVenueInBooking = async (payload: { partyBookingId: number; packageInVenueId: number }) => {
-    const res = await dispatch(updatePackageInVenueInBooking(payload))
-    if (res?.meta?.requestStatus === 'fulfilled') {
-      await fetchPartyBookingByPartyDateId(payload.partyBookingId)
-      message.success('Update package success!')
-      return true
-    } else {
-      message.error('Error when update package!')
-      return false
-    }
-  }
 
   const completeOneBooking = async (id: number) => {
     const res = await dispatch(completeBooking(id))
     if (res?.meta?.requestStatus === 'fulfilled') {
-      await fetchPartyBookingByPartyDateId(id)
       message.success('Complete booking success!')
       return true
     } else {
@@ -411,8 +257,32 @@ export default function Venue() {
   const cancelOneBooking = async (id: number) => {
     const res = await dispatch(cancelBooking(id))
     if (res?.meta?.requestStatus === 'fulfilled') {
-      await fetchPartyBookingByPartyDateId(id)
       message.success('Cancel booking success!')
+      return true
+    } else {
+      message.error(res?.payload?.message)
+      return false
+    }
+  }
+
+  const createSlotInRoomList = async (request: SlotInRoomListCreateRequest) => {
+    const res = await dispatch(createSlotInRoomListByRoomId(request))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchAllRoom()
+      message.success('Create success!')
+      return true
+    } else {
+      message.error(res?.payload?.message)
+      return false
+    }
+  }
+
+  const createOneRoom = async (payload: RoomDataCreateRequest) => {
+    const res = await dispatch(createRoom(payload))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchAllRoom()
+      message.success('Create success!')
+      modalRoomForm.resetFields()
       return true
     } else {
       message.error(res?.payload?.message)
@@ -423,24 +293,11 @@ export default function Venue() {
   const expandedRowRender = (record: TableListItem) => {
     const data: ExpandedRowTable[] = []
 
-    record?.slotInVenueList?.map((item, index) => {
+    record?.slotInRoomList?.map((obj, index) => {
       data.push({
+        ...obj,
         key: (index + 1).toString(),
-        id: item?.id,
-        active: item?.active,
-        status: item?.status,
-        slot: {
-          id: item?.slot?.id,
-          timeStart: item?.slot?.timeStart,
-          timeEnd: item?.slot?.timeEnd,
-          validTimeRange: false,
-          active: false
-        },
-        partyDated: {
-          id: item?.partyDated?.id,
-          date: item?.partyDated?.date,
-          active: item?.partyDated?.active
-        }
+        inUseInTotal: obj?.slotInRoomList?.length.toString()
       })
     })
 
@@ -470,37 +327,31 @@ export default function Venue() {
             dataIndex: 'operation',
             key: 'operation',
             valueType: 'option',
-            render: (_, recordChild) => {
+            render: (_: any, recordChild) => {
               const items: MenuProps['items'] = [
                 {
                   label: 'View booking',
                   key: '1',
-                  icon: <EditOutlined />,
-                  onClick: () => {
-                    fetchPartyBookingByPartyDateId(recordChild?.partyDated?.id)
-                    setVenue(record)
-                    setDrawerBookingVisit(true)
-                  },
-                  disabled: recordChild?.status ? false : true
+                  icon: <PrinterOutlined />,
+                  onClick: () => null
                 },
                 {
-                  label: recordChild?.active ? (
+                  label: record?.active ? (
                     <Typography style={{ color: 'red' }}>Disable slot</Typography>
                   ) : (
                     <Typography style={{ color: 'green' }}>Enable slot</Typography>
                   ),
-                  key: '2',
-                  icon: recordChild?.active ? (
+                  key: '4',
+                  icon: record?.active ? (
                     <CloseOutlined style={{ color: 'red' }} />
                   ) : (
                     <CheckOutlined style={{ color: 'green' }} />
                   ),
-                  disabled: record?.active ? false : true,
                   onClick: () => {
-                    if (recordChild?.active) {
-                      disableOneSlotInVenue(recordChild?.id)
+                    if (record?.active) {
+                      disableOneSlotInRoom(record?.id)
                     } else {
-                      enableOneSlotInVenue(recordChild?.id)
+                      enableOneSlotInRoom(record?.id)
                     }
                   }
                 }
@@ -509,8 +360,12 @@ export default function Venue() {
                 items
               }
               return (
-                <Dropdown menu={menuProps} trigger={['click']}>
-                  <Button icon={<MoreOutlined />}></Button>
+                <Dropdown
+                  menu={menuProps}
+                  trigger={['click']}
+                  // onOpenChange={() => setKey(key === record.key ? null : record.key)}
+                >
+                  <Button icon={<MoreOutlined spin={key === record.key ? true : false} />}></Button>
                 </Dropdown>
               )
             }
@@ -527,31 +382,40 @@ export default function Venue() {
 
   const [key, setKey] = useState<string | null>(null)
   const columns: ProColumns<TableListItem>[] = [
+    { title: 'Room No.', dataIndex: 'key', key: 'key', width: '10%' },
     {
       title: 'Name',
-      width: '20%',
-      dataIndex: 'venueName'
-    },
-    {
-      title: 'Location',
+      dataIndex: 'roomName',
       width: '15%',
-      dataIndex: 'location'
+      key: 'roomName'
     },
     {
       title: 'Capacity',
+      dataIndex: 'capacity',
       width: '10%',
-      dataIndex: 'capacity'
+      key: 'capacity'
+    },
+    {
+      title: 'Pricing',
+      dataIndex: 'pricing',
+      width: '15%',
+      key: 'pricing'
     },
     {
       title: 'Is Active?',
-      width: '10%',
       dataIndex: 'active',
+      width: '10%',
+      key: 'active',
       render: (_, record) => (record?.active ? <Tag color='success'>Active</Tag> : <Tag color='error'>Inactive</Tag>)
     },
     {
-      title: 'In use / Total slot',
-      width: '20%',
-      dataIndex: 'inUseOfTotalSlot'
+      title: 'In use / Total',
+      dataIndex: 'inUseInTotal',
+      width: '15%',
+      key: 'status',
+      align: 'center',
+      render: (_, record) =>
+        record?.slotInRoomList?.filter(item => item?.status === true)?.length + ' / ' + record?.slotInRoomList?.length
     },
     {
       title: 'Action',
@@ -559,28 +423,16 @@ export default function Venue() {
       render: (_: any, record: TableListItem) => {
         const items: MenuProps['items'] = [
           {
-            label: 'View theme list',
+            label: 'Add slot',
             key: '1',
             icon: <PrinterOutlined />,
-            onClick: () => handleOpenThemeDrawer(record)
-          },
-          {
-            label: 'View package list',
-            key: '2',
-            icon: <DropboxOutlined />,
-            onClick: () => handleOpenPackageDrawer(record)
-          },
-          {
-            label: 'View slot list',
-            key: '3',
-            icon: <SolutionOutlined />,
-            onClick: () => handleOpenSlotDrawer(record)
+            onClick: () => handleOpenSlotNotAddModal(record)
           },
           {
             label: record?.active ? (
-              <Typography style={{ color: 'red' }}>Disable venue</Typography>
+              <Typography style={{ color: 'red' }}>Disable room</Typography>
             ) : (
-              <Typography style={{ color: 'green' }}>Enable venue</Typography>
+              <Typography style={{ color: 'green' }}>Enable room</Typography>
             ),
             key: '4',
             icon: record?.active ? (
@@ -590,9 +442,9 @@ export default function Venue() {
             ),
             onClick: () => {
               if (record?.active) {
-                disableOneVenue(record?.id)
+                disableOneRoom({ roomId: record?.id })
               } else {
-                enableOneVenue(record?.id)
+                enableOneRoom({ roomId: record?.id })
               }
             }
           }
@@ -612,7 +464,7 @@ export default function Venue() {
       }
     }
   ]
-
+  console.log('venueId', JSON.stringify(venueId, null, 2))
   const items: DescriptionsProps['items'] = [
     {
       key: '1',
@@ -621,99 +473,8 @@ export default function Venue() {
         <Space>
           <Typography>{venue?.venueName || 'venue name'}</Typography>
           <Tooltip title={location}>
-            <a>{venue?.location || 'location'}</a>
+            <a>{venue?.ward || 'location'}</a>
           </Tooltip>
-        </Space>
-      )
-    },
-    {
-      key: '2',
-      label: 'Theme',
-      children: (
-        <Space direction='vertical'>
-          <ModalForm
-            title='Theme'
-            trigger={
-              <Button type='primary'>
-                <EyeOutlined />
-                View theme
-              </Button>
-            }
-            form={form}
-            autoFocusFirstInput
-            modalProps={{
-              destroyOnClose: true,
-              onCancel: () => console.log('run')
-            }}
-            submitTimeout={2000}
-            onFinish={async values => {
-              return true
-            }}
-          >
-            <ThemeInVenueDetail themeInVenue={partyBooking?.themeInVenue} />
-          </ModalForm>
-          {partyBooking?.status === 'PENDING' && (
-            <ModalForm
-              title='Change theme'
-              trigger={
-                <Button type='default'>
-                  <SwapOutlined />
-                  Change theme
-                </Button>
-              }
-              // form={form}
-              autoFocusFirstInput
-              modalProps={{
-                destroyOnClose: true,
-                onCancel: () => console.log('run')
-              }}
-              onFinish={async values => {
-                let result: boolean | undefined = false
-                if (typeof partyBooking?.id !== 'undefined') {
-                  result = await updateOneThemeInVenueInBooking({
-                    partyBookingId: partyBooking?.id,
-                    themeInVenueId: values?.themeInVenueId
-                  })
-                }
-
-                return result
-              }}
-            >
-              {themeInVenueNotChooseList?.length > 0 ? (
-                <ProFormRadio.Group
-                  name='themeInVenueId'
-                  layout='horizontal'
-                  // label='Industry Distribution'
-                  style={{ marginBottom: 10 }}
-                  options={themeInVenueNotChooseList?.map((item, index) => ({
-                    label: (
-                      <Card
-                        key={index}
-                        hoverable
-                        style={{ width: 200, marginBottom: 10 }}
-                        cover={
-                          <Image
-                            style={{
-                              width: '100%',
-                              height: 100,
-                              objectFit: 'cover'
-                            }}
-                            alt='example'
-                            src={item?.theme?.themeImgUrl}
-                          />
-                        }
-                      >
-                        <Card.Meta title={item?.theme?.themeName} />
-                      </Card>
-                    ),
-                    value: item?.id
-                  }))}
-                />
-              ) : (
-                <Empty style={{ margin: 'auto' }} />
-              )}
-            </ModalForm>
-          )}
         </Space>
       )
     },
@@ -760,12 +521,12 @@ export default function Venue() {
               }}
               onFinish={async values => {
                 let result: boolean | undefined = false
-                if (typeof partyBooking?.id !== 'undefined') {
-                  result = await updateOnePackageInVenueInBooking({
-                    partyBookingId: partyBooking?.id,
-                    packageInVenueId: values?.packageInVenueId
-                  })
-                }
+                // if (typeof partyBooking?.id !== 'undefined') {
+                //   result = await updateOnePackageInVenueInBooking({
+                //     partyBookingId: partyBooking?.id,
+                //     packageInVenueId: values?.packageInVenueId
+                //   })
+                // }
 
                 return result
               }}
@@ -958,18 +719,17 @@ export default function Venue() {
         headerTitle='Venue Management'
         options={false}
         toolBarRender={() => [
-          <Button key='refresh'>Refresh</Button>,
-          // <Button key='out'>
-          //   Download
-          //   <DownOutlined />
-          // </Button>,
+          <Button loading={loading} onClick={() => fetchAllRoom()} key='refresh'>
+            Refresh
+          </Button>,
+
           <ModalForm
-            loading={loadingCreateVenue}
-            title='Create A New Venue'
+            loading={loadingCreate || loading}
+            title='Create A New Room'
             trigger={
               <Button type='primary'>
                 <PlusOutlined />
-                Add new venue
+                Add new room
               </Button>
             }
             form={form}
@@ -979,28 +739,17 @@ export default function Venue() {
               onCancel: () => console.log('run')
             }}
             submitTimeout={2000}
-            onFinish={async ({
-              name,
-              description,
-              fileImg,
-              location,
-              capacity
-            }: {
-              name: string
-              description: string
-              fileImg: UploadFile[]
-              location: string
-              capacity: number
-            }) => {
-              console.log(name, description, location, capacity)
-              const result = createOneVenue({
-                venueName: name,
-                venueDescription: description,
-                fileImage: fileImg?.[0]?.originFileObj,
-                location: location,
-                capacity: capacity
-              })
-              return result
+            onFinish={async values => {
+              if (venueId !== null) {
+                const result = await createOneRoom({
+                  venueId,
+                  roomName: values.roomName,
+                  capacity: values.capacity,
+                  pricing: values.pricing,
+                  roomImgUrl: values.roomImgUrl?.[0]?.originFileObj
+                })
+                return result
+              }
             }}
             submitter={{
               searchConfig: {
@@ -1012,35 +761,28 @@ export default function Venue() {
             <ProFormText
               rules={[{ required: true, message: 'Please input this' }]}
               width='md'
-              name='name'
+              name='roomName'
               label='Name'
               // tooltip='Name is ok'
-              placeholder='Enter venue name'
-            />
-            <ProFormTextArea
-              rules={[{ required: true, message: 'Please input this' }]}
-              width='md'
-              name='description'
-              label='Description'
-              placeholder='Enter venue description'
-            />
-            <ProFormTextArea
-              rules={[{ required: true, message: 'Please input this' }]}
-              width='md'
-              name='location'
-              label='Location'
-              placeholder='Enter venue description'
+              placeholder='Enter room name'
             />
             <ProFormDigit
               width={328}
               rules={[{ required: true, message: 'Please input this' }]}
               name='capacity'
               label='Capacity'
-              placeholder='Enter venue capacity'
+              placeholder='Enter room capacity'
+            />
+            <ProFormDigit
+              width={328}
+              rules={[{ required: true, message: 'Please input this' }]}
+              name='pricing'
+              label='Pricing'
+              placeholder='Enter room pricing'
             />
             <ProFormUploadButton
               rules={[{ required: true, message: 'Please input this' }]}
-              name='fileImg'
+              name='roomImgUrl'
               label='Upload image'
               title='Upload'
               max={1}
@@ -1114,116 +856,104 @@ export default function Venue() {
         )}
         {loadingPartyBooking && <Skeleton style={{ height: 600 }} active={true} />}
       </DrawerForm>
-      <DrawerForm
-        title='Theme In Venue List'
-        resize={{
-          onResize() {
-            console.log('resize!')
-          },
-          maxWidth: window.innerWidth * 0.8,
-          minWidth: 1000
-        }}
-        form={form}
-        drawerProps={{
-          destroyOnClose: true
-        }}
-        submitTimeout={2000}
+      <ModalForm
+        title={`Venue: ${venue?.venueName} - Add new room`}
+        form={modalRoomForm}
+        width={500}
         onFinish={async values => {
-          // if (venueId !== null) {
-          //   const res = await createOneSlotInVenue({ venue_id: venueId, slot_id: values?.slotId })
-          //   return res
-          // }
-          return true
+          if (venueId !== null) {
+            const result = await createOneRoom({
+              venueId,
+              roomName: values.roomName,
+              capacity: values.capacity,
+              pricing: values.pricing,
+              roomImgUrl: values.roomImgUrl?.[0]?.originFileObj
+            })
+            return result
+          }
         }}
-        open={drawerThemeInVenuegVisit}
-        onOpenChange={setDrawerThemeInVenueVisit}
-        disabled={loadingCreateItemInVenueList}
+        open={modalRoomVisit}
+        onOpenChange={setModalRoomVisit}
+        disabled={false}
         submitter={{ searchConfig: { submitText: 'Submit', resetText: 'Cancel' } }}
       >
-        <Flex align='center' justify='space-between'>
-          <Typography.Title level={3}>{`Venue: ${venue?.venueName}`}</Typography.Title>
-          <ModalForm
-            title='Add new theme in venue'
-            trigger={
-              <Button type='primary'>
-                <PlusOutlined />
-                Add new theme in venue
-              </Button>
-            }
-            form={form}
-            autoFocusFirstInput
-            modalProps={{
-              destroyOnClose: true,
-              onCancel: () => console.log('run')
-            }}
-            onFinish={async values => {
-              let result = false
-              if (venueId !== null) {
-                result = await createThemeInVenueList({ venueId: venueId, payload: values?.themeIdList })
-              }
-              return result
-            }}
-          >
-            {themeNotAddList?.length > 0 ? (
-              <ProFormCheckbox.Group
-                name='themeIdList'
-                layout='horizontal'
-                // label='Industry Distribution'
-                style={{ marginBottom: 10 }}
-                options={themeNotAddList?.map((item, index) => ({
-                  label: (
-                    <Card
-                      key={index}
-                      hoverable
-                      style={{ width: 200, marginBottom: 10 }}
-                      cover={
-                        <Image
-                          style={{ width: '100%', height: 100, objectFit: 'cover' }}
-                          alt='example'
-                          src={item?.themeImgUrl}
-                        />
-                      }
-                    >
-                      <Meta title={item?.themeName} />
-                    </Card>
-                  ),
-                  value: item?.id
-                }))}
-              />
-            ) : (
-              <Empty style={{ margin: 'auto' }} />
-            )}
-          </ModalForm>
-        </Flex>
-        <Row gutter={[16, 16]}>
-          {themeInVenueList.length > 0 ? (
-            themeInVenueList.map((item, index) => {
-              return (
-                <Col span={8}>
-                  <Card
-                    hoverable
-                    style={{ width: '100%' }}
-                    cover={
-                      <Image
-                        style={{ width: '100%', height: 200, objectFit: 'cover' }}
-                        alt='example'
-                        src={item?.theme?.themeImgUrl}
-                      />
+        <ProFormText
+          rules={[{ required: true, message: 'Please input this' }]}
+          width='md'
+          name='roomName'
+          label='Name'
+          // tooltip='Name is ok'
+          placeholder='Enter room name'
+        />
+        <ProFormDigit
+          width={328}
+          rules={[{ required: true, message: 'Please input this' }]}
+          name='capacity'
+          label='Capacity'
+          placeholder='Enter room capacity'
+        />
+        <ProFormDigit
+          width={328}
+          rules={[{ required: true, message: 'Please input this' }]}
+          name='pricing'
+          label='Pricing'
+          placeholder='Enter room pricing'
+        />
+        <ProFormUploadButton
+          rules={[{ required: true, message: 'Please input this' }]}
+          name='roomImgUrl'
+          label='Upload image'
+          title='Upload'
+          max={1}
+          fieldProps={{
+            name: 'file',
+            listType: 'picture-card',
+            progress: { showInfo: false }
+          }}
+        />
+      </ModalForm>
+
+      <ModalForm
+        title={`${room?.roomName} = Add new slot`}
+        form={modalRoomForm}
+        autoFocusFirstInput
+        open={modalSlotNotAddVisit}
+        onOpenChange={setModalSlotNotAddVisit}
+        onFinish={async values => {
+          let result = false
+          if (room !== null) {
+            result = await createSlotInRoomList({ roomId: room?.id, payload: values?.slotList })
+          }
+          return result
+        }}
+      >
+        {slotNotAddList?.length > 0 ? (
+          <ProFormCheckbox.Group
+            name='slotList'
+            layout='horizontal'
+            // label='Industry Distribution'
+            style={{ marginBottom: 10 }}
+            options={slotNotAddList?.map((item, index) => ({
+              label: (
+                <Card key={index} hoverable style={{ width: 200, marginBottom: 10 }}>
+                  <Meta
+                    description={
+                      <Flex vertical gap={10}>
+                        <strong>Start time: </strong> <Typography>{item?.timeStart}</Typography>
+                        <strong>End time: </strong> <Typography>{item?.timeEnd}</Typography>
+                      </Flex>
                     }
-                  >
-                    <Space direction='vertical'>
-                      <Tag color={item?.active ? 'success' : 'error'}>{item?.active ? 'Active' : 'Inactive'}</Tag>
-                      <Meta title={item?.theme?.themeName} description={item?.theme?.themeDescription} />
-                    </Space>
-                  </Card>
-                </Col>
-              )
-            })
-          ) : (
-            <Empty style={{ margin: 'auto', marginTop: 20 }} />
-          )}
-        </Row>
-      </DrawerForm>
+                  />
+                </Card>
+              ),
+              value: item?.id
+            }))}
+          />
+        ) : (
+          <Empty style={{ margin: 'auto' }} />
+        )}
+      </ModalForm>
+
       <DrawerForm
         title='Package In Venue List'
         resize={{
@@ -1265,7 +995,7 @@ export default function Venue() {
             onFinish={async values => {
               let result = false
               if (venueId !== null) {
-                result = await createPackageInVenueList({ venueId: venueId, payload: values?.idList })
+                // result = await createPackageInVenueList({ venueId: venueId, payload: values?.idList })
               }
               return result
             }}
@@ -1345,104 +1075,126 @@ export default function Venue() {
           )}
         </Row>
       </DrawerForm>
-      <DrawerForm
-        title='Slot In Venue List'
-        resize={{
-          onResize() {
-            console.log('resize!')
-          },
-          maxWidth: window.innerWidth * 0.8,
-          minWidth: 1000
-        }}
-        form={form}
-        drawerProps={{
-          destroyOnClose: true
-        }}
-        submitTimeout={2000}
-        onFinish={async values => {
-          return true
-        }}
-        open={drawerSlotInVenueVisit}
-        onOpenChange={setDrawerslotInVenueVisit}
-        disabled={loadingCreateItemInVenueList}
-        submitter={{ searchConfig: { submitText: 'Submit', resetText: 'Cancel' } }}
-      >
-        <Flex align='center' justify='space-between'>
-          <Typography.Title level={3}>{`Venue: ${venue?.venueName}`}</Typography.Title>
-          <ModalForm
-            title='Add new slot in venue'
-            trigger={
-              <Button type='primary'>
-                <PlusOutlined />
-                Add new slot in venue
-              </Button>
-            }
-            form={form}
-            autoFocusFirstInput
-            modalProps={{
-              destroyOnClose: true,
-              onCancel: () => console.log('run')
-            }}
-            onFinish={async values => {
-              let result = false
-              if (venueId !== null) {
-                result = await createSlotInVenueList({ venueId: venueId, payload: values?.themeIdList })
-              }
-              return result
-            }}
-          >
-            {slotNotAddList?.length > 0 ? (
-              <ProFormCheckbox.Group
-                name='themeIdList'
-                layout='horizontal'
-                // label='Industry Distribution'
-                style={{ marginBottom: 10 }}
-                options={slotNotAddList?.map((item, index) => ({
-                  label: (
-                    <Card key={index} hoverable style={{ width: 200, marginBottom: 10 }}>
-                      <Meta
-                        description={
-                          <Flex vertical gap={10}>
-                            <strong>Start time: </strong> <Typography>{item?.timeStart}</Typography>
-                            <strong>End time: </strong> <Typography>{item?.timeEnd}</Typography>
-                          </Flex>
-                        }
-                      />
-                    </Card>
-                  ),
-                  value: item?.id
-                }))}
-              />
-            ) : (
-              <Empty style={{ margin: 'auto' }} />
-            )}
-          </ModalForm>
-        </Flex>
-        <Row gutter={[16, 16]}>
-          {slotInVenueList.length > 0 ? (
-            slotInVenueList.map((item, index) => {
-              return (
-                <Col key={index} span={8}>
-                  <Card hoverable style={{ width: '100%' }}>
-                    <Meta
-                      description={
-                        <Flex vertical gap={10}>
-                          <Flex vertical gap={10}>
-                            <strong>Start time: </strong> <Typography>{item?.slot?.timeStart}</Typography>
-                            <strong>End time: </strong> <Typography>{item?.slot?.timeEnd}</Typography>
-                          </Flex>
-                        </Flex>
-                      }
-                    />
-                  </Card>
-                </Col>
-              )
-            })
-          ) : (
-            <Empty style={{ margin: 'auto', marginTop: 20 }} />
-          )}
-        </Row>
-      </DrawerForm>
     </Fragment>
   )
+}
+export default Venue
+
+{
+  /* <ModalForm
+loading={loadingCreateVenue}
+title='Create A New Room'
+trigger={
+  <Button type='primary'>
+    <PlusOutlined />
+    Add new room
+  </Button>
+}
+form={form}
+autoFocusFirstInput
+modalProps={{
+  destroyOnClose: true,
+  onCancel: () => console.log('run')
+}}
+submitTimeout={2000}
+onFinish={async ({
+  name,
+  description,
+  fileImg,
+  street,
+  ward,
+  district,
+  city
+}: {
+  name: string
+  description: string
+  fileImg: UploadFile[]
+  street: string
+  ward: string
+  district: string
+  city: string
+}) => {
+  console.log(name, description, street, ward, district, city)
+  const result = createOneVenue({
+    venueName: name,
+    venueDescription: description,
+    fileImage: fileImg?.[0]?.originFileObj,
+    street,
+    ward,
+    district,
+    city
+  })
+  return result
+}}
+submitter={{
+  searchConfig: {
+    submitText: 'Submit',
+    resetText: 'Cancel'
+  }
+}}
+>
+<ProFormGroup>
+  <ProFormText
+    rules={[{ required: true, message: 'Please input this' }]}
+    width='md'
+    name='name'
+    label='Name'
+    // tooltip='Name is ok'
+    placeholder='Enter venue name'
+  />
+  <ProFormTextArea
+    rules={[{ required: true, message: 'Please input this' }]}
+    width='md'
+    name='description'
+    label='Description'
+    placeholder='Enter venue description'
+  />
+  <ProFormUploadButton
+    rules={[{ required: true, message: 'Please input this' }]}
+    name='fileImg'
+    label='Upload image'
+    title='Upload'
+    max={1}
+    fieldProps={{
+      name: 'file',
+      listType: 'picture-card',
+      progress: { showInfo: false }
+    }}
+  />
+</ProFormGroup>
+<ProFormGroup>
+  <ProFormText
+    rules={[{ required: true, message: 'Please input this' }]}
+    width='md'
+    name='street'
+    label='Street'
+    // tooltip='Name is ok'
+    placeholder='Enter venue street'
+  />
+  <ProFormText
+    rules={[{ required: true, message: 'Please input this' }]}
+    width='md'
+    name='ward'
+    label='Ward'
+    // tooltip='Name is ok'
+    placeholder='Enter venue ward'
+  />
+  <ProFormText
+    rules={[{ required: true, message: 'Please input this' }]}
+    width='md'
+    name='district'
+    label='District'
+    // tooltip='Name is ok'
+    placeholder='Enter venue district'
+  />
+  <ProFormText
+    rules={[{ required: true, message: 'Please input this' }]}
+    width='md'
+    name='city'
+    label='City'
+    // tooltip='Name is ok'
+    placeholder='Enter venue city'
+  />
+</ProFormGroup>
+</ModalForm> */
 }

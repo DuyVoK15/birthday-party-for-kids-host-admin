@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import {
   Button,
+  Flex,
   Form,
   Image,
   Input,
   InputNumber,
   Popconfirm,
+  Radio,
   Space,
   Table,
   Typography,
@@ -14,20 +16,23 @@ import {
   message
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import { ModalForm, ProFormDigit, ProFormText, ProFormTextArea, ProFormUploadButton } from '@ant-design/pro-components'
+import {
+  ModalForm,
+  ProFormDigit,
+  ProFormRadio,
+  ProFormText,
+  ProFormTextArea,
+  ProFormUploadButton
+} from '@ant-design/pro-components'
 import { useAppDispatch } from 'src/app/store'
 import { createService, deleteService, getAllService, updateService } from 'src/features/action/service.action'
 import { useAppSelector } from 'src/app/hooks'
 import { ServiceCreateRequest } from 'src/dtos/request/service.request'
+import { SERVICE_ENUM } from 'src/enums/service'
+import { ServiceDataResponse } from 'src/dtos/response/service.response'
 
-interface Item {
+interface Item extends ServiceDataResponse {
   key: string
-  id: number
-  serviceNumber: string
-  serviceName: string
-  serviceImgUrl: any
-  serviceDescription: string
-  pricing: number
 }
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
@@ -111,8 +116,9 @@ const Service: React.FC = () => {
           payload: {
             serviceName: row?.serviceName,
             serviceDescription: row?.serviceDescription || record?.serviceDescription,
-            fileImage: row?.serviceImgUrl?.file?.originFileObj,
-            pricing: String(row?.pricing)
+            fileImage: row?.serviceImgUrl?.[0]?.originFileObj,
+            pricing: String(row?.pricing),
+            serviceType: ''
           }
         }).then(() => {
           setEditingKey('')
@@ -145,7 +151,7 @@ const Service: React.FC = () => {
   const columns = [
     {
       title: 'Service No.',
-      dataIndex: 'serviceNumber',
+      dataIndex: 'key',
       width: '10%',
       editable: false
     },
@@ -167,7 +173,14 @@ const Service: React.FC = () => {
       width: '30%',
       editable: true,
       render: (_: any, record: Item) => {
-        return <Image style={{ borderRadius: 5, objectFit: 'cover' }} width={'100%'} height={200} src={record?.serviceImgUrl} />
+        return (
+          <Image
+            style={{ borderRadius: 5, objectFit: 'cover' }}
+            width={'100%'}
+            height={200}
+            src={record?.serviceImgUrl}
+          />
+        )
       }
     },
     {
@@ -229,15 +242,10 @@ const Service: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    serviceList?.map((item: any, index: number) => {
+    serviceList?.map((item: ServiceDataResponse, index: number) => {
       serviceListView.push({
-        key: index.toString(),
-        id: item?.id,
-        serviceNumber: (index + 1).toString(),
-        serviceName: item?.serviceName,
-        serviceImgUrl: item?.serviceImgUrl,
-        serviceDescription: item?.serviceDescription,
-        pricing: item?.pricing
+        key: (index + 1).toString(),
+        ...item
       })
     })
     setData(serviceListView)
@@ -245,21 +253,17 @@ const Service: React.FC = () => {
 
   const createOneService = async (payload: ServiceCreateRequest) => {
     let isCloseModal = false
-    await dispatch(
-      createService({
-        fileImage: payload.fileImage,
-        serviceName: payload.serviceName,
-        serviceDescription: payload.serviceDescription,
-        pricing: payload.pricing
-      })
-    ).then(async res => {
+    await dispatch(createService(payload)).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
         await fetchAllService().then(res => {
           if (res?.meta?.requestStatus === 'fulfilled') {
             message.success('Create service success!')
+            form.resetFields()
             isCloseModal = true
           }
         })
+      } else {
+        message.error(`Error when create service! ${res.payload?.message ?? ''}`)
       }
     })
     return isCloseModal
@@ -285,106 +289,144 @@ const Service: React.FC = () => {
     })
   }
 
+  const [type, setType] = useState<SERVICE_ENUM>(SERVICE_ENUM.ALL)
+
   return (
-    <Form form={form} component={false}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <ModalForm
-          loading={loading}
-          title='Create A New Service'
-          trigger={
-            <Button type='primary'>
-              <PlusOutlined />
-              Add new service
+    <React.Fragment>
+      <Form form={form} component={false}>
+        <Flex justify='space-between'>
+          <Radio.Group
+            value={type}
+            onChange={e => {
+              setType(e.target.value)
+            }}
+            size='middle'
+          >
+            <Radio.Button value={SERVICE_ENUM.ALL}>All</Radio.Button>
+            <Radio.Button value={SERVICE_ENUM.DECORATION}>Decor</Radio.Button>
+            <Radio.Button value={SERVICE_ENUM.FOOD}>Food</Radio.Button>
+          </Radio.Group>
+          <Flex gap={10}>
+            <Button loading={loading} onClick={() => fetchAllService()}>
+              Refresh
             </Button>
-          }
-          form={formModal}
-          autoFocusFirstInput
-          modalProps={{
-            destroyOnClose: true,
-            onCancel: () => console.log('run')
-          }}
-          submitTimeout={2000}
-          onFinish={async ({
-            name,
-            description,
-            fileImg,
-            pricing
-          }: {
-            name: string
-            description: string
-            fileImg: UploadFile[]
-            pricing: string
-          }) => {
-            console.log({ name, description, fileImg, pricing })
-            const isCloseModal = createOne({
-              serviceName: name,
-              serviceDescription: description,
-              fileImage: fileImg?.[0]?.originFileObj,
-              pricing: pricing
-            })
-            return isCloseModal
-          }}
-          submitter={{
-            searchConfig: {
-              submitText: 'Submit',
-              resetText: 'Cancel'
+            <ModalForm
+              loading={loading}
+              title='Create A New Service'
+              trigger={
+                <Button type='primary'>
+                  <PlusOutlined />
+                  Add new service
+                </Button>
+              }
+              form={formModal}
+              autoFocusFirstInput
+              modalProps={{
+                destroyOnClose: true,
+                onCancel: () => console.log('run')
+              }}
+              submitTimeout={2000}
+              onFinish={async ({
+                name,
+                description,
+                fileImg,
+                pricing,
+                serviceType
+              }: {
+                name: string
+                description: string
+                fileImg: UploadFile[]
+                pricing: string
+                serviceType: string
+              }) => {
+                console.log({ name, description, fileImg, pricing })
+                const isCloseModal = createOne({
+                  serviceName: name,
+                  serviceDescription: description,
+                  fileImage: fileImg?.[0]?.originFileObj,
+                  pricing: pricing,
+                  serviceType: serviceType
+                })
+                return isCloseModal
+              }}
+              submitter={{
+                searchConfig: {
+                  submitText: 'Submit',
+                  resetText: 'Cancel'
+                }
+              }}
+            >
+              <ProFormRadio.Group
+                rules={[{ required: true, message: 'Please input this' }]}
+                name='serviceType'
+                label='Service type'
+                options={[
+                  {
+                    label: 'Decoration',
+                    value: SERVICE_ENUM.DECORATION
+                  },
+                  {
+                    label: 'Food',
+                    value: SERVICE_ENUM.FOOD
+                  }
+                ]}
+              />
+              <ProFormText
+                rules={[{ required: true, message: 'Please input this' }]}
+                width='md'
+                name='name'
+                label='Name'
+                tooltip='Name is ok'
+                placeholder='Enter service name'
+              />
+              <ProFormTextArea
+                rules={[{ required: true, message: 'Please input this' }]}
+                width='md'
+                name='description'
+                label='Description'
+                placeholder='Enter service description'
+              />
+              <ProFormDigit
+                width={328}
+                rules={[{ required: true, message: 'Please input this' }]}
+                name='pricing'
+                label='Pricing'
+                placeholder='Enter service pricing'
+              />
+              <ProFormUploadButton
+                rules={[{ required: true, message: 'Please input this' }]}
+                name='fileImg'
+                label='Upload image'
+                title='Upload'
+                max={1}
+                fieldProps={{
+                  name: 'file',
+                  listType: 'picture-card',
+                  progress: { showInfo: false }
+                }}
+              />
+            </ModalForm>
+          </Flex>
+        </Flex>
+        <Table
+          style={{ marginTop: 10 }}
+          loading={loading}
+          components={{
+            body: {
+              cell: EditableCell
             }
           }}
-        >
-          <ProFormText
-            rules={[{ required: true, message: 'Please input this' }]}
-            width='md'
-            name='name'
-            label='Name'
-            tooltip='Name is ok'
-            placeholder='Enter service name'
-          />
-          <ProFormTextArea
-            rules={[{ required: true, message: 'Please input this' }]}
-            width='md'
-            name='description'
-            label='Description'
-            placeholder='Enter service description'
-          />
-          <ProFormDigit
-            width={328}
-            rules={[{ required: true, message: 'Please input this' }]}
-            name='pricing'
-            label='Pricing'
-            placeholder='Enter service pricing'
-          />
-          <ProFormUploadButton
-            rules={[{ required: true, message: 'Please input this' }]}
-            name='fileImg'
-            label='Upload image'
-            title='Upload'
-            max={1}
-            fieldProps={{
-              name: 'file',
-              listType: 'picture-card',
-              progress: { showInfo: false }
-            }}
-          />
-        </ModalForm>
-      </div>
-      <Table
-        style={{ marginTop: 10 }}
-        loading={loading}
-        components={{
-          body: {
-            cell: EditableCell
-          }
-        }}
-        bordered
-        dataSource={data}
-        columns={mergedColumns}
-        rowClassName='editable-row'
-        pagination={{
-          onChange: cancel,
-          pageSize: 5
-        }}
-      />
-    </Form>
+          bordered
+          dataSource={data}
+          columns={mergedColumns}
+          rowClassName='editable-row'
+          pagination={{
+            onChange: cancel,
+            pageSize: 5
+          }}
+        />
+      </Form>
+    </React.Fragment>
   )
 }
 
