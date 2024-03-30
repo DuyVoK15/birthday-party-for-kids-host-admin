@@ -8,4 +8,5 @@ export interface PackageCreateRequest {
   packageDescription: string
   percent: number
   packageServiceRequests: PackageServiceRequest[] | []
+  packageType: string
 }
