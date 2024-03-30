@@ -63,3 +63,23 @@ export const deleteService = createAsyncThunk('service/deleteService', async (id
     return rejectWithValue(axiosError.response?.data)
   }
 })
+export const enableService = createAsyncThunk('service/enableService', async (id: number, { rejectWithValue }) => {
+  try {
+    const response = await serviceService.enableService(id)
+    return response.data
+  } catch (error: any) {
+    const axiosError = error as AxiosError
+    console.log(axiosError)
+    return rejectWithValue(axiosError.response?.data)
+  }
+})
+export const disableService = createAsyncThunk('service/disableService', async (id: number, { rejectWithValue }) => {
+  try {
+    const response = await serviceService.disableService(id)
+    return response.data
+  } catch (error: any) {
+    const axiosError = error as AxiosError
+    console.log(axiosError)
+    return rejectWithValue(axiosError.response?.data)
+  }
+})

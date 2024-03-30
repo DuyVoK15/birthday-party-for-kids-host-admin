@@ -53,9 +53,9 @@ export const updateSlot = createAsyncThunk(
   }
 )
 
-export const deleteSlot = createAsyncThunk('slot/deleteSlot', async (id: number, { rejectWithValue }) => {
+export const enableSlot = createAsyncThunk('slot/enableSlot', async (id: number, { rejectWithValue }) => {
   try {
-    const response = await slotService.deleteSlot(id)
+    const response = await slotService.enableSlot(id)
     return response.data
   } catch (error: any) {
     const axiosError = error as AxiosError
@@ -64,30 +64,35 @@ export const deleteSlot = createAsyncThunk('slot/deleteSlot', async (id: number,
   }
 })
 
-export const enableSlotInVenueById = createAsyncThunk(
-  'slot/enableSlotInVenueById',
-  async (id: number, { rejectWithValue }) => {
-    try {
-      const response = await slotService.enableSlotInVenueById(id)
-      return response.data
-    } catch (error: any) {
-      const axiosError = error as AxiosError
-      console.log(axiosError)
-      return rejectWithValue(axiosError.response?.data)
-    }
+export const disableSlot = createAsyncThunk('slot/disableSlot', async (id: number, { rejectWithValue }) => {
+  try {
+    const response = await slotService.disableSlot(id)
+    return response.data
+  } catch (error: any) {
+    const axiosError = error as AxiosError
+    console.log(axiosError)
+    return rejectWithValue(axiosError.response?.data)
   }
-)
+})
 
-export const disableSlotInVenueById = createAsyncThunk(
-  'slot/disableSlotInVenueById',
-  async (id: number, { rejectWithValue }) => {
-    try {
-      const response = await slotService.disableSlotInVenueById(id)
-      return response.data
-    } catch (error: any) {
-      const axiosError = error as AxiosError
-      console.log(axiosError)
-      return rejectWithValue(axiosError.response?.data)
-    }
+export const enableSlotInRoom = createAsyncThunk('slot/enableSlotInRoom', async (id: number, { rejectWithValue }) => {
+  try {
+    const response = await slotService.enableSlotInRoom(id)
+    return response.data
+  } catch (error: any) {
+    const axiosError = error as AxiosError
+    console.log(axiosError)
+    return rejectWithValue(axiosError.response?.data)
   }
-)
+})
+
+export const disableSlotInRoom = createAsyncThunk('slot/disableSlotInRoom', async (id: number, { rejectWithValue }) => {
+  try {
+    const response = await slotService.disableSlotInRoom(id)
+    return response.data
+  } catch (error: any) {
+    const axiosError = error as AxiosError
+    console.log(axiosError)
+    return rejectWithValue(axiosError.response?.data)
+  }
+})

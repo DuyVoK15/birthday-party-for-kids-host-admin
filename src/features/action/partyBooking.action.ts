@@ -2,17 +2,21 @@ import { createAsyncThunk } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
 import { partyBookingService } from 'src/services/partyBooking.service'
 
-export const updateThemeInVenueInBooking = createAsyncThunk(
-  'partyBooking/updateThemeInVenueInBooking',
-  async (
-    payload: {
-      partyBookingId: number
-      themeInVenueId: number
-    },
-    { rejectWithValue }
-  ) => {
+export const getAllBooking = createAsyncThunk('partyBooking/getAllBooking', async (_, { rejectWithValue }) => {
+  try {
+    const response = await partyBookingService.getAllBooking()
+    return response.data
+  } catch (error: any) {
+    const axiosError = error as AxiosError
+    console.log(axiosError)
+    return rejectWithValue(axiosError.response?.data)
+  }
+})
+export const getBookingById = createAsyncThunk(
+  'partyBooking/getBookingById',
+  async (id: number, { rejectWithValue }) => {
     try {
-      const response = await partyBookingService.updateThemeInVenueInBooking(payload)
+      const response = await partyBookingService.getBookingById(id)
       return response.data
     } catch (error: any) {
       const axiosError = error as AxiosError
@@ -21,18 +25,11 @@ export const updateThemeInVenueInBooking = createAsyncThunk(
     }
   }
 )
-
-export const updatePackageInVenueInBooking = createAsyncThunk(
-  'partyBooking/updatePackageInVenueInBooking',
-  async (
-    payload: {
-      partyBookingId: number
-      packageInVenueId: number
-    },
-    { rejectWithValue }
-  ) => {
+export const getAllBookingCompleted = createAsyncThunk(
+  'partyBooking/getAllBookingCompleted',
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await partyBookingService.updatePackageInVenueInBooking(payload)
+      const response = await partyBookingService.getAllBookingCompleted()
       return response.data
     } catch (error: any) {
       const axiosError = error as AxiosError

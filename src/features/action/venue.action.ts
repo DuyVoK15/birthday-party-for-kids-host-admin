@@ -21,9 +21,9 @@ export const getAllVenue = createAsyncThunk('venue/getAllVenue', async (_, { rej
 
 export const getAllVenueCheckSlotByDate = createAsyncThunk(
   'venue/getAllVenueCheckSlotByDate',
-  async (date: string | null, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await venueService.getAllVenueCheckSlotByDate(date)
+      const response = await venueService.getAllVenueCheckSlotByDate()
       return response.data
     } catch (error) {
       const axiosError = error as AxiosError
@@ -84,20 +84,6 @@ export const createVenue = createAsyncThunk(
   }
 )
 
-export const createSlotInVenue = createAsyncThunk(
-  'venue/createSlotInVenue',
-  async (payload: { venue_id: number; slot_id: number }, { rejectWithValue }) => {
-    try {
-      const response = await venueService.createSlotInVenue(payload)
-      return response.data
-    } catch (error) {
-      const axiosError = error as AxiosError
-      console.log(axiosError)
-      return rejectWithValue(axiosError.response?.data)
-    }
-  }
-)
-
 export const getPartyBookingByPartyDateId = createAsyncThunk(
   'venue/getPartyBookingByPartyDateId',
   async (id: number, { rejectWithValue }) => {
@@ -112,67 +98,11 @@ export const getPartyBookingByPartyDateId = createAsyncThunk(
   }
 )
 
-export const getAllThemeInVenueByVenueId = createAsyncThunk(
-  'venue/getAllThemeInVenueByVenueId',
-  async (id: number, { rejectWithValue }) => {
-    try {
-      const response = await venueService.getAllThemeInVenueByVenueId(id)
-      return response.data
-    } catch (error) {
-      const axiosError = error as AxiosError
-      console.log(axiosError)
-      return rejectWithValue(axiosError.response?.data)
-    }
-  }
-)
-
-export const getAllPackageInVenueByVenueId = createAsyncThunk(
-  'venue/getAllPackageInVenueByVenueId',
-  async (id: number, { rejectWithValue }) => {
-    try {
-      const response = await venueService.getAllPackageInVenueByVenueId(id)
-      return response.data
-    } catch (error) {
-      const axiosError = error as AxiosError
-      console.log(axiosError)
-      return rejectWithValue(axiosError.response?.data)
-    }
-  }
-)
-
 export const createThemeInVenueListByVenueId = createAsyncThunk(
   'venue/createThemeInVenueListByVenueId',
   async (request: ItemInVenueListCreateRequest, { rejectWithValue }) => {
     try {
       const response = await themeService.createThemeInVenueListByVenueId(request)
-      return response.data
-    } catch (error) {
-      const axiosError = error as AxiosError
-      console.log(axiosError)
-      return rejectWithValue(axiosError.response?.data)
-    }
-  }
-)
-
-export const getAllSlotInVenueByVenueId = createAsyncThunk(
-  'venue/getAllSlotInVenueByVenueId',
-  async (id: number, { rejectWithValue }) => {
-    try {
-      const response = await venueService.getAllSlotInVenueByVenueId(id)
-      return response.data
-    } catch (error) {
-      const axiosError = error as AxiosError
-      console.log(axiosError)
-      return rejectWithValue(axiosError.response?.data)
-    }
-  }
-)
-
-export const createPackageInVenueListByVenueId = createAsyncThunk(
-  'venue/createPackageInVenueListByVenueId',
-  async (request: ItemInVenueListCreateRequest, { rejectWithValue }) => {
-    try {
-      const response = await packageService.createPackageInVenueListByVenueId(request)
       return response.data
     } catch (error) {
       const axiosError = error as AxiosError
