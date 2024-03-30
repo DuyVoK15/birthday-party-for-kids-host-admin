@@ -5,18 +5,21 @@ export interface SlotDataResponse {
   timeStart: string
   timeEnd: string
   validTimeRange: boolean
+  account: []
   active: boolean
 }
-export interface SlotInVenueDataResponse {
+export interface SlotInRoomDataResponse {
+  slotInRoomList: any
   id: number
   active: boolean
   status: boolean
   slot: SlotDataResponse
-  partyDated: PartyDatedDataResponse
 }
 
-export interface SlotInVenueArrayResponse {
-  data: SlotInVenueDataResponse[] | []
+export interface SlotInRoomArrayResponse {
+  status: string
+  message: string
+  data: SlotInRoomDataResponse[] | []
 }
 
 export interface SlotNotAddArrayResponse {
