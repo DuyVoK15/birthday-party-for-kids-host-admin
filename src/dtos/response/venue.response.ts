@@ -1,17 +1,34 @@
-import { SlotInVenueDataResponse } from './slot.response'
+import { RoomDataResponse } from './room.response'
 
-export interface VenueResponse {
-  id: number
-  venueName: string
-  venueDescription: string
-  venueImgUrl: string
-  location: string
-  capacity: number
-  slotInVenueList: SlotInVenueDataResponse[] | []
-  active: boolean
+export interface VenueDataResponse {
+  id: number | null
+  createAt: string | null
+  updateAt: string | null
+  deleteAt: string | null
+  venueName: string | null
+  venueDescription: string | null
+  venueImgUrl: string | null
+  street: string | null
+  ward: string | null
+  district: string | null
+  city: string | null
+  active: boolean | null
+  roomList: RoomDataResponse[] | []
+  account: []
 }
-export interface VenueCheckSlotByDateResponse {
-  status: string
-  message: string
-  data: VenueResponse[] | []
+
+export interface VenueArrayResponse {
+  status: string | null
+  message: string | null
+  data: VenueDataResponse[] | []
+}
+export interface VenueObjectResponse {
+  status: string | null
+  message: string | null
+  data: VenueDataResponse
+}
+export interface VenueArrayResponse {
+  status: string | null
+  message: string | null
+  data: VenueDataResponse[] | []
 }
