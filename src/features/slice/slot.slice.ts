@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { createSlot, deleteSlot, getAllSlot, getSlotById, updateSlot } from '../action/slot.action'
+import { createSlot, getAllSlot, getSlotById, updateSlot } from '../action/slot.action'
 
 interface AuthState {
   slotReponse: any
@@ -70,15 +70,7 @@ export const slotSlice = createSlice({
         state.loading = false
       })
       //
-      .addCase(deleteSlot.pending, (state, action) => {
-        state.loading = true
-      })
-      .addCase(deleteSlot.fulfilled, (state, action) => {
-        state.loading = false
-      })
-      .addCase(deleteSlot.rejected, (state, action) => {
-        state.loading = false
-      })
+  
     //
   }
 })
