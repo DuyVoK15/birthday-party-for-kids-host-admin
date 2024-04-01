@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
 import { packageService } from 'src/services/package.service'
-import { PackageCreateRequest } from 'src/dtos/request/package.request'
+import { PackageCreateRequest, PackageUpdateRequest } from 'src/dtos/request/package.request'
 
 export const getAllPackage = createAsyncThunk('package/getAllPackage', async (_, { rejectWithValue }) => {
   try {
@@ -41,7 +41,7 @@ export const createPackage = createAsyncThunk(
 
 export const updatePackage = createAsyncThunk(
   'package/updatePackage',
-  async (request: { id: number; payload: PackageCreateRequest }, { rejectWithValue }) => {
+  async (request: { id: number; payload: PackageUpdateRequest }, { rejectWithValue }) => {
     try {
       const response = await packageService.updatePackage(request)
       return response.data

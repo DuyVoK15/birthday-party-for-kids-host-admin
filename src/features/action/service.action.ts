@@ -1,18 +1,21 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
 import { serviceService } from 'src/services/service.service'
-import { ServiceCreateRequest } from 'src/dtos/request/service.request'
+import { FilterServiceRequest, ServiceCreateRequest } from 'src/dtos/request/service.request'
 
-export const getAllService = createAsyncThunk('service/getAllService', async (_, { rejectWithValue }) => {
-  try {
-    const response = await serviceService.getAllService()
-    return response.data
-  } catch (error: any) {
-    const axiosError = error as AxiosError
-    console.log(axiosError)
-    return rejectWithValue(axiosError.response?.data)
+export const getAllService = createAsyncThunk(
+  'service/getAllService',
+  async (payload: { filter?: FilterServiceRequest }, { rejectWithValue }) => {
+    try {
+      const response = await serviceService.getAllService(payload)
+      return response.data
+    } catch (error: any) {
+      const axiosError = error as AxiosError
+      console.log(axiosError)
+      return rejectWithValue(axiosError.response?.data)
+    }
   }
-})
+)
 
 export const getServiceById = createAsyncThunk('service/getServiceById', async (id: number, { rejectWithValue }) => {
   try {
