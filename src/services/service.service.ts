@@ -1,12 +1,12 @@
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
 import { headerFormData } from './axiosClient/headerConstant'
-import { ServiceCreateRequest } from 'src/dtos/request/service.request'
+import { FilterServiceRequest, ServiceCreateRequest } from 'src/dtos/request/service.request'
 
 export const serviceService = {
-  getAllService: (): Promise<AxiosResponse<any>> => {
+  getAllService: (payload: { filter?: FilterServiceRequest }): Promise<AxiosResponse<any>> => {
     const url = `/api/services/getAll-service-for-host`
-    return axiosClient.get(url)
+    return axiosClient.get(url, { params: payload.filter })
   },
   getServiceById: (id: number): Promise<AxiosResponse<any>> => {
     const url = `/api/services/get-services-id-for-host/${id}`

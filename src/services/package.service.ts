@@ -1,8 +1,6 @@
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
-import { PackageCreateRequest } from 'src/dtos/request/package.request'
-import { ItemInVenueListCreateRequest } from 'src/dtos/request/theme.request'
-import { PackageInVenueArrayResponse } from 'src/dtos/response/package.response'
+import { PackageCreateRequest, PackageUpdateRequest } from 'src/dtos/request/package.request'
 
 export const packageService = {
   getAllPackage: (): Promise<AxiosResponse<any>> => {
@@ -25,14 +23,14 @@ export const packageService = {
 
     return axiosClient.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
-  updatePackage: (request: { id: number; payload: PackageCreateRequest }): Promise<AxiosResponse<any>> => {
+  updatePackage: (request: { id: number; payload: PackageUpdateRequest }): Promise<AxiosResponse<any>> => {
     const url = `/api/package/update-package/${request.id}`
     const formData = new FormData()
     formData.append('fileImg', request.payload.fileImage)
     formData.append('packageName', request.payload.packageName)
     formData.append('packageDescription', request.payload.packageDescription)
-    formData.append('packageServiceRequests', JSON.stringify(request.payload.packageServiceRequests))
-    formData.append('packageType', request.payload.packageType)
+    // formData.append('packageServiceRequests', JSON.stringify(request.payload.packageServiceRequests))
+    // formData.append('packageType', request.payload.packageType)
 
     return axiosClient.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
   },

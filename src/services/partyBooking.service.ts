@@ -1,16 +1,18 @@
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
+import { PartyBookingArrayResponse, PartyBookingObjectResponse } from 'src/dtos/response/partyBooking.response'
+import { FilterBoookingRequest } from 'src/dtos/request/partyBooking.request'
 
 export const partyBookingService = {
-  getAllBooking: (): Promise<AxiosResponse<any>> => {
+  getAllBooking: (request: { filter?: FilterBoookingRequest }): Promise<AxiosResponse<PartyBookingArrayResponse>> => {
     const url = `/api/party-booking/get-all-party-booking-for-host`
-    return axiosClient.get(url)
+    return axiosClient.get(url, { params: request.filter })
   },
-  getBookingById: (id: number): Promise<AxiosResponse<any>> => {
+  getBookingById: (id: number): Promise<AxiosResponse<PartyBookingObjectResponse>> => {
     const url = `/api/party-booking/get-by-id-for-host/${id}`
     return axiosClient.get(url)
   },
-  getAllBookingCompleted: (): Promise<AxiosResponse<any>> => {
+  getAllBookingCompleted: (): Promise<AxiosResponse<PartyBookingArrayResponse>> => {
     const url = `/api/party-booking/get-all-completed`
     return axiosClient.get(url)
   },
