@@ -1,13 +1,17 @@
-import { ServiceDataResponse } from "./service.response"
+import { ServiceDataResponse } from './service.response'
+import { VenueDataResponse } from './venue.response'
 
 export interface PackageDataResponse {
   id: number
   packageName: string
   packageDescription: string
   packageImgUrl: string
+  packageType: string
+  percent: number
   pricing: number
   packageServiceList: PackageServiceDataResponse[] | []
   active: boolean
+  venue: VenueDataResponse
 }
 
 export interface PackageServiceDataResponse {
@@ -15,23 +19,17 @@ export interface PackageServiceDataResponse {
   count: number
   pricing: number
   active: boolean
-  services: ServiceDataResponse;
+  services: ServiceDataResponse
 }
 
-export interface PackageInVenueDataResponse {
-  id: number
-  active: boolean
-  apackage: PackageDataResponse
-}
-
-export interface PackageInVenueArrayResponse {
-  data: PackageInVenueDataResponse[] | []
-}
-
-export interface PackageInVenueObjectResponse {
-  data: PackageInVenueDataResponse
-}
-
-export interface PackageNotAddArrayResponse {
+export interface PackageArrayResponse {
+  status: string
+  message: string
   data: PackageDataResponse[] | []
+}
+
+export interface PackageObjectResponse {
+  status: string
+  message: string
+  data: PackageDataResponse
 }

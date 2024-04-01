@@ -9,7 +9,6 @@ export interface SlotDataResponse {
   active: boolean
 }
 export interface SlotInRoomDataResponse {
-  slotInRoomList: any
   id: number
   active: boolean
   status: boolean

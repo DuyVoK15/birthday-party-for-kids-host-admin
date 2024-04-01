@@ -1,30 +1,44 @@
+import { PARTY_BOOKING_STATUS } from 'src/enums/partyBooking'
 import { AccountDataResponse } from './auth.response'
-import { PackageInVenueDataResponse } from './package.response'
+import { PackageDataResponse } from './package.response'
 import { PartyDatedDataResponse } from './partyDated.response'
-import { SlotInVenueDataResponse } from './slot.response'
+import { SlotInRoomDataResponse } from './slot.response'
 import { ThemeInVenueDataResponse } from './theme.response'
+import { UpgradeServiceDataResponse } from './upgradeService.response'
+import { VenueDataResponse } from './venue.response'
 
-export interface PartyBookingDataResponse {
+export interface PackageInBookingDataResponse {
   id: number
-  kidName: string
-  kidDOB: string
-  email: string
-  phone: string
-  status: string
-  upgradeServices: []
-  partyDated: PartyDatedDataResponse
-  packageInVenue: PackageInVenueDataResponse
-  themeInVenue: ThemeInVenueDataResponse
-  slotInVenueObject: SlotInVenueDataResponse
-  account: AccountDataResponse
-  paymentList: []
-  review: any;
-  isPayment: boolean
-  active: boolean
-  pricingTotal: number
   createAt: string
   updateAt: string
   deleteAt: string
+  apackage: PackageDataResponse
+}
+
+export interface PartyBookingDataResponse {
+  id: number
+  createAt: string
+  updateAt: string
+  deleteAt: string
+  kidName: string
+  kidDOB: string
+  reservationAgent: string
+  email: string
+  phone: string
+  status: PARTY_BOOKING_STATUS
+  participantAmount: number
+  date: string
+  account: AccountDataResponse
+  upgradeServices: UpgradeServiceDataResponse[] | []
+  packageInBookings: PackageInBookingDataResponse[] | []
+  review: any
+  slotInRoom: SlotInRoomDataResponse
+  active: boolean
+  venueObject: VenueDataResponse
+  isPayment: boolean
+  pricingTotal: number
+  remainingMoney: number
+  deposit: number
 }
 
 export interface PartyBookingObjectResponse {
@@ -33,7 +47,7 @@ export interface PartyBookingObjectResponse {
   data: PartyBookingDataResponse
 }
 
-export interface PartyBookingResponse {
+export interface PartyBookingArrayResponse {
   status: string
   message: string
   data: PartyBookingDataResponse[] | []
