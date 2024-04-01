@@ -55,6 +55,7 @@ import {
 import { RoomDataResponse } from 'src/dtos/response/room.response'
 import { SlotInRoomDataResponse } from 'src/dtos/response/slot.response'
 import { VenueDataResponse } from 'src/dtos/response/venue.response'
+import { PARTY_BOOKING_STATUS } from 'src/enums/partyBooking'
 import { cancelBooking, completeBooking } from 'src/features/action/partyBooking.action'
 import {
   createRoom,
@@ -77,7 +78,6 @@ export interface TableListItem extends RoomDataResponse {
 }
 
 export interface ExpandedRowTable extends SlotInRoomDataResponse {
-  slotInRoomList: any
   key: string
   inUseInTotal: string
 }
@@ -148,7 +148,6 @@ const Venue: React.FC = () => {
   const loadingCreateItemInVenueList = useAppSelector(state => state.venueReducer.loadingCreateItemInVenueList)
   const partyBooking = useAppSelector(state => state.venueReducer.partyBooking)
   const packageInVenueList = useAppSelector(state => state.venueReducer.packageInVenueList)
-  const packageInVenueNotChooseList = useAppSelector(state => state.packageReducer.packageInVenueNotChooseList)
 
   const fetchVenue = async () => {
     const res = await dispatch(getAllVenueCheckSlotByDate())
@@ -242,7 +241,6 @@ const Venue: React.FC = () => {
     }
   }
 
-
   const completeOneBooking = async (id: number) => {
     const res = await dispatch(completeBooking(id))
     if (res?.meta?.requestStatus === 'fulfilled') {
@@ -297,7 +295,7 @@ const Venue: React.FC = () => {
       data.push({
         ...obj,
         key: (index + 1).toString(),
-        inUseInTotal: obj?.slotInRoomList?.length.toString()
+        inUseInTotal: record?.slotInRoomList?.length.toString()
       })
     })
 
@@ -336,22 +334,22 @@ const Venue: React.FC = () => {
                   onClick: () => null
                 },
                 {
-                  label: record?.active ? (
+                  label: recordChild?.active ? (
                     <Typography style={{ color: 'red' }}>Disable slot</Typography>
                   ) : (
                     <Typography style={{ color: 'green' }}>Enable slot</Typography>
                   ),
                   key: '4',
-                  icon: record?.active ? (
+                  icon: recordChild?.active ? (
                     <CloseOutlined style={{ color: 'red' }} />
                   ) : (
                     <CheckOutlined style={{ color: 'green' }} />
                   ),
                   onClick: () => {
-                    if (record?.active) {
-                      disableOneSlotInRoom(record?.id)
+                    if (recordChild?.active) {
+                      disableOneSlotInRoom(recordChild?.id)
                     } else {
-                      enableOneSlotInRoom(record?.id)
+                      enableOneSlotInRoom(recordChild?.id)
                     }
                   }
                 }
@@ -501,10 +499,10 @@ const Venue: React.FC = () => {
               return true
             }}
           >
-            <PackageInVenueDetail packageInVenue={partyBooking?.packageInVenue} />
+            <PackageInVenueDetail packageInVenue={null} />
           </ModalForm>
 
-          {partyBooking?.status === 'PENDING' && partyBooking?.isPayment === false && (
+          {partyBooking?.status === PARTY_BOOKING_STATUS.PENDING && partyBooking?.isPayment === false && (
             <ModalForm
               title='Package'
               trigger={
@@ -531,7 +529,7 @@ const Venue: React.FC = () => {
                 return result
               }}
             >
-              {packageInVenueNotChooseList?.length > 0 ? (
+              {/* {packageInVenueNotChooseList?.length > 0 ? (
                 <ProFormRadio.Group
                   name='packageInVenueId'
                   layout='horizontal'
@@ -576,7 +574,7 @@ const Venue: React.FC = () => {
                 />
               ) : (
                 <Empty style={{ margin: 'auto' }} />
-              )}
+              )} */}
             </ModalForm>
           )}
         </Space>
@@ -590,12 +588,12 @@ const Venue: React.FC = () => {
     {
       key: '5',
       label: 'Usage Time',
-      children: partyBooking?.partyDated?.date + ' at ' + partyBooking?.slotInVenueObject?.slot?.timeStart
+      children: ''
     },
     {
       key: '100',
       label: 'Finish Time',
-      children: partyBooking?.partyDated?.date + ' at ' + partyBooking?.slotInVenueObject?.slot?.timeEnd
+      children: ''
     },
     {
       key: '6',
@@ -604,11 +602,11 @@ const Venue: React.FC = () => {
       children: (
         <Badge
           status={
-            partyBooking?.status === 'PENDING'
+            partyBooking?.status === PARTY_BOOKING_STATUS.PENDING
               ? 'processing'
-              : partyBooking?.status === 'CANCELLED'
+              : partyBooking?.status === PARTY_BOOKING_STATUS.CANCELLED
               ? 'error'
-              : partyBooking?.status === 'COMPLETED'
+              : partyBooking?.status === PARTY_BOOKING_STATUS.COMPLETED
               ? 'success'
               : 'warning'
           }
@@ -716,7 +714,7 @@ const Venue: React.FC = () => {
         expandable={{ expandedRowRender }}
         search={false}
         dateFormatter='string'
-        headerTitle='Venue Management'
+        headerTitle='Room Management'
         options={false}
         toolBarRender={() => [
           <Button loading={loading} onClick={() => fetchAllRoom()} key='refresh'>
@@ -822,7 +820,7 @@ const Venue: React.FC = () => {
             <Flex justify='space-between' align='center'>
               <Typography.Title level={3}>{`Booking ID: ${partyBooking?.id}`}</Typography.Title>
               <Flex gap={10}>
-                {partyBooking?.status !== 'COMPLETED' && (
+                {partyBooking?.status !== PARTY_BOOKING_STATUS.COMPLETED && (
                   <Popconfirm
                     title='Action'
                     description='Are you sure to COMPLETE this booking?'
@@ -835,8 +833,8 @@ const Venue: React.FC = () => {
                   </Popconfirm>
                 )}
 
-                {partyBooking?.status === 'PENDING' ||
-                  (partyBooking?.status === 'CONFIRMED' && (
+                {partyBooking?.status === PARTY_BOOKING_STATUS.PENDING ||
+                  (partyBooking?.status === PARTY_BOOKING_STATUS.CONFIRMED && (
                     <Popconfirm
                       title='Action'
                       description='Are you sure to CANCEL this booking?'

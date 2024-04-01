@@ -8,8 +8,10 @@ import {
   InputNumber,
   Popconfirm,
   Radio,
+  Select,
   Space,
   Table,
+  Tag,
   Typography,
   Upload,
   UploadFile,
@@ -62,6 +64,14 @@ const EditableCell: React.FC<EditableCellProps> = ({
       </Upload>
     ) : dataIndex === 'pricing' ? (
       <InputNumber />
+    ) : dataIndex === 'serviceType' ? (
+      <Select
+        defaultValue={record?.serviceType}
+        options={[
+          { label: 'Decoration', value: SERVICE_ENUM.DECORATION },
+          { label: 'Food', value: SERVICE_ENUM.FOOD }
+        ]}
+      />
     ) : (
       <Input />
     )
@@ -93,12 +103,21 @@ const Service: React.FC = () => {
   const [data, setData] = useState<Item[]>([])
   const [editingKey, setEditingKey] = useState('')
   const [removingKey, setRemovingKey] = useState('')
+  const [serviceType, setServiceType] = useState<SERVICE_ENUM | null>(null)
+  const [active, setActive] = useState<boolean | null>(null)
 
   const isEditing = (record: Item) => record.key === editingKey
   const isRemoving = (record: Item) => record.key === removingKey
 
   const edit = (record: Partial<Item> & { key: React.Key }) => {
-    form.setFieldsValue({ serviceName: '', serviceDescription: '', serviceImgUrl: null, pricing: '', ...record })
+    form.setFieldsValue({
+      serviceName: '',
+      serviceDescription: '',
+      serviceImgUrl: null,
+      pricing: '',
+      serviceType: '',
+      ...record
+    })
     setEditingKey(record.key)
   }
 
@@ -110,15 +129,16 @@ const Service: React.FC = () => {
     try {
       const row = (await form.validateFields()) as Item
       console.log(row)
+      const fileBinary: any = row?.serviceImgUrl
       if (row) {
         await updateOneService({
           id: record?.id,
           payload: {
             serviceName: row?.serviceName,
             serviceDescription: row?.serviceDescription || record?.serviceDescription,
-            fileImage: row?.serviceImgUrl?.[0]?.originFileObj,
+            fileImage: fileBinary?.file?.[0]?.originFileObj,
             pricing: String(row?.pricing),
-            serviceType: ''
+            serviceType: row?.serviceType
           }
         }).then(() => {
           setEditingKey('')
@@ -158,26 +178,41 @@ const Service: React.FC = () => {
     {
       title: 'Name',
       dataIndex: 'serviceName',
-      width: '20%',
+      width: '15%',
       editable: true
     },
     {
       title: 'Pricing',
       dataIndex: 'pricing',
-      width: '20%',
+      width: '15%',
+      editable: true
+    },
+    {
+      title: 'Is Acitve?',
+      dataIndex: 'active',
+      width: '10%',
+      editable: false,
+      render: (_: any, record: Item) => {
+        return record?.active ? <Tag color='success'>Active</Tag> : <Tag color='error'>Inactive</Tag>
+      }
+    },
+    {
+      title: 'Type',
+      dataIndex: 'serviceType',
+      width: '10%',
       editable: true
     },
     {
       title: 'Image',
       dataIndex: 'serviceImgUrl',
-      width: '30%',
+      width: '20%',
       editable: true,
       render: (_: any, record: Item) => {
         return (
           <Image
             style={{ borderRadius: 5, objectFit: 'cover' }}
             width={'100%'}
-            height={200}
+            height={150}
             src={record?.serviceImgUrl}
           />
         )
@@ -232,14 +267,19 @@ const Service: React.FC = () => {
   const serviceListView: Item[] = []
 
   const fetchAllService = async () => {
-    const res = await dispatch(getAllService())
+    const res = await dispatch(getAllService({ filter: { serviceType, active } }))
     console.log(JSON.stringify(res, null, 2))
     return res
   }
-  console.log('Mảng của tôi', serviceListView)
+
+  const refreshAllService = async () => {
+    setServiceType(null)
+    setActive(null)
+  }
+
   useEffect(() => {
     fetchAllService()
-  }, [])
+  }, [serviceType, active])
 
   useEffect(() => {
     serviceList?.map((item: ServiceDataResponse, index: number) => {
@@ -289,25 +329,37 @@ const Service: React.FC = () => {
     })
   }
 
-  const [type, setType] = useState<SERVICE_ENUM>(SERVICE_ENUM.ALL)
-
   return (
     <React.Fragment>
       <Form form={form} component={false}>
         <Flex justify='space-between'>
-          <Radio.Group
-            value={type}
-            onChange={e => {
-              setType(e.target.value)
-            }}
-            size='middle'
-          >
-            <Radio.Button value={SERVICE_ENUM.ALL}>All</Radio.Button>
-            <Radio.Button value={SERVICE_ENUM.DECORATION}>Decor</Radio.Button>
-            <Radio.Button value={SERVICE_ENUM.FOOD}>Food</Radio.Button>
-          </Radio.Group>
+          <Flex gap={15}>
+            <Radio.Group
+              value={serviceType}
+              onChange={e => {
+                setServiceType(e.target.value)
+              }}
+              size='middle'
+            >
+              <Radio.Button value={null}>All</Radio.Button>
+              <Radio.Button value={SERVICE_ENUM.DECORATION}>Decor</Radio.Button>
+              <Radio.Button value={SERVICE_ENUM.FOOD}>Food</Radio.Button>
+            </Radio.Group>
+
+            <Radio.Group
+              value={active}
+              onChange={e => {
+                setActive(e.target.value)
+              }}
+              size='middle'
+            >
+              <Radio.Button value={null}>All</Radio.Button>
+              <Radio.Button value={true}>Active</Radio.Button>
+              <Radio.Button value={false}>Inactive</Radio.Button>
+            </Radio.Group>
+          </Flex>
           <Flex gap={10}>
-            <Button loading={loading} onClick={() => fetchAllService()}>
+            <Button loading={loading} onClick={() => refreshAllService()}>
               Refresh
             </Button>
             <ModalForm

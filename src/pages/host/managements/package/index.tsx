@@ -6,6 +6,7 @@ import {
   Input,
   InputNumber,
   Popconfirm,
+  Select,
   Space,
   Table,
   Tag,
@@ -34,22 +35,15 @@ import {
   updatePackage
 } from 'src/features/action/package.action'
 import { useAppSelector } from 'src/app/hooks'
-import { PackageCreateRequest } from 'src/dtos/request/package.request'
+import { PackageCreateRequest, PackageUpdateRequest } from 'src/dtos/request/package.request'
 import { useRouter } from 'next/router'
 import { getAllService } from 'src/features/action/service.action'
 import { PackageDataResponse, PackageServiceDataResponse } from 'src/dtos/response/package.response'
 import PackageDetail from 'src/views/host/managements/package/PackageDetail'
+import { SERVICE_ENUM } from 'src/enums/service'
 
-interface Item {
+interface Item extends PackageDataResponse {
   key: string
-  id: number
-  packageNumber: string
-  packageName: string
-  packageImgUrl: any
-  packageDescription: string
-  active: boolean
-  pricing: number
-  packageServiceList: PackageServiceDataResponse[] | []
 }
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
@@ -79,6 +73,14 @@ const EditableCell: React.FC<EditableCellProps> = ({
       </Upload>
     ) : dataIndex === 'pricing' ? (
       <InputNumber />
+    ) : dataIndex === 'packageType' ? (
+      <Select
+        defaultValue={record?.packageType}
+        options={[
+          { label: 'Decoration', value: SERVICE_ENUM.DECORATION },
+          { label: 'Food', value: SERVICE_ENUM.FOOD }
+        ]}
+      />
     ) : (
       <Input />
     )
@@ -116,7 +118,7 @@ const Package: React.FC = () => {
   const isRemoving = (record: Item) => record.key === removingKey
 
   const edit = (record: Partial<Item> & { key: React.Key }) => {
-    form.setFieldsValue({ packageName: '', packageDescription: '', packageImgUrl: null, pricing: '', ...record })
+    form.setFieldsValue({ packageName: '', packageImgUrl: '', packageType: '', ...record })
     setEditingKey(record.key)
   }
 
@@ -128,15 +130,15 @@ const Package: React.FC = () => {
     try {
       const row = (await form.validateFields()) as Item
       console.log(row)
+      const imageBinary: any = row?.packageImgUrl
+
       if (row) {
         await updateOnePackage({
           id: record?.id,
           payload: {
             packageName: row?.packageName,
-            packageDescription: row?.packageDescription || record?.packageDescription,
-            fileImage: row?.packageImgUrl?.file?.originFileObj,
-            percent: 1,
-            packageServiceRequests: []
+            fileImage: imageBinary?.file?.originFileObj,
+            packageDescription: row?.packageDescription
           }
         }).then(() => {
           setEditingKey('')
@@ -169,7 +171,7 @@ const Package: React.FC = () => {
   const columns = [
     {
       title: 'Package No.',
-      dataIndex: 'packageNumber',
+      dataIndex: 'key',
       width: '7%',
       editable: false
     },
@@ -192,6 +194,12 @@ const Package: React.FC = () => {
       editable: false,
       render: (_: any, record: Item) =>
         record?.active ? <Tag color='success'>Active</Tag> : <Tag color='error'>Inactive</Tag>
+    },
+    {
+      title: 'Type',
+      dataIndex: 'packageType',
+      width: '13%',
+      editable: false
     },
     {
       title: 'Image',
@@ -282,21 +290,14 @@ const Package: React.FC = () => {
   useEffect(() => {
     packageList?.map((item: PackageDataResponse, index: number) => {
       packageListView.push({
-        key: index.toString(),
-        id: item?.id,
-        packageNumber: (index + 1).toString(),
-        packageName: item?.packageName,
-        packageImgUrl: item?.packageImgUrl,
-        packageDescription: item?.packageDescription,
-        pricing: item?.pricing,
-        active: item?.active,
-        packageServiceList: item?.packageServiceList
+        key: (index + 1).toString(),
+        ...item
       })
     })
     setData(packageListView)
   }, [packageList])
   const fetchAllService = async () => {
-    const res = await dispatch(getAllService())
+    const res = await dispatch(getAllService({}))
     console.log(JSON.stringify(res, null, 2))
     return res
   }
@@ -305,11 +306,7 @@ const Package: React.FC = () => {
     let isCloseModal = false
     await dispatch(
       createPackage({
-        fileImage: payload.fileImage,
-        packageName: payload.packageName,
-        packageDescription: payload.packageDescription,
-        percent: payload.percent,
-        packageServiceRequests: payload.packageServiceRequests
+        ...payload
       })
     ).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
@@ -336,7 +333,7 @@ const Package: React.FC = () => {
     })
   }
 
-  const updateOnePackage = async (request: { id: number; payload: PackageCreateRequest }) => {
+  const updateOnePackage = async (request: { id: number; payload: PackageUpdateRequest }) => {
     await dispatch(updatePackage({ id: request?.id, payload: request?.payload })).then(async res => {
       if (res?.meta?.requestStatus === 'fulfilled') {
         await fetchAllPackage()
@@ -378,21 +375,9 @@ const Package: React.FC = () => {
             onCancel: () => console.log('run')
           }}
           submitTimeout={2000}
-          onFinish={async ({
-            name,
-            description,
-            fileImg,
-            percent,
-            packageServiceList
-          }: {
-            name: string
-            description: string
-            percent: number
-            fileImg: UploadFile[]
-            packageServiceList: []
-          }) => {
-            console.log({ name, description, fileImg, packageServiceList, percent })
-            const serviceIds = packageServiceList.map((item: any) => item.serviceId)
+          onFinish={async (values: PackageCreateRequest) => {
+            console.log(values)
+            const serviceIds = values?.packageServiceRequests.map((item: any) => item.serviceId)
 
             // Kiểm tra nếu có 3 giá trị trùng lặp
             if (hasDuplicates(serviceIds)) {
@@ -401,11 +386,8 @@ const Package: React.FC = () => {
               // Xử lý logic khi không có lỗi
               // Ví dụ: Gửi dữ liệu đi
               const isCloseModal = createOne({
-                packageName: name,
-                packageDescription: description,
-                fileImage: fileImg?.[0]?.originFileObj,
-                percent: percent,
-                packageServiceRequests: packageServiceList
+                ...values,
+                fileImage: values.fileImage?.[0]?.originFileObj
               })
               return isCloseModal
             }
@@ -421,7 +403,7 @@ const Package: React.FC = () => {
           <ProFormText
             rules={[{ required: true, message: 'Please input this' }]}
             width='md'
-            name='name'
+            name='packageName'
             label='Name'
             tooltip='Name is ok'
             placeholder='Enter package name'
@@ -429,12 +411,12 @@ const Package: React.FC = () => {
           <ProFormTextArea
             rules={[{ required: true, message: 'Please input this' }]}
             width='md'
-            name='description'
+            name='packageDescription'
             label='Description'
             placeholder='Enter package description'
           />
           <ProFormList
-            name='packageServiceList'
+            name='packageServiceRequests'
             creatorButtonProps={{
               position: 'top',
               creatorButtonText: 'Add new service'
@@ -492,7 +474,7 @@ const Package: React.FC = () => {
           />
           <ProFormUploadButton
             rules={[{ required: true, message: 'Please input this' }]}
-            name='fileImg'
+            name='fileImage'
             label='Upload image'
             title='Upload'
             max={1}

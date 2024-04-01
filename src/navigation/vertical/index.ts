@@ -12,6 +12,8 @@ import TimelineClock from 'mdi-material-ui/TimelineClock'
 import PackageVariant from 'mdi-material-ui/PackageVariant'
 import AccountSupervisorCircle from 'mdi-material-ui/AccountSupervisorCircle'
 import LocationEnter from 'mdi-material-ui/LocationEnter'
+import RoomServiceOutline from 'mdi-material-ui/RoomServiceOutline'
+import HomeThermometerOutline from 'mdi-material-ui/HomeThermometerOutline'
 
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
@@ -73,29 +75,29 @@ const navigation = (): VerticalNavItemsType => {
         //   path: '/host/managements/customer'
         // },
         {
-          title: 'Venue',
-          icon: LocationEnter,
+          title: 'Booking',
+          icon: HomeThermometerOutline,
+          path: '/host/managements/booking'
+        },
+        {
+          title: 'Room',
+          icon: RoomServiceOutline,
           path: '/host/managements/venue'
         },
         {
-          title: 'Slot',
-          icon: TimelineClock,
-          path: '/host/managements/slot'
-        },
+          title: 'Package',
+          icon: PackageVariant,
+          path: '/host/managements/package'
+        },     
         {
           title: 'Service',
           icon: AccountSupervisorCircle,
           path: '/host/managements/service'
         },
         {
-          title: 'Package',
-          icon: PackageVariant,
-          path: '/host/managements/package'
-        },
-        {
-          title: 'Theme',
-          icon: ThemeLightDark,
-          path: '/host/managements/theme'
+          title: 'Slot',
+          icon: TimelineClock,
+          path: '/host/managements/slot'
         },
         // {
         //   sectionTitle: 'User Interface'

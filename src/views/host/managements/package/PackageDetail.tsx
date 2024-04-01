@@ -1,6 +1,6 @@
 import { Avatar, Card, Flex, Image, Space, Typography } from 'antd'
 import React from 'react'
-import { PackageDataResponse, PackageInVenueDataResponse } from 'src/dtos/response/package.response'
+import { PackageDataResponse } from 'src/dtos/response/package.response'
 
 const PackageDetail = ({ packageInVenue }: { packageInVenue?: PackageDataResponse }) => {
   return (
