@@ -5,3 +5,7 @@ export interface ServiceCreateRequest {
   pricing: string
   serviceType: string
 }
+export interface FilterServiceRequest {
+  active: boolean | null
+  serviceType: string | null
+}

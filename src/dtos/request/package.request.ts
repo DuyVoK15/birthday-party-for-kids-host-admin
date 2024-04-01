@@ -10,3 +10,12 @@ export interface PackageCreateRequest {
   packageServiceRequests: PackageServiceRequest[] | []
   packageType: string
 }
+
+export interface PackageUpdateRequest {
+  fileImage?: any
+  packageName?: any
+  packageDescription?: any
+  // percent?: any
+  // packageServiceRequests?: PackageServiceRequest[] | []
+  // packageType?: any
+}
