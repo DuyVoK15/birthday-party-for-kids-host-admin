@@ -1,12 +1,10 @@
 import { createSlice, isAnyOf } from '@reduxjs/toolkit'
 import { createPackage, deletePackage, getAllPackage, getPackageById, updatePackage } from '../action/package.action'
-import { PackageInVenueDataResponse } from 'src/dtos/response/package.response'
 
 interface AuthState {
   packageReponse: any
   packageList: any
   packageById: any
-  packageInVenueNotChooseList: PackageInVenueDataResponse[] | []
   createPackage: any
   updatePackage: any
   loading: boolean
@@ -16,7 +14,6 @@ const initialState: AuthState = {
   packageReponse: null,
   packageList: [],
   packageById: null,
-  packageInVenueNotChooseList: [],
   createPackage: null,
   updatePackage: null,
   loading: false

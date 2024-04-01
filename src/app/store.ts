@@ -11,6 +11,7 @@ import inquiryReducer from '../features/slice/inquiry.slice'
 import venueReducer from '../features/slice/venue.slice'
 import dashboardReducer from '../features/slice/dashboard.slice'
 import paymentReducer from '../features/slice/payment.slice'
+import partyBookingReducer from '../features/slice/partyBooking.slice'
 
 export const store = configureStore({
   reducer: {
@@ -22,7 +23,8 @@ export const store = configureStore({
     inquiryReducer,
     venueReducer,
     dashboardReducer,
-    paymentReducer
+    paymentReducer,
+    partyBookingReducer
   }
 })
 
