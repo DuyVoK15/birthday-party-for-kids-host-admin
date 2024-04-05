@@ -136,7 +136,7 @@ const Service: React.FC = () => {
           payload: {
             serviceName: row?.serviceName,
             serviceDescription: row?.serviceDescription || record?.serviceDescription,
-            fileImage: fileBinary?.file?.[0]?.originFileObj,
+            fileImage: fileBinary?.file?.originFileObj,
             pricing: String(row?.pricing),
             serviceType: row?.serviceType
           }
@@ -273,8 +273,12 @@ const Service: React.FC = () => {
   }
 
   const refreshAllService = async () => {
-    setServiceType(null)
-    setActive(null)
+    if (serviceType !== null || active !== null) {
+      setServiceType(null)
+      setActive(null)
+    } else {
+      fetchAllService()
+    }
   }
 
   useEffect(() => {
@@ -340,6 +344,7 @@ const Service: React.FC = () => {
                 setServiceType(e.target.value)
               }}
               size='middle'
+              optionType='button'
             >
               <Radio.Button value={null}>All</Radio.Button>
               <Radio.Button value={SERVICE_ENUM.DECORATION}>Decor</Radio.Button>

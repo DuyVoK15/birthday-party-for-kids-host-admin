@@ -45,6 +45,11 @@ const navigation = (): VerticalNavItemsType => {
           icon: CommentOutline,
           path: '/host/inquiries'
         },
+        {
+          title: 'Your venue',
+          icon: LocationEnter,
+          path: '/host/venue'
+        },
         // {
         //   sectionTitle: 'Pages'
         // },
@@ -82,7 +87,7 @@ const navigation = (): VerticalNavItemsType => {
         {
           title: 'Room',
           icon: RoomServiceOutline,
-          path: '/host/managements/venue'
+          path: '/host/managements/room'
         },
         {
           title: 'Package',

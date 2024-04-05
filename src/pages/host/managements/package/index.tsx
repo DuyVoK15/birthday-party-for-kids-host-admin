@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import {
   Button,
+  Flex,
   Form,
   Image,
   Input,
   InputNumber,
   Popconfirm,
+  Radio,
   Select,
   Space,
   Table,
@@ -21,6 +23,7 @@ import {
   ProForm,
   ProFormDigit,
   ProFormList,
+  ProFormRadio,
   ProFormSelect,
   ProFormText,
   ProFormTextArea,
@@ -269,24 +272,38 @@ const Package: React.FC = () => {
   const loading = useAppSelector(state => state.packageReducer.loading)
   const packageList = useAppSelector(state => state.packageReducer.packageList)
   const serviceList = useAppSelector(state => state.serviceReducer.serviceList)
+  const [packageType, setPackageType] = useState<SERVICE_ENUM | null>(null)
+  const [active, setActive] = useState<boolean | null>(null)
 
   const packageListView: Item[] = []
 
   const fetchAllPackage = async () => {
-    const res = await dispatch(getAllPackage())
+    const res = await dispatch(getAllPackage({ filter: { active, packageType } }))
     console.log(JSON.stringify(res, null, 2))
     return res
   }
+  const fetchRefreshAllPackage = async () => {
+    if (active !== null || packageType !== null) {
+      setPackageType(null)
+      setActive(null)
+    } else {
+      fetchAllPackage()
+    }
+  }
+
   console.log('Mảng của tôi', packageListView)
   useEffect(() => {
     fetchAllPackage()
-  }, [])
+  }, [packageType, active])
+
   useEffect(() => {
     setServiceDataList(serviceList)
   }, [serviceList])
+
   useEffect(() => {
     fetchAllService()
   }, [])
+
   useEffect(() => {
     packageList?.map((item: PackageDataResponse, index: number) => {
       packageListView.push({
@@ -303,22 +320,14 @@ const Package: React.FC = () => {
   }
 
   const createOnePackage = async (payload: PackageCreateRequest) => {
-    let isCloseModal = false
-    await dispatch(
-      createPackage({
-        ...payload
-      })
-    ).then(async res => {
-      if (res?.meta?.requestStatus === 'fulfilled') {
-        await fetchAllPackage().then(res => {
-          if (res?.meta?.requestStatus === 'fulfilled') {
-            message.success('Create package success!')
-            isCloseModal = true
-          }
-        })
-      }
-    })
-    return isCloseModal
+    const res = await dispatch(createPackage(payload))
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      await fetchAllPackage()
+      message.success('Create package success')
+      return true
+    }
+    message.error(`Error when create package! (${res?.payload?.message})`)
+    return false
   }
 
   const deleteOnePackage = async (id: number) => {
@@ -358,100 +367,137 @@ const Package: React.FC = () => {
 
   return (
     <Form form={form} component={false}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <ModalForm
-          loading={loading}
-          title='Create A New Package'
-          trigger={
-            <Button type='primary'>
-              <PlusOutlined />
-              Add new package
-            </Button>
-          }
-          form={formModal}
-          autoFocusFirstInput
-          modalProps={{
-            destroyOnClose: true,
-            onCancel: () => console.log('run')
-          }}
-          submitTimeout={2000}
-          onFinish={async (values: PackageCreateRequest) => {
-            console.log(values)
-            const serviceIds = values?.packageServiceRequests.map((item: any) => item.serviceId)
-
-            // Kiểm tra nếu có 3 giá trị trùng lặp
-            if (hasDuplicates(serviceIds)) {
-              message.error('Duplicated service selected, try again!')
-            } else {
-              // Xử lý logic khi không có lỗi
-              // Ví dụ: Gửi dữ liệu đi
-              const isCloseModal = createOne({
-                ...values,
-                fileImage: values.fileImage?.[0]?.originFileObj
-              })
-              return isCloseModal
-            }
-          }}
-          onChange={e => console.log(e)}
-          submitter={{
-            searchConfig: {
-              submitText: 'Submit',
-              resetText: 'Cancel'
-            }
-          }}
-        >
-          <ProFormText
-            rules={[{ required: true, message: 'Please input this' }]}
-            width='md'
-            name='packageName'
-            label='Name'
-            tooltip='Name is ok'
-            placeholder='Enter package name'
-          />
-          <ProFormTextArea
-            rules={[{ required: true, message: 'Please input this' }]}
-            width='md'
-            name='packageDescription'
-            label='Description'
-            placeholder='Enter package description'
-          />
-          <ProFormList
-            name='packageServiceRequests'
-            creatorButtonProps={{
-              position: 'top',
-              creatorButtonText: 'Add new service'
-            }}
-            creatorRecord={{}}
+      <Flex align='center' justify='space-between'>
+        <Flex gap={15}>
+          <Radio.Group
+            onChange={e => setPackageType(e.target.value)}
+            value={packageType}
+            size='middle'
+            optionType='button'
           >
-            <ProForm.Group>
-              <ProFormSelect
-                width={'lg'}
-                name='serviceId'
-                label='Service'
-                request={async () =>
-                  serviceDataList.map((item: any) => {
-                    return {
-                      label: `${item?.serviceName} - ${item?.pricing} VND `,
-                      value: item?.id
-                    }
-                  })
-                }
-                placeholder='Please select a service'
-                rules={[{ required: true, message: 'Please select a service!' }]}
-              />
-              <ProFormDigit
-                width={'sm'}
-                label='Amount'
-                name='count'
-                min={1}
-                max={1000}
-                fieldProps={{ precision: 0 }}
-                placeholder={'0'}
-                rules={[{ required: true, message: 'Please enter count!' }]}
-              />
-            </ProForm.Group>
-          </ProFormList>
-          {/* <ProFormCheckbox.Group
+            <Radio value={null}>All</Radio>
+            <Radio value={SERVICE_ENUM.DECORATION}>Decor</Radio>
+            <Radio value={SERVICE_ENUM.FOOD}>Food</Radio>
+          </Radio.Group>
+          <Radio.Group
+            value={active}
+            onChange={e => {
+              setActive(e.target.value)
+            }}
+            size='middle'
+          >
+            <Radio.Button value={null}>All</Radio.Button>
+            <Radio.Button value={true}>Active</Radio.Button>
+            <Radio.Button value={false}>Inactive</Radio.Button>
+          </Radio.Group>
+        </Flex>
+        <Flex gap={10}>
+          <Button loading={loading} onClick={fetchRefreshAllPackage}>
+            Refresh
+          </Button>
+          <ModalForm
+            loading={loading}
+            title='Create A New Package'
+            trigger={
+              <Button type='primary'>
+                <PlusOutlined />
+                Add new package
+              </Button>
+            }
+            form={formModal}
+            autoFocusFirstInput
+            modalProps={{
+              destroyOnClose: true,
+              onCancel: () => console.log('run')
+            }}
+            submitTimeout={2000}
+            onFinish={async (values: PackageCreateRequest) => {
+              console.log(values)
+              const serviceIds = values?.packageServiceRequests.map((item: any) => item.serviceId)
+
+              // Kiểm tra nếu có 3 giá trị trùng lặp
+              if (hasDuplicates(serviceIds)) {
+                message.error('Duplicated service selected, try again!')
+              } else {
+                // Xử lý logic khi không có lỗi
+                // Ví dụ: Gửi dữ liệu đi
+                const isCloseModal = createOne({
+                  ...values,
+                  fileImage: values.fileImage?.[0]?.originFileObj
+                })
+                return isCloseModal
+              }
+            }}
+            onChange={e => console.log(e)}
+            submitter={{
+              searchConfig: {
+                submitText: 'Submit',
+                resetText: 'Cancel'
+              }
+            }}
+          >
+            <ProFormRadio.Group
+              name='packageType'
+              rules={[{ required: true, message: 'Please input this' }]}
+              width='md'
+              label='Type'
+              options={[
+                { label: 'Decoration', value: SERVICE_ENUM.DECORATION },
+                { label: 'Food', value: SERVICE_ENUM.FOOD }
+              ]}
+            />
+            <ProFormText
+              rules={[{ required: true, message: 'Please input this' }]}
+              width='md'
+              name='packageName'
+              label='Name'
+              tooltip='Name is ok'
+              placeholder='Enter package name'
+            />
+            <ProFormTextArea
+              rules={[{ required: true, message: 'Please input this' }]}
+              width='md'
+              name='packageDescription'
+              label='Description'
+              placeholder='Enter package description'
+            />
+            <ProFormList
+              name='packageServiceRequests'
+              creatorButtonProps={{
+                position: 'top',
+                creatorButtonText: 'Add new service'
+              }}
+              creatorRecord={{}}
+            >
+              <ProForm.Group>
+                <ProFormSelect
+                  width={'lg'}
+                  name='serviceId'
+                  label='Service'
+                  request={async () =>
+                    serviceDataList.map((item: any) => {
+                      return {
+                        label: `${item?.serviceName} - ${item?.pricing} VND `,
+                        value: item?.id
+                      }
+                    })
+                  }
+                  placeholder='Please select a service'
+                  rules={[{ required: true, message: 'Please select a service!' }]}
+                />
+                <ProFormDigit
+                  width={'sm'}
+                  label='Amount'
+                  name='count'
+                  min={1}
+                  max={1000}
+                  fieldProps={{ precision: 0 }}
+                  placeholder={'0'}
+                  rules={[{ required: true, message: 'Please enter count!' }]}
+                />
+              </ProForm.Group>
+            </ProFormList>
+            {/* <ProFormCheckbox.Group
             name='packageServiceList'
             layout='vertical'
             label='123'
@@ -462,30 +508,31 @@ const Package: React.FC = () => {
               }
             })}
           /> */}
-          <ProFormDigit
-            rules={[{ required: true, message: 'Please input this' }]}
-            width='md'
-            name='percent'
-            label='Percent'
-            tooltip='Please input this'
-            placeholder='Enter percent discount'
-            min={0.1}
-            max={0.5}
-          />
-          <ProFormUploadButton
-            rules={[{ required: true, message: 'Please input this' }]}
-            name='fileImage'
-            label='Upload image'
-            title='Upload'
-            max={1}
-            fieldProps={{
-              name: 'file',
-              listType: 'picture-card',
-              progress: { showInfo: false }
-            }}
-          />
-        </ModalForm>
-      </div>
+            <ProFormDigit
+              rules={[{ required: true, message: 'Please input this' }]}
+              width='md'
+              name='percent'
+              label='Percent'
+              tooltip='Please input this'
+              placeholder='Enter percent discount'
+              min={0.1}
+              max={0.5}
+            />
+            <ProFormUploadButton
+              rules={[{ required: true, message: 'Please input this' }]}
+              name='fileImage'
+              label='Upload image'
+              title='Upload'
+              max={1}
+              fieldProps={{
+                name: 'file',
+                listType: 'picture-card',
+                progress: { showInfo: false }
+              }}
+            />
+          </ModalForm>
+        </Flex>
+      </Flex>
       <Table
         style={{ marginTop: 10 }}
         loading={loading}

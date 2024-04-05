@@ -5,7 +5,11 @@ import {
   EyeOutlined,
   CheckOutlined,
   CloseOutlined,
-  SwapOutlined
+  SwapOutlined,
+  CloseCircleOutlined,
+  SyncOutlined,
+  CheckCircleOutlined,
+  ExclamationCircleOutlined
 } from '@ant-design/icons'
 import type { ProColumns } from '@ant-design/pro-components'
 import {
@@ -52,11 +56,13 @@ import {
   RoomGetSlotNotAddRequest,
   SlotInRoomListCreateRequest
 } from 'src/dtos/request/room.request'
+import { PartyBookingDataResponse } from 'src/dtos/response/partyBooking.response'
 import { RoomDataResponse } from 'src/dtos/response/room.response'
 import { SlotInRoomDataResponse } from 'src/dtos/response/slot.response'
 import { VenueDataResponse } from 'src/dtos/response/venue.response'
 import { PARTY_BOOKING_STATUS } from 'src/enums/partyBooking'
-import { cancelBooking, completeBooking } from 'src/features/action/partyBooking.action'
+import { SERVICE_ENUM } from 'src/enums/service'
+import { cancelBooking, completeBooking, getBookingById } from 'src/features/action/partyBooking.action'
 import {
   createRoom,
   createSlotInRoomListByRoomId,
@@ -67,6 +73,7 @@ import {
 } from 'src/features/action/room.action'
 import { disableSlotInRoom, enableSlotInRoom } from 'src/features/action/slot.action'
 import { getAllPackageNotAdd, getAllVenueCheckSlotByDate } from 'src/features/action/venue.action'
+import PackageDetail from 'src/views/host/managements/package/PackageDetail'
 import PackageInVenueDetail from 'src/views/host/managements/package/PackageInVenueDetail'
 import UpgradeServiceBookingDetail from 'src/views/host/managements/upgrade-service/UpgradeServiceBookingDetail'
 
@@ -146,7 +153,7 @@ const Venue: React.FC = () => {
   const loadingGetSlotNotAdd = useAppSelector(state => state.venueReducer.loadingGetSlotNotAdd)
   const loadingPartyBooking = useAppSelector(state => state.venueReducer.loadingPartyBooking)
   const loadingCreateItemInVenueList = useAppSelector(state => state.venueReducer.loadingCreateItemInVenueList)
-  const partyBooking = useAppSelector(state => state.venueReducer.partyBooking)
+  const booking = useAppSelector(state => state.partyBookingReducer.bookingById)
   const packageInVenueList = useAppSelector(state => state.venueReducer.packageInVenueList)
 
   const fetchVenue = async () => {
@@ -192,7 +199,21 @@ const Venue: React.FC = () => {
   //   setVenueId(record?.id)
   //   setVenue(record)
   // }
+  const fetchBookingById = async (id: number) => {
+    const res = await dispatch(getBookingById(id))
+    console.log(JSON.stringify(res, null, 2))
+    return res
+  }
 
+  const handleOpenBookingDetail = async (record: ExpandedRowTable) => {
+    const res = await fetchBookingById(record?.partyBookingId)
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      setDrawerBookingVisit(true)
+    } else {
+      const message = (res?.payload as any)?.message
+      message.error(message)
+    }
+  }
   const handleOpenSlotNotAddModal = async (record: TableListItem) => {
     if (venueId !== null) {
       await fetchGetAllSlotNotAdd({ roomId: record?.id })
@@ -241,25 +262,25 @@ const Venue: React.FC = () => {
     }
   }
 
-  const completeOneBooking = async (id: number) => {
-    const res = await dispatch(completeBooking(id))
+  const cancelOneBooking = async (record: PartyBookingDataResponse) => {
+    const res = await fetchBookingById(record?.id)
     if (res?.meta?.requestStatus === 'fulfilled') {
-      message.success('Complete booking success!')
-      return true
+      message.success(`Cancel booking ID ${record?.id} success!`)
+      await fetchBookingById(record?.id)
     } else {
-      message.error(res?.payload?.message)
-      return false
+      const message = (res?.payload as any)?.message
+      message.error(message)
     }
   }
 
-  const cancelOneBooking = async (id: number) => {
-    const res = await dispatch(cancelBooking(id))
+  const completeOneBooking = async (record: PartyBookingDataResponse) => {
+    const res = await fetchBookingById(record?.id)
     if (res?.meta?.requestStatus === 'fulfilled') {
-      message.success('Cancel booking success!')
-      return true
+      message.success(`Cancel booking ID ${record?.id} success!`)
+      await fetchBookingById(record?.id)
     } else {
-      message.error(res?.payload?.message)
-      return false
+      const message = (res?.payload as any)?.message
+      message.error(message)
     }
   }
 
@@ -331,7 +352,10 @@ const Venue: React.FC = () => {
                   label: 'View booking',
                   key: '1',
                   icon: <PrinterOutlined />,
-                  onClick: () => null
+                  onClick: () => {
+                    handleOpenBookingDetail(recordChild)
+                  },
+                  disabled: recordChild?.status ? false : true
                 },
                 {
                   label: recordChild?.active ? (
@@ -469,24 +493,24 @@ const Venue: React.FC = () => {
       label: 'Venue',
       children: (
         <Space>
-          <Typography>{venue?.venueName || 'venue name'}</Typography>
-          <Tooltip title={location}>
-            <a>{venue?.ward || 'location'}</a>
+          <Typography>{booking?.venueObject?.venueName || 'venue name'}</Typography>
+          <Tooltip title={'Location'}>
+            <a>{booking?.venueObject?.district || 'location'}</a>
           </Tooltip>
         </Space>
       )
     },
     {
-      key: '3',
-      label: 'Package',
+      key: '2',
+      label: 'Package Decoration',
       children: (
         <Space direction='vertical'>
           <ModalForm
-            title='Package'
+            title='Package Decoration'
             trigger={
               <Button type='primary'>
                 <EyeOutlined />
-                View package
+                View
               </Button>
             }
             form={form}
@@ -499,10 +523,15 @@ const Venue: React.FC = () => {
               return true
             }}
           >
-            <PackageInVenueDetail packageInVenue={null} />
+            <PackageDetail
+              packageInVenue={
+                booking?.packageInBookings?.find(item => item.apackage.packageType === SERVICE_ENUM.DECORATION)
+                  ?.apackage
+              }
+            />
           </ModalForm>
 
-          {partyBooking?.status === PARTY_BOOKING_STATUS.PENDING && partyBooking?.isPayment === false && (
+          {booking?.status === PARTY_BOOKING_STATUS.PENDING && booking?.isPayment === false && (
             <ModalForm
               title='Package'
               trigger={
@@ -519,9 +548,117 @@ const Venue: React.FC = () => {
               }}
               onFinish={async values => {
                 let result: boolean | undefined = false
-                // if (typeof partyBooking?.id !== 'undefined') {
+                // if (typeof booking?.id !== 'undefined') {
                 //   result = await updateOnePackageInVenueInBooking({
-                //     partyBookingId: partyBooking?.id,
+                //     bookingId: booking?.id,
+                //     packageInVenueId: values?.packageInVenueId
+                //   })
+                // }
+
+                return result
+              }}
+            >
+              {/* {packageInVenueNotChooseList?.length > 0 ? (
+                  <ProFormRadio.Group
+                    name='packageInVenueId'
+                    layout='horizontal'
+                    style={{ marginBottom: 10 }}
+                    options={packageInVenueNotChooseList?.map((item, index) => ({
+                      label: (
+                        <Card
+                          key={index}
+                          hoverable
+                          style={{ width: 300, marginBottom: 10 }}
+                          cover={
+                            <Image
+                              style={{
+                                width: '100%',
+                                height: 100,
+                                objectFit: 'cover'
+                              }}
+                              alt='example'
+                              src={item?.apackage?.packageImgUrl}
+                            />
+                          }
+                        >
+                          <Space direction='vertical'>
+                            <Card.Meta title={item?.apackage?.packageName} />
+                            <ModalForm
+                              title='Chi tiết gói dịch vụ'
+                              trigger={
+                                <Button style={{ padding: 0 }} type='link'>
+                                  <EyeOutlined />
+                                  Chi tiết gói dịch vụ
+                                </Button>
+                              }
+                              style={{ padding: 0 }}
+                            >
+                              <PackageInVenueDetail packageInVenue={item} />
+                            </ModalForm>
+                          </Space>
+                        </Card>
+                      ),
+                      value: item?.id
+                    }))}
+                  />
+                ) : (
+                  <Empty style={{ margin: 'auto' }} />
+                )} */}
+            </ModalForm>
+          )}
+        </Space>
+      )
+    },
+    {
+      key: '3',
+      label: 'Package Food',
+      children: (
+        <Space direction='vertical'>
+          <ModalForm
+            title='Package Food	'
+            trigger={
+              <Button type='primary'>
+                <EyeOutlined />
+                View
+              </Button>
+            }
+            form={form}
+            autoFocusFirstInput
+            modalProps={{
+              destroyOnClose: true,
+              onCancel: () => console.log('run')
+            }}
+            onFinish={async values => {
+              return true
+            }}
+          >
+            <PackageDetail
+              packageInVenue={
+                booking?.packageInBookings?.find(item => item.apackage.packageType === SERVICE_ENUM.FOOD)?.apackage
+              }
+            />
+          </ModalForm>
+
+          {booking?.status === PARTY_BOOKING_STATUS.PENDING && booking?.isPayment === false && (
+            <ModalForm
+              title='Package'
+              trigger={
+                <Button type='default'>
+                  <SwapOutlined />
+                  Change package
+                </Button>
+              }
+              form={form}
+              autoFocusFirstInput
+              modalProps={{
+                destroyOnClose: true,
+                onCancel: () => console.log('run')
+              }}
+              onFinish={async values => {
+                let result: boolean | undefined = false
+                // if (typeof booking?.id !== 'undefined') {
+                //   result = await updateOnePackageInVenueInBooking({
+                //     bookingId: booking?.id,
                 //     packageInVenueId: values?.packageInVenueId
                 //   })
                 // }
@@ -583,36 +720,50 @@ const Venue: React.FC = () => {
     {
       key: '4',
       label: 'Order time',
-      children: partyBooking?.createAt ? dayjs(partyBooking?.createAt).format('YYYY-MM-DD vào lúc HH:mm:ss') : 'null'
+      children: booking?.createAt ? dayjs(booking?.createAt).format('YYYY-MM-DD at HH:mm:ss') : 'null'
     },
     {
       key: '5',
       label: 'Usage Time',
-      children: ''
+      children: `${booking?.date} at ${booking?.slotInRoom?.slot?.timeStart}`
     },
     {
       key: '100',
       label: 'Finish Time',
-      children: ''
+      children: `${booking?.date} at ${booking?.slotInRoom?.slot?.timeEnd}`
     },
     {
       key: '6',
       label: 'Status',
       span: 1,
-      children: (
-        <Badge
-          status={
-            partyBooking?.status === PARTY_BOOKING_STATUS.PENDING
-              ? 'processing'
-              : partyBooking?.status === PARTY_BOOKING_STATUS.CANCELLED
-              ? 'error'
-              : partyBooking?.status === PARTY_BOOKING_STATUS.COMPLETED
-              ? 'success'
-              : 'warning'
-          }
-          text={partyBooking?.status}
-        />
-      )
+      children: (() => {
+        switch (booking?.status) {
+          case PARTY_BOOKING_STATUS.CONFIRMED:
+            return (
+              <Tag icon={<ExclamationCircleOutlined />} color='warning'>
+                {PARTY_BOOKING_STATUS.CONFIRMED}
+              </Tag>
+            )
+          case PARTY_BOOKING_STATUS.COMPLETED:
+            return (
+              <Tag icon={<CheckCircleOutlined />} color='success'>
+                {PARTY_BOOKING_STATUS.COMPLETED}
+              </Tag>
+            )
+          case PARTY_BOOKING_STATUS.CANCELLED:
+            return (
+              <Tag icon={<CloseCircleOutlined />} color='error'>
+                {PARTY_BOOKING_STATUS.CANCELLED}
+              </Tag>
+            )
+          default:
+            return (
+              <Tag icon={<SyncOutlined spin />} color='processing'>
+                {PARTY_BOOKING_STATUS.PENDING}
+              </Tag>
+            )
+        }
+      })()
     },
     {
       key: '60',
@@ -638,14 +789,14 @@ const Venue: React.FC = () => {
             return true
           }}
         >
-          <UpgradeServiceBookingDetail upgradeServices={partyBooking?.upgradeServices} />
+          <UpgradeServiceBookingDetail upgradeServices={booking?.upgradeServices} />
         </ModalForm>
       )
     },
     {
       key: '7',
       label: 'Negotiated Amount',
-      children: partyBooking?.pricingTotal?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+      children: booking?.totalPrice?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
     },
     {
       key: '8',
@@ -655,22 +806,24 @@ const Venue: React.FC = () => {
     {
       key: '9',
       label: 'Official Receipts',
-      children: partyBooking?.pricingTotal?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+      children: booking?.totalPrice?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
     },
     {
       key: '10',
       label: 'Booking Info',
       children: (
         <>
-          Name booking: {userInfo?.data?.fullName}
+          Name booking: {booking?.reservationAgent}
           <br />
-          Email: {partyBooking?.email}
+          Email: {booking?.email}
           <br />
-          Phone: {partyBooking?.phone}
+          Phone: {booking?.phone}
           <br />
-          Kid Name: {partyBooking?.kidName}
+          Participant Amount: {booking?.participantAmount}
           <br />
-          Kid DOB: {partyBooking?.kidDOB}
+          Kid Name: {booking?.kidName}
+          <br />
+          Kid DOB: {booking?.kidDOB}
         </>
       )
     }
@@ -806,25 +959,23 @@ const Venue: React.FC = () => {
         drawerProps={{
           destroyOnClose: true
         }}
-        submitTimeout={2000}
         onFinish={async values => {
           return true
         }}
         open={drawerBookingVisit}
         onOpenChange={setDrawerBookingVisit}
-        disabled={loadingGetSlotNotAdd}
         submitter={{ render: false }}
       >
-        {partyBooking !== null && (
-          <Fragment>
+        {booking !== null && (
+          <React.Fragment>
             <Flex justify='space-between' align='center'>
-              <Typography.Title level={3}>{`Booking ID: ${partyBooking?.id}`}</Typography.Title>
+              <Typography.Title level={3}>{`Booking ID: ${booking?.id}`}</Typography.Title>
               <Flex gap={10}>
-                {partyBooking?.status !== PARTY_BOOKING_STATUS.COMPLETED && (
+                {booking?.status !== PARTY_BOOKING_STATUS.COMPLETED && (
                   <Popconfirm
                     title='Action'
                     description='Are you sure to COMPLETE this booking?'
-                    onConfirm={() => completeOneBooking(partyBooking?.id)}
+                    onConfirm={() => null}
                     onCancel={() => null}
                     okText='Yes'
                     cancelText='No'
@@ -833,12 +984,12 @@ const Venue: React.FC = () => {
                   </Popconfirm>
                 )}
 
-                {partyBooking?.status === PARTY_BOOKING_STATUS.PENDING ||
-                  (partyBooking?.status === PARTY_BOOKING_STATUS.CONFIRMED && (
+                {booking?.status === PARTY_BOOKING_STATUS.PENDING ||
+                  (booking?.status === PARTY_BOOKING_STATUS.CONFIRMED && (
                     <Popconfirm
                       title='Action'
                       description='Are you sure to CANCEL this booking?'
-                      onConfirm={() => cancelOneBooking(partyBooking?.id)}
+                      onConfirm={() => cancelOneBooking(booking)}
                       onCancel={() => null}
                       okText='Yes'
                       cancelText='No'
@@ -850,10 +1001,11 @@ const Venue: React.FC = () => {
             </Flex>
 
             <Descriptions title='User Info' layout='vertical' bordered items={items} />
-          </Fragment>
+          </React.Fragment>
         )}
-        {loadingPartyBooking && <Skeleton style={{ height: 600 }} active={true} />}
+        {false && <Skeleton style={{ height: 600 }} active={true} />}
       </DrawerForm>
+
       <ModalForm
         title={`Venue: ${venue?.venueName} - Add new room`}
         form={modalRoomForm}
@@ -1077,122 +1229,3 @@ const Venue: React.FC = () => {
   )
 }
 export default Venue
-
-{
-  /* <ModalForm
-loading={loadingCreateVenue}
-title='Create A New Room'
-trigger={
-  <Button type='primary'>
-    <PlusOutlined />
-    Add new room
-  </Button>
-}
-form={form}
-autoFocusFirstInput
-modalProps={{
-  destroyOnClose: true,
-  onCancel: () => console.log('run')
-}}
-submitTimeout={2000}
-onFinish={async ({
-  name,
-  description,
-  fileImg,
-  street,
-  ward,
-  district,
-  city
-}: {
-  name: string
-  description: string
-  fileImg: UploadFile[]
-  street: string
-  ward: string
-  district: string
-  city: string
-}) => {
-  console.log(name, description, street, ward, district, city)
-  const result = createOneVenue({
-    venueName: name,
-    venueDescription: description,
-    fileImage: fileImg?.[0]?.originFileObj,
-    street,
-    ward,
-    district,
-    city
-  })
-  return result
-}}
-submitter={{
-  searchConfig: {
-    submitText: 'Submit',
-    resetText: 'Cancel'
-  }
-}}
->
-<ProFormGroup>
-  <ProFormText
-    rules={[{ required: true, message: 'Please input this' }]}
-    width='md'
-    name='name'
-    label='Name'
-    // tooltip='Name is ok'
-    placeholder='Enter venue name'
-  />
-  <ProFormTextArea
-    rules={[{ required: true, message: 'Please input this' }]}
-    width='md'
-    name='description'
-    label='Description'
-    placeholder='Enter venue description'
-  />
-  <ProFormUploadButton
-    rules={[{ required: true, message: 'Please input this' }]}
-    name='fileImg'
-    label='Upload image'
-    title='Upload'
-    max={1}
-    fieldProps={{
-      name: 'file',
-      listType: 'picture-card',
-      progress: { showInfo: false }
-    }}
-  />
-</ProFormGroup>
-<ProFormGroup>
-  <ProFormText
-    rules={[{ required: true, message: 'Please input this' }]}
-    width='md'
-    name='street'
-    label='Street'
-    // tooltip='Name is ok'
-    placeholder='Enter venue street'
-  />
-  <ProFormText
-    rules={[{ required: true, message: 'Please input this' }]}
-    width='md'
-    name='ward'
-    label='Ward'
-    // tooltip='Name is ok'
-    placeholder='Enter venue ward'
-  />
-  <ProFormText
-    rules={[{ required: true, message: 'Please input this' }]}
-    width='md'
-    name='district'
-    label='District'
-    // tooltip='Name is ok'
-    placeholder='Enter venue district'
-  />
-  <ProFormText
-    rules={[{ required: true, message: 'Please input this' }]}
-    width='md'
-    name='city'
-    label='City'
-    // tooltip='Name is ok'
-    placeholder='Enter venue city'
-  />
-</ProFormGroup>
-</ModalForm> */
-}

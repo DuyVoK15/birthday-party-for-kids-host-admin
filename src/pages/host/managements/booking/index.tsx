@@ -18,6 +18,7 @@ import {
   Skeleton,
   Space,
   Table,
+  TablePaginationConfig,
   Tag,
   Tooltip,
   Typography,
@@ -64,6 +65,12 @@ interface Item extends PartyBookingDataResponse {
   key: string
 }
 
+interface Pagination {
+  current: number
+  pageSize: number
+  total?: number
+}
+
 const Booking: React.FC = () => {
   const [form] = Form.useForm()
   const [formModal] = Form.useForm()
@@ -73,29 +80,28 @@ const Booking: React.FC = () => {
   const [date, setDate] = useState<string | null>(null)
   const [status, setStatus] = useState<PARTY_BOOKING_STATUS | null>(null)
   const [drawerBookingVisit, setDrawerBookingVisit] = useState(false)
+  const [pagination, setPagination] = useState<Pagination>({ current: 1, pageSize: 5 })
 
-  const createOne = async (payload: ServiceCreateRequest) => {
-    try {
-      const isCloseModal = await createOneService(payload)
-      return isCloseModal
-    } catch (errInfo) {
-      console.log('Error', errInfo)
-      message.error(errInfo)
+  const fetchPagination = async () => {
+    setPagination(prev => ({ ...prev, total: metadata?.totalItems }))
+    if (metadata?.totalPages !== undefined && pagination.current > metadata?.totalPages) {
+      setPagination(prev => ({ ...prev, current: 1 }))
     }
   }
 
-  const removeOne = async (id: number) => {
-    try {
-      await deleteOneService(id)
-    } catch (errInfo) {
-      console.log('Error', errInfo)
-    }
+  const handleTableChange = async (pagination: any, filters: any, sorter: any) => {
+    setPagination(prev => ({ ...prev, current: pagination.current, pageSize: pagination.pageSize }))
+    const res = await dispatch(
+      getAllBooking({ filter: { status, date }, paging: { page: pagination.current, size: pagination.pageSize } })
+    )
+    console.log(JSON.stringify(res, null, 2))
+    return res
   }
 
   const columns: any = [
     {
-      title: 'No.',
-      dataIndex: 'key',
+      title: 'ID.',
+      dataIndex: 'id',
       width: '3%',
       editable: false,
       align: 'center'
@@ -156,19 +162,22 @@ const Booking: React.FC = () => {
       title: 'Total price',
       dataIndex: 'totalPrice',
       width: '10%',
-      editable: true
+      editable: false,
+      render: (_: any, record: Item) => record?.totalPrice?.toLocaleString()
     },
     {
       title: 'Deposit',
       dataIndex: 'deposit',
       width: '10%',
-      editable: true
+      editable: false,
+      render: (_: any, record: Item) => record?.deposit?.toLocaleString()
     },
     {
       title: 'Remaining',
       dataIndex: 'remainingMoney',
       width: '10%',
-      editable: true
+      editable: false,
+      render: (_: any, record: Item) => record?.remainingMoney?.toLocaleString()
     },
     {
       title: 'Action',
@@ -198,11 +207,15 @@ const Booking: React.FC = () => {
   const dispatch = useAppDispatch()
   const loading = useAppSelector(state => state.partyBookingReducer.loading)
   const bookingList = useAppSelector(state => state.partyBookingReducer.bookingList)
+  const metadata = useAppSelector(state => state.partyBookingReducer.bookingResponse?.metadata)
   const booking = useAppSelector(state => state.partyBookingReducer.bookingById)
   const bookingListView: Item[] = []
 
   const fetchAllBooking = async () => {
-    const res = await dispatch(getAllBooking({ filter: { status, date } }))
+    const res = await dispatch(
+      getAllBooking({ filter: { status, date }, paging: { page: 1, size: pagination.pageSize } })
+    )
+
     console.log(JSON.stringify(res, null, 2))
     return res
   }
@@ -211,6 +224,10 @@ const Booking: React.FC = () => {
     setDate(null)
     setStatus(null)
   }
+
+  useEffect(() => {
+    fetchPagination()
+  }, [metadata?.totalItems])
 
   useEffect(() => {
     fetchAllBooking()
@@ -242,42 +259,26 @@ const Booking: React.FC = () => {
     }
   }
 
-  const createOneService = async (payload: ServiceCreateRequest) => {
-    let isCloseModal = false
-    await dispatch(createService(payload)).then(async res => {
-      if (res?.meta?.requestStatus === 'fulfilled') {
-        await fetchAllBooking().then(res => {
-          if (res?.meta?.requestStatus === 'fulfilled') {
-            message.success('Create service success!')
-            form.resetFields()
-            isCloseModal = true
-          }
-        })
-      } else {
-        message.error(`Error when create service! ${res.payload?.message ?? ''}`)
-      }
-    })
-    return isCloseModal
+  const cancelOneBooking = async (record: PartyBookingDataResponse) => {
+    const res = await fetchBookingById(record?.id)
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      message.success(`Cancel booking ID ${record?.id} success!`);
+      await fetchBookingById(record?.id);
+    } else {
+      const message = (res?.payload as any)?.message
+      message.error(message)
+    }
   }
 
-  const deleteOneService = async (id: number) => {
-    await dispatch(deleteService(id)).then(async res => {
-      if (res?.meta?.requestStatus === 'fulfilled') {
-        await fetchAllBooking().then(res => {
-          if (res?.meta?.requestStatus === 'fulfilled') {
-            message.success('Delete service success!')
-          }
-        })
-      }
-    })
-  }
-
-  const updateOneService = async (request: { id: number; payload: ServiceCreateRequest }) => {
-    await dispatch(updateService({ id: request?.id, payload: request?.payload })).then(async res => {
-      if (res?.meta?.requestStatus === 'fulfilled') {
-        await fetchAllBooking()
-      }
-    })
+  const completeOneBooking = async (record: PartyBookingDataResponse) => {
+    const res = await fetchBookingById(record?.id)
+    if (res?.meta?.requestStatus === 'fulfilled') {
+      message.success(`Cancel booking ID ${record?.id} success!`);
+      await fetchBookingById(record?.id);
+    } else {
+      const message = (res?.payload as any)?.message
+      message.error(message)
+    }
   }
 
   const items: DescriptionsProps['items'] = [
@@ -299,11 +300,11 @@ const Booking: React.FC = () => {
       children: (
         <Space direction='vertical'>
           <ModalForm
-            title='Package'
+            title='Package Decoration'
             trigger={
               <Button type='primary'>
                 <EyeOutlined />
-                View package
+                View
               </Button>
             }
             form={form}
@@ -316,7 +317,12 @@ const Booking: React.FC = () => {
               return true
             }}
           >
-            <PackageDetail packageInVenue={booking?.packageInBookings?.[0].apackage} />
+            <PackageDetail
+              packageInVenue={
+                booking?.packageInBookings?.find(item => item.apackage.packageType === SERVICE_ENUM.DECORATION)
+                  ?.apackage
+              }
+            />
           </ModalForm>
 
           {booking?.status === PARTY_BOOKING_STATUS.PENDING && booking?.isPayment === false && (
@@ -399,15 +405,15 @@ const Booking: React.FC = () => {
     },
     {
       key: '3',
-      label: 'Package',
+      label: 'Package Food',
       children: (
         <Space direction='vertical'>
           <ModalForm
-            title='Package'
+            title='Package Food	'
             trigger={
               <Button type='primary'>
                 <EyeOutlined />
-                View package
+                View
               </Button>
             }
             form={form}
@@ -420,7 +426,11 @@ const Booking: React.FC = () => {
               return true
             }}
           >
-            <PackageDetail packageInVenue={booking?.packageInBookings?.[1].apackage} />
+            <PackageDetail
+              packageInVenue={
+                booking?.packageInBookings?.find(item => item.apackage.packageType === SERVICE_ENUM.FOOD)?.apackage
+              }
+            />
           </ModalForm>
 
           {booking?.status === PARTY_BOOKING_STATUS.PENDING && booking?.isPayment === false && (
@@ -580,7 +590,7 @@ const Booking: React.FC = () => {
     {
       key: '7',
       label: 'Negotiated Amount',
-      children: booking?.pricingTotal?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+      children: booking?.totalPrice?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
     },
     {
       key: '8',
@@ -590,7 +600,7 @@ const Booking: React.FC = () => {
     {
       key: '9',
       label: 'Official Receipts',
-      children: booking?.pricingTotal?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+      children: booking?.totalPrice?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
     },
     {
       key: '10',
@@ -602,6 +612,8 @@ const Booking: React.FC = () => {
           Email: {booking?.email}
           <br />
           Phone: {booking?.phone}
+          <br />
+          Participant Amount: {booking?.participantAmount}
           <br />
           Kid Name: {booking?.kidName}
           <br />
@@ -653,6 +665,8 @@ const Booking: React.FC = () => {
           dataSource={data}
           columns={columns}
           rowClassName='editable-row'
+          pagination={pagination}
+          onChange={handleTableChange}
         />
       </Form>
       <DrawerForm
@@ -698,7 +712,7 @@ const Booking: React.FC = () => {
                     <Popconfirm
                       title='Action'
                       description='Are you sure to CANCEL this booking?'
-                      onConfirm={() => null}
+                      onConfirm={() => cancelOneBooking(booking)}
                       onCancel={() => null}
                       okText='Yes'
                       cancelText='No'
