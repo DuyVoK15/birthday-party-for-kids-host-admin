@@ -13,6 +13,7 @@ export interface SlotInRoomDataResponse {
   active: boolean
   status: boolean
   slot: SlotDataResponse
+  partyBookingId: number
 }
 
 export interface SlotInRoomArrayResponse {
