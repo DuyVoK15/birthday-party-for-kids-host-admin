@@ -1,11 +1,10 @@
 import { Avatar, Card, Flex, Image, Space, Typography } from "antd";
 import React from "react";
-import { PackageInVenueDataResponse } from "src/dtos/response/package.response";
 
 const PackageInVenueDetail = ({
   packageInVenue,
 }: {
-  packageInVenue?: PackageInVenueDataResponse;
+  packageInVenue?: any;
 }) => {
   return (
     <div className="mt-5">
@@ -38,7 +37,7 @@ const PackageInVenueDetail = ({
           <Flex justify="space-between" align="flex-start">
             <Space direction="vertical">
               {packageInVenue?.apackage?.packageServiceList.map(
-                (item, index) => {
+                (item: any, index: number) => {
                   return (
                     <Card key={index} bodyStyle={{ padding: 15 }}>
                       <Flex gap={20}>
