@@ -36,7 +36,7 @@ export interface PartyBookingDataResponse {
   active: boolean
   venueObject: VenueDataResponse
   isPayment: boolean
-  pricingTotal: number
+  totalPrice: number
   remainingMoney: number
   deposit: number
 }
@@ -51,4 +51,8 @@ export interface PartyBookingArrayResponse {
   status: string
   message: string
   data: PartyBookingDataResponse[] | []
+  metadata: {
+    totalItems: number,
+    totalPages: number
+  }
 }

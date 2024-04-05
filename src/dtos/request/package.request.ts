@@ -19,3 +19,8 @@ export interface PackageUpdateRequest {
   // packageServiceRequests?: PackageServiceRequest[] | []
   // packageType?: any
 }
+
+export interface FilterPackageRequest {
+  active?: boolean | null
+  packageType?: string | null
+}
