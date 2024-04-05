@@ -8,11 +8,7 @@ import {
   ThemeInVenueDataResponse,
   ThemeNotAddArrayResponse
 } from 'src/dtos/response/theme.response'
-import {
-  PackageInVenueArrayResponse,
-  PackageInVenueDataResponse,
-  PackageNotAddArrayResponse
-} from 'src/dtos/response/package.response'
+
 import { SlotNotAddArrayResponse } from 'src/dtos/response/slot.response'
 
 export const venueService = {
@@ -28,7 +24,7 @@ export const venueService = {
     const url = `/api/venue/get-theme-not-add-in-venue/${id}`
     return axiosClient.get(url)
   },
-  getAllPackageNotAdd: (id: number): Promise<AxiosResponse<PackageNotAddArrayResponse>> => {
+  getAllPackageNotAdd: (id: number): Promise<AxiosResponse<any>> => {
     const url = `/api/venue/get-package-not-add-in-venue/${id}`
     return axiosClient.get(url)
   },

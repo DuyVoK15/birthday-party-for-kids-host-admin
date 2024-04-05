@@ -1,11 +1,14 @@
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
 import { PartyBookingArrayResponse, PartyBookingObjectResponse } from 'src/dtos/response/partyBooking.response'
-import { FilterBoookingRequest } from 'src/dtos/request/partyBooking.request'
+import { FilterBoookingRequest, PagingBoookingRequest } from 'src/dtos/request/partyBooking.request'
 
 export const partyBookingService = {
-  getAllBooking: (request: { filter?: FilterBoookingRequest }): Promise<AxiosResponse<PartyBookingArrayResponse>> => {
-    const url = `/api/party-booking/get-all-party-booking-for-host`
+  getAllBooking: (request: {
+    filter?: FilterBoookingRequest
+    paging: PagingBoookingRequest
+  }): Promise<AxiosResponse<PartyBookingArrayResponse>> => {
+    const url = `/api/party-booking/get-all-party-booking-for-host?page=${request.paging.page}&size=${request.paging.size}`
     return axiosClient.get(url, { params: request.filter })
   },
   getBookingById: (id: number): Promise<AxiosResponse<PartyBookingObjectResponse>> => {

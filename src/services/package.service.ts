@@ -1,11 +1,11 @@
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
-import { PackageCreateRequest, PackageUpdateRequest } from 'src/dtos/request/package.request'
+import { FilterPackageRequest, PackageCreateRequest, PackageUpdateRequest } from 'src/dtos/request/package.request'
 
 export const packageService = {
-  getAllPackage: (): Promise<AxiosResponse<any>> => {
+  getAllPackage: (payload: { filter?: FilterPackageRequest }): Promise<AxiosResponse<any>> => {
     const url = `/api/package/get-all-package-for-host`
-    return axiosClient.get(url)
+    return axiosClient.get(url, { params: payload.filter })
   },
   getPackageById: (id: number): Promise<AxiosResponse<any>> => {
     const url = `/api/package/get-package-for-host/${id}`
@@ -17,7 +17,7 @@ export const packageService = {
     formData.append('fileImg', payload.fileImage)
     formData.append('packageName', payload.packageName)
     formData.append('packageDescription', payload.packageDescription)
-    formData.append('percent', JSON.stringify(payload.percent))
+    formData.append('percent', payload.percent.toString())
     formData.append('packageServiceRequests', JSON.stringify(payload.packageServiceRequests))
     formData.append('packageType', payload.packageType)
 
