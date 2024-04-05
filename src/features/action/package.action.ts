@@ -1,18 +1,21 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
 import { packageService } from 'src/services/package.service'
-import { PackageCreateRequest, PackageUpdateRequest } from 'src/dtos/request/package.request'
+import { FilterPackageRequest, PackageCreateRequest, PackageUpdateRequest } from 'src/dtos/request/package.request'
 
-export const getAllPackage = createAsyncThunk('package/getAllPackage', async (_, { rejectWithValue }) => {
-  try {
-    const response = await packageService.getAllPackage()
-    return response.data
-  } catch (error: any) {
-    const axiosError = error as AxiosError
-    console.log(axiosError)
-    return rejectWithValue(axiosError.response?.data)
+export const getAllPackage = createAsyncThunk(
+  'package/getAllPackage',
+  async (payload: { filter?: FilterPackageRequest }, { rejectWithValue }) => {
+    try {
+      const response = await packageService.getAllPackage(payload)
+      return response.data
+    } catch (error: any) {
+      const axiosError = error as AxiosError
+      console.log(axiosError)
+      return rejectWithValue(axiosError.response?.data)
+    }
   }
-})
+)
 
 export const getPackageById = createAsyncThunk('package/getPackageById', async (id: number, { rejectWithValue }) => {
   try {

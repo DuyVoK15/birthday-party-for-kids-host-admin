@@ -3,7 +3,7 @@ import { getAllVenue, getAllVenueCheckSlotByDate } from '../action/venue.action'
 import { VenueArrayResponse, VenueDataResponse } from 'src/dtos/response/venue.response'
 import { PartyBookingDataResponse } from 'src/dtos/response/partyBooking.response'
 import { ThemeDataResponse, ThemeInVenueDataResponse } from 'src/dtos/response/theme.response'
-import { PackageDataResponse, PackageInVenueDataResponse } from 'src/dtos/response/package.response'
+import { PackageDataResponse } from 'src/dtos/response/package.response'
 import { SlotDataResponse } from 'src/dtos/response/slot.response'
 import {
   createRoom,
@@ -26,7 +26,7 @@ interface VenueState {
   roomList: RoomDataResponse[] | []
   partyBooking: PartyBookingDataResponse | null
   themeInVenueList: ThemeInVenueDataResponse[] | []
-  packageInVenueList: PackageInVenueDataResponse[] | []
+  packageInVenueList: any[] | []
   slotInVenueList: any[] | []
   loading: boolean
   loadingCreate: boolean

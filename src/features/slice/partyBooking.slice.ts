@@ -1,9 +1,9 @@
 import { createSlice, isAnyOf } from '@reduxjs/toolkit'
 import { getAllBooking, getBookingById } from '../action/partyBooking.action'
-import { PartyBookingDataResponse } from 'src/dtos/response/partyBooking.response'
+import { PartyBookingArrayResponse, PartyBookingDataResponse } from 'src/dtos/response/partyBooking.response'
 
 interface AuthState {
-  bookingResponse: any
+  bookingResponse: PartyBookingArrayResponse | null
   bookingList: PartyBookingDataResponse[] | []
   bookingById: PartyBookingDataResponse | null
   createBooking: any

@@ -1,11 +1,17 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
-import { FilterBoookingRequest } from 'src/dtos/request/partyBooking.request'
+import { FilterBoookingRequest, PagingBoookingRequest } from 'src/dtos/request/partyBooking.request'
 import { partyBookingService } from 'src/services/partyBooking.service'
 
 export const getAllBooking = createAsyncThunk(
   'partyBooking/getAllBooking',
-  async (request: { filter?: FilterBoookingRequest }, { rejectWithValue }) => {
+  async (
+    request: {
+      filter?: FilterBoookingRequest
+      paging: PagingBoookingRequest
+    },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await partyBookingService.getAllBooking(request)
       return response.data
