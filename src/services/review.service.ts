@@ -4,7 +4,7 @@ import { ReviewArrayResponse } from 'src/dtos/response/review.response'
 
 export const reviewService = {
   getAllReview: (request: { fitler?: { rating?: number | null } }): Promise<AxiosResponse<ReviewArrayResponse>> => {
-    const url = `/api/review/get-all-reviews-for-host`
+    const url = `/api/review/get-all-reviews-for-host?rating=0`
     return axiosClient.get(url, { params: request.fitler })
   },
   updateReview: (request: {

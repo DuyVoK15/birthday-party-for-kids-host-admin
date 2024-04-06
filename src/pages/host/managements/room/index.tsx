@@ -263,7 +263,7 @@ const Venue: React.FC = () => {
   }
 
   const cancelOneBooking = async (record: PartyBookingDataResponse) => {
-    const res = await fetchBookingById(record?.id)
+    const res = await dispatch(cancelBooking(record?.id))
     if (res?.meta?.requestStatus === 'fulfilled') {
       message.success(`Cancel booking ID ${record?.id} success!`)
       await fetchBookingById(record?.id)
@@ -274,7 +274,7 @@ const Venue: React.FC = () => {
   }
 
   const completeOneBooking = async (record: PartyBookingDataResponse) => {
-    const res = await fetchBookingById(record?.id)
+    const res = await dispatch(completeBooking(record?.id))
     if (res?.meta?.requestStatus === 'fulfilled') {
       message.success(`Cancel booking ID ${record?.id} success!`)
       await fetchBookingById(record?.id)
@@ -720,7 +720,7 @@ const Venue: React.FC = () => {
     {
       key: '4',
       label: 'Order time',
-      children: booking?.createAt ? dayjs(booking?.createAt).format('YYYY-MM-DD at HH:mm:ss') : 'null'
+      children: booking?.createAt ? dayjs(booking?.createAt).format('YYYY-MM-DD HH:mm:ss') : 'null'
     },
     {
       key: '5',
@@ -975,7 +975,7 @@ const Venue: React.FC = () => {
                   <Popconfirm
                     title='Action'
                     description='Are you sure to COMPLETE this booking?'
-                    onConfirm={() => null}
+                    onConfirm={() => completeOneBooking(booking)}
                     onCancel={() => null}
                     okText='Yes'
                     cancelText='No'

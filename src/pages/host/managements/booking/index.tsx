@@ -54,7 +54,7 @@ import { ServiceCreateRequest } from 'src/dtos/request/service.request'
 import { SERVICE_ENUM } from 'src/enums/service'
 import { ServiceDataResponse } from 'src/dtos/response/service.response'
 import { PartyBookingDataResponse } from 'src/dtos/response/partyBooking.response'
-import { getAllBooking, getBookingById } from 'src/features/action/partyBooking.action'
+import { cancelBooking, completeBooking, getAllBooking, getBookingById } from 'src/features/action/partyBooking.action'
 import dayjs from 'dayjs'
 import { PARTY_BOOKING_STATUS } from 'src/enums/partyBooking'
 import { HomeCircle } from 'mdi-material-ui'
@@ -260,10 +260,10 @@ const Booking: React.FC = () => {
   }
 
   const cancelOneBooking = async (record: PartyBookingDataResponse) => {
-    const res = await fetchBookingById(record?.id)
+    const res = await dispatch(cancelBooking(record?.id))
     if (res?.meta?.requestStatus === 'fulfilled') {
-      message.success(`Cancel booking ID ${record?.id} success!`);
-      await fetchBookingById(record?.id);
+      message.success(`Cancel booking ID ${record?.id} success!`)
+      await fetchBookingById(record?.id)
     } else {
       const message = (res?.payload as any)?.message
       message.error(message)
@@ -271,10 +271,10 @@ const Booking: React.FC = () => {
   }
 
   const completeOneBooking = async (record: PartyBookingDataResponse) => {
-    const res = await fetchBookingById(record?.id)
+    const res = await dispatch(completeBooking(record?.id))
     if (res?.meta?.requestStatus === 'fulfilled') {
-      message.success(`Cancel booking ID ${record?.id} success!`);
-      await fetchBookingById(record?.id);
+      message.success(`Cancel booking ID ${record?.id} success!`)
+      await fetchBookingById(record?.id)
     } else {
       const message = (res?.payload as any)?.message
       message.error(message)
@@ -514,7 +514,7 @@ const Booking: React.FC = () => {
     {
       key: '4',
       label: 'Order time',
-      children: booking?.createAt ? dayjs(booking?.createAt).format('YYYY-MM-DD at HH:mm:ss') : 'null'
+      children: booking?.createAt ? dayjs(booking?.createAt).format('YYYY-MM-DD HH:mm:ss') : 'null'
     },
     {
       key: '5',
@@ -698,7 +698,7 @@ const Booking: React.FC = () => {
                   <Popconfirm
                     title='Action'
                     description='Are you sure to COMPLETE this booking?'
-                    onConfirm={() => null}
+                    onConfirm={() => completeOneBooking(booking)}
                     onCancel={() => null}
                     okText='Yes'
                     cancelText='No'
