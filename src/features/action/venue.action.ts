@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
 import { ItemInVenueListCreateRequest } from 'src/dtos/request/theme.request'
-import { VenueCreateRequest } from 'src/dtos/request/venue.request'
+import { VenueCreateRequest, VenueUpdateRequest } from 'src/dtos/request/venue.request'
 import { packageService } from 'src/services/package.service'
 import { partyDatedService } from 'src/services/partydated.service'
 import { slotService } from 'src/services/slot.service'
@@ -46,6 +46,7 @@ export const getAllThemeNotAdd = createAsyncThunk(
     }
   }
 )
+
 export const getAllPackageNotAdd = createAsyncThunk(
   'venue/getAllPackageNotAdd',
   async (id: number, { rejectWithValue }) => {
@@ -75,6 +76,20 @@ export const createVenue = createAsyncThunk(
   async (payload: VenueCreateRequest, { rejectWithValue }) => {
     try {
       const response = await venueService.createVenue(payload)
+      return response.data
+    } catch (error) {
+      const axiosError = error as AxiosError
+      console.log(axiosError)
+      return rejectWithValue(axiosError.response?.data)
+    }
+  }
+)
+
+export const updateVenue = createAsyncThunk(
+  'venue/updateVenue',
+  async (payload: VenueUpdateRequest, { rejectWithValue }) => {
+    try {
+      const response = await venueService.updateVenue(payload)
       return response.data
     } catch (error) {
       const axiosError = error as AxiosError

@@ -2,7 +2,7 @@ import { VenueArrayResponse, VenueObjectResponse } from './../dtos/response/venu
 import { AxiosResponse } from 'axios'
 import axiosClient from './axiosClient/axiosClient'
 import {} from 'src/dtos/response/venue.response'
-import { VenueCreateRequest } from 'src/dtos/request/venue.request'
+import { VenueCreateRequest, VenueUpdateRequest } from 'src/dtos/request/venue.request'
 import {
   ThemeInVenueArrayResponse,
   ThemeInVenueDataResponse,
@@ -44,6 +44,19 @@ export const venueService = {
     formData.append('city', payload.city)
 
     return axiosClient.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+  },
+  updateVenue: (payload: VenueUpdateRequest): Promise<AxiosResponse<any>> => {
+    const url = `/api/venue/update-venue`
+    const formData = new FormData()
+    formData.append('fileImg', payload.fileImage)
+    formData.append('venueName', payload.venueName)
+    formData.append('venueDescription', payload.venueDescription)
+    formData.append('street', payload.street)
+    formData.append('ward', payload.ward)
+    formData.append('district', payload.district)
+    formData.append('city', payload.city)
+
+    return axiosClient.put(url, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
   enableVenueById: (id: number): Promise<AxiosResponse<any>> => {
     const url = `/api/venue/set-active-venue/${id}`
