@@ -19,6 +19,7 @@ import HomeThermometerOutline from 'mdi-material-ui/HomeThermometerOutline'
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
 import AppConstants from 'src/enums/app'
 import { PayCircleOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons'
+import { Star, StarOutline } from 'mdi-material-ui'
 
 const navigation = (): VerticalNavItemsType => {
   const role = typeof window !== 'undefined' ? window.localStorage.getItem(AppConstants.ROLE) : false
@@ -83,6 +84,11 @@ const navigation = (): VerticalNavItemsType => {
           title: 'Booking',
           icon: HomeThermometerOutline,
           path: '/host/managements/booking'
+        },
+        {
+          title: 'Review',
+          icon: StarOutline,
+          path: '/host/managements/review'
         },
         {
           title: 'Room',
