@@ -35,7 +35,7 @@ const StatisticsCard = () => {
   const dashboard = useAppSelector(state => state.dashboardReducer.dashboard)
   const salesData: DataType[] = [
     {
-      stats: dashboard?.venueList?.length.toString() ?? '0',
+      stats: '1' ?? '0',
       title: 'Venues',
       color: 'primary',
       icon: <TrendingUp sx={{ fontSize: '1.75rem' }} />
@@ -48,7 +48,7 @@ const StatisticsCard = () => {
       icon: <OrderAlphabeticalAscending sx={{ fontSize: '1.75rem' }} />
     },
     {
-      stats: dashboard?.customerList?.length.toString() ?? '0',
+      stats: '1' ?? '0',
       title: 'Customers',
       color: 'success',
       icon: <AccountOutline sx={{ fontSize: '1.75rem' }} />

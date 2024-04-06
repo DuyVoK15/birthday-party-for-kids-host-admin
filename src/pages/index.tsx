@@ -100,13 +100,13 @@ const Dashboard = () => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={12} md={6} lg={4}>
+        {/* <Grid item xs={12} md={6} lg={4}>
           <Theme newArr={newThemeList} />
-        </Grid>
+        </Grid> */}
         <Grid item xs={6} md={6} lg={4}>
           <Package newArr={newPackageList} />
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={6} md={6} lg={4}>
           <SalesByCountries newArr={newServiceList} />
         </Grid>
       </Grid>
